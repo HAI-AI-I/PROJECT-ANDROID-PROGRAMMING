@@ -14,5 +14,5 @@ object LibrarySpacing {
 
     val ExtraLarge = 32.dp
 
-    val Huge = 40.dp
+    val Huge = 48.dp
 }
