@@ -17,6 +17,9 @@ private val LibraryColorScheme = lightColorScheme(
 
     secondary = SecondaryBlue,
 
+    secondaryContainer = SecondaryContainerBlue,
+    onSecondaryContainer = OnSecondaryContainerBlue,
+
     background = Background,
 
     surface = Surface,
