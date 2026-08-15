@@ -11,9 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.group_7.library_management.components.dialogs.BorrowConfirmationDialog
-import com.group_7.library_management.ui.auth.LoginScreen
-import com.group_7.library_management.ui.splash.SplashScreen
+import com.group_7.library_management.ui.home.HomeScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,10 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Library_managementTheme {
-
-//                    SplashScreen()
-//                LoginScreen()
-                BorrowConfirmationDialog()
+                HomeScreen()
             }
         }
     }

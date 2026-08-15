@@ -19,3 +19,15 @@ val Success = Color(0xFF16A34A)
 val Warning = Color(0xFFF59E0B)
 val Error = Color(0xFFDC2626)
 val Border = Color(0xFFE2E8F0)
+
+// Library Management Colors
+val DarkBlue = Color(0xFF0D1B54)
+val AccentBlue = Color(0xFF7C89FE)
+val BackgroundLight = Color(0xFFFAFAFA)
+val SurfaceGray = Color(0xFFF0F0F0)
+
+val WarningColor = Color(0xFFF59E0B)
+val SuccessColor = Color(0xFF10B981)
+val ErrorColor = Color(0xFFEF4444)
+val InfoColor = Color(0xFF3B82F6)
+val TextGray = Color(0xFF6B7280)
