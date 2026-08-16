@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.group_7.library_management.ui.home.HomeScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
+import com.group_7.library_management.ui.librarian.LibrarianScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Library_managementTheme {
-                HomeScreen()
+                LibrarianScreen()
             }
         }
     }
