@@ -84,7 +84,7 @@ fun NotificationsScreen(
             id = "1",
             title = "Clean Code còn 2 ngày nữa đến hạn trả",
             message = "Vui lòng sắp xếp thời gian trả sách để tránh bị phạt phí quá hạn.",
-            time = "10 phút trước",
+            time = "15 phút trước",
             type = NotificationType.WARNING
         ),
         NotificationItem(

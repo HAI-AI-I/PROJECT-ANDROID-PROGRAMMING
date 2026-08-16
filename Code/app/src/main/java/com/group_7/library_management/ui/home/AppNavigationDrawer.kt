@@ -79,7 +79,7 @@ fun AppNavigationDrawer(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = user?.name ?: "Nguyễn Văn A",
+                    text = user?.name ?: "Nguyễn Văn An",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
