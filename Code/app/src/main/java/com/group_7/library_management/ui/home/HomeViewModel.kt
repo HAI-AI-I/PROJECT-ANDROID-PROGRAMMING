@@ -27,7 +27,7 @@ class HomeViewModel : ViewModel() {
         _uiState.value = HomeUiState(
             currentUser = User(
                 id = "1",
-                name = "Nguyễn Văn A",
+                name = "Nguyễn Văn An",
                 studentId = "24510000",
                 qrCodeData = "STUDENT_24510000"
             ),

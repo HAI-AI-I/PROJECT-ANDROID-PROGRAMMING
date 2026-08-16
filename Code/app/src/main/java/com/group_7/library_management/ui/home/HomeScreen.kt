@@ -402,7 +402,7 @@ fun BorrowStatusSection() {
         StatusRowItem(
             icon = Icons.Default.LibraryBooks,
             title = "Đang mượn",
-            count = "2",
+            count = "3",
             iconTint = SecondaryBlue,
             bgColor = SurfaceVariant
         )
