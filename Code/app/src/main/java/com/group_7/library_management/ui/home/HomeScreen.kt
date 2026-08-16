@@ -104,10 +104,10 @@ fun HomeScreen(
         }
     ) {
         Scaffold(
-            containerColor = Background,
+            containerColor = MaterialTheme.colorScheme.background,
             bottomBar = {
                 NavigationBar(
-                    containerColor = Surface,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 8.dp,
                     modifier = Modifier.height(80.dp)
                 ) {
@@ -236,25 +236,25 @@ fun TopBarSection(onMenuClick: () -> Unit, onNotificationClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onMenuClick, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextPrimary)
+            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
         }
 
         Text(
             text = "Library UTH",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = PrimaryBlue
+            color = MaterialTheme.colorScheme.primary
         )
 
         IconButton(onClick = onNotificationClick, modifier = Modifier.size(36.dp)) {
             Box {
-                Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = TextPrimary)
+                Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.onSurface)
                 Box(
                     modifier = Modifier
                         .size(10.dp)
                         .clip(CircleShape)
-                        .background(Error)
-                        .border(1.5.dp, Background, CircleShape)
+                        .background(MaterialTheme.colorScheme.error)
+                        .border(1.5.dp, MaterialTheme.colorScheme.background, CircleShape)
                         .align(Alignment.TopEnd)
                 )
             }
@@ -269,14 +269,14 @@ fun GreetingSection(user: User?) {
             text = "Chào bạn,\n${user?.name ?: "Nam"} \uD83D\uDC4B",
             style = MaterialTheme.typography.headlineLarge.copy(fontSize = 34.sp),
             fontWeight = FontWeight.ExtraBold,
-            color = PrimaryBlue,
+            color = MaterialTheme.colorScheme.primary,
             lineHeight = 42.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Khám phá cuốn sách tiếp theo của bạn",
             style = MaterialTheme.typography.bodyLarge,
-            color = TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -306,8 +306,8 @@ fun SearchSection() {
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
-                unfocusedContainerColor = SurfaceVariant,
-                focusedContainerColor = SurfaceVariant
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
             ),
             singleLine = true
         )
@@ -333,13 +333,13 @@ fun BookListSection(title: String, actionText: String, books: List<Book>) {
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             if (actionText.isNotEmpty()) {
                 Text(
                     text = actionText,
                     style = MaterialTheme.typography.labelLarge,
-                    color = PrimaryBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -365,7 +365,7 @@ fun BookItemCard(book: Book) {
                 .fillMaxWidth()
                 .height(180.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Surface)
+                .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, Border, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
@@ -373,7 +373,7 @@ fun BookItemCard(book: Book) {
                 Icon(
                     Icons.Default.Book,
                     contentDescription = null,
-                    tint = PrimaryBlue.copy(alpha = 0.5f),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                     modifier = Modifier.size(48.dp)
                 )
             }
@@ -384,13 +384,13 @@ fun BookItemCard(book: Book) {
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            color = TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = book.author,
             style = MaterialTheme.typography.bodySmall,
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1
         )
     }
@@ -403,22 +403,22 @@ fun BorrowStatusSection() {
             icon = Icons.Default.LibraryBooks,
             title = "Đang mượn",
             count = "3",
-            iconTint = SecondaryBlue,
-            bgColor = SurfaceVariant
+            iconTint = MaterialTheme.colorScheme.secondary,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Event,
             title = "Sắp đến hạn",
             count = "1",
             iconTint = Warning,
-            bgColor = SurfaceVariant
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Warning,
             title = "Quá hạn",
             count = "0",
             iconTint = TextTertiary,
-            bgColor = SurfaceVariant
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
@@ -429,7 +429,7 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(Surface)
+            .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, Border, RoundedCornerShape(20.dp))
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -452,14 +452,14 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         Text(
             text = count,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = PrimaryBlue
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

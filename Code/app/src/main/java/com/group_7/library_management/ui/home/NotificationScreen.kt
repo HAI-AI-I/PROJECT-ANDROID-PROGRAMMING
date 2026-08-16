@@ -111,11 +111,11 @@ fun NotificationsScreen(
     )
 
     Scaffold(
-        containerColor = BackgroundLight,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = { NotificationTopBar(onMenuClick) },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp,
                 modifier = Modifier.height(80.dp)
             ) {
@@ -210,15 +210,15 @@ fun NotificationCard(item: NotificationItem) {
         NotificationType.INFO -> InfoColor to Icons.Default.Info
     }
 
-    val titleColor = if (item.type == NotificationType.ERROR) ErrorColor else Color.Black
+    val titleColor = if (item.type == NotificationType.ERROR) ErrorColor else MaterialTheme.colorScheme.onSurface
     val timeColor = if (item.type == NotificationType.ERROR) ErrorColor else TextGray
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Color(0xFFF3F4F6))
+        border = BorderStroke(1.dp, Border)
     ) {
         Row(modifier = Modifier.height(IntrinsicSize.Min)) {
             Box(
@@ -273,7 +273,7 @@ fun NotificationCard(item: NotificationItem) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Options",
-                        tint = Color.Gray
+                        tint = TextTertiary
                     )
                 }
             }
@@ -291,18 +291,18 @@ fun NotificationTopBar(onMenuClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onMenuClick, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
         }
 
         Text(
             text = "Library UTH 13",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = DarkBlue
+            color = MaterialTheme.colorScheme.primary
         )
 
         IconButton(onClick = { }, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = DarkBlue)
+            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

@@ -46,6 +46,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.group_7.library_management.models.User
+import com.group_7.library_management.ui.theme.BackgroundLight
+import com.group_7.library_management.ui.theme.Border
+import com.group_7.library_management.ui.theme.DarkBlue
+import com.group_7.library_management.ui.theme.Error
+import com.group_7.library_management.ui.theme.PrimaryBlue
+import com.group_7.library_management.ui.theme.SecondaryContainerBlue
+import com.group_7.library_management.ui.theme.Surface
+import com.group_7.library_management.ui.theme.SurfaceGray
+import com.group_7.library_management.ui.theme.TextPrimary
+import com.group_7.library_management.ui.theme.TextSecondary
+import com.group_7.library_management.ui.theme.TextTertiary
 
 @Composable
 fun AppNavigationDrawer(
@@ -56,7 +67,7 @@ fun AppNavigationDrawer(
 ) {
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp),
-        drawerContainerColor = Color.White
+        drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
@@ -73,7 +84,7 @@ fun AppNavigationDrawer(
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape),
-                    tint = Color.LightGray
+                    tint = TextTertiary
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -82,33 +93,33 @@ fun AppNavigationDrawer(
                     text = user?.name ?: "Nguyễn Văn An",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFF0F0F0), RoundedCornerShape(6.dp))
+                        .background(SurfaceGray, RoundedCornerShape(6.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "MSSV: ${user?.studentId ?: "UTH123456"}",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.DarkGray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
+            HorizontalDivider(color = Border, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
             Spacer(modifier = Modifier.height(20.dp))
 
 
             Text(
                 text = "MAIN",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
+                color = TextTertiary,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -139,14 +150,14 @@ fun AppNavigationDrawer(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
+            HorizontalDivider(color = Border, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
             Spacer(modifier = Modifier.height(20.dp))
 
 
             Text(
                 text = "ACCOUNT",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
+                color = TextTertiary,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -171,9 +182,9 @@ fun AppNavigationDrawer(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(Color.Red)
+                                .background(MaterialTheme.colorScheme.error)
                                 .align(Alignment.TopEnd)
-                                .border(1.dp, Color.White, CircleShape)
+                                .border(1.dp, MaterialTheme.colorScheme.surface, CircleShape)
                         )
                     }
                 },
@@ -182,8 +193,8 @@ fun AppNavigationDrawer(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = Color.DarkGray,
-                    unselectedTextColor = Color.DarkGray
+                    unselectedIconColor = TextSecondary,
+                    unselectedTextColor = TextSecondary
                 )
             )
 
@@ -200,9 +211,9 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick("help") }
             )
 
-            Spacer(modifier = Modifier.weight(1f)) // Đẩy nút Đăng xuất xuống dưới cùng
+            Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+            HorizontalDivider(color = Border, thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- FOOTER (Logout) ---
@@ -217,12 +228,12 @@ fun AppNavigationDrawer(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = "Logout",
-                    tint = Color(0xFFD32F2F)
+                    tint = MaterialTheme.colorScheme.error
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Đăng xuất",
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -247,12 +258,12 @@ fun DrawerItem(
         onClick = onClick,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = Color(0xFFE8EAF6),
-            selectedIconColor = Color(0xFF0D1B54),
-            selectedTextColor = Color(0xFF0D1B54),
+            selectedContainerColor = SecondaryContainerBlue,
+            selectedIconColor = DarkBlue,
+            selectedTextColor = DarkBlue,
             unselectedContainerColor = Color.Transparent,
-            unselectedIconColor = Color.DarkGray,
-            unselectedTextColor = Color.DarkGray
+            unselectedIconColor = TextSecondary,
+            unselectedTextColor = TextSecondary
         )
     )
 }
