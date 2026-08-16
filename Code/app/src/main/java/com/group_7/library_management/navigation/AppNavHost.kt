@@ -11,6 +11,7 @@ import com.group_7.library_management.ui.auth.ForgotPasswordScreen
 import com.group_7.library_management.ui.auth.LoginScreen
 import com.group_7.library_management.ui.auth.RegisterScreen
 import com.group_7.library_management.ui.auth.RestPassword
+import com.group_7.library_management.ui.home.HomeScreen
 
 
 @Composable
@@ -28,6 +29,9 @@ fun AppNavHost(
                 },
                 onNavigateToForgotPassword = {
                     navController.navigate(Routes.FORGOT_PASSWORD)
+                },
+                onSubmit = {
+                    navController.navigate(Routes.HOME)
                 }
             )
         }
@@ -76,6 +80,10 @@ fun AppNavHost(
                     navController.navigate(Routes.LOGIN)
                 }
             )
+        }
+
+        composable(route= Routes.HOME) {
+            HomeScreen()
         }
     }
 }

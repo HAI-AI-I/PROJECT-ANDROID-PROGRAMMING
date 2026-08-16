@@ -46,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.group_7.library_management.models.User
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.MemberBottomBar
 
 @Composable
 fun AppNavigationDrawer(

@@ -8,4 +8,10 @@ object Routes {
     const val CONFIRM_CODE_RESET_AUTH="confirm_code_reset_auth"
     const val CONFIRM_CODE_REGIS_AUTH="confirm_code_regis_auth"
     const val RESET_PASSWORD_AUTH="reset_password_auth"
+
+    const val HOME="home"
+    const val BOOKS="boos"
+    const val MY_BORROWING="my_borrowing"
+    const val PROFILE="profile"
+
 }

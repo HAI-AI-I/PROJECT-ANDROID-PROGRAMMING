@@ -66,14 +66,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.group_7.library_management.components.CreateLogoIcon
+import com.group_7.library_management.components.CreateLogoTitle
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.User
 import com.group_7.library_management.ui.theme.*
 import kotlinx.coroutines.launch
+import java.lang.reflect.Member
 
-// ==========================================
-// 1. MÀN HÌNH CHÍNH (CONTAINER QUẢN LÝ ĐIỀU HƯỚNG)
-// ==========================================
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
@@ -105,63 +109,41 @@ fun HomeScreen(
     ) {
         Scaffold(
             containerColor = Background,
+            topBar = {
+                MemberTopBar(
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onNotificationClick = { currentRoute = "notifications" },
+                    showNotificationBadge = true
+                )
+            },
             bottomBar = {
-                NavigationBar(
-                    containerColor = Surface,
-                    tonalElevation = 8.dp,
-                    modifier = Modifier.height(80.dp)
-                ) {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 0 && currentRoute == "home",
-                        onClick = {
-                            selectedBottomTab = 0
-                            currentRoute = "home"
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Book, contentDescription = null) },
-                        label = { Text("Books", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 1,
-                        onClick = { selectedBottomTab = 1 }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.LibraryBooks, contentDescription = null) },
-                        label = { Text("My Borrowing", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 2,
-                        onClick = { selectedBottomTab = 2 }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                        label = { Text("Profile", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 3,
-                        onClick = { selectedBottomTab = 3 }
-                    )
-                }
+                MemberBottomBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        currentRoute = route
+                    }
+                )
             }
         ) { paddingValues ->
             when (currentRoute) {
                 "home" -> {
                     HomeContent(
                         paddingValues = paddingValues,
-                        uiState = uiState,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { currentRoute = "notifications" }
+                        uiState = uiState
                     )
                 }
                 "notifications" -> {
-                    // Gọi sang màn hình NotificationsScreen nằm ở file NotificationScreen.kt
                     NotificationsScreen(
-                        onMenuClick = { scope.launch { drawerState.open() } }
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onNotificationClick = { /* Có thể reload thông báo */ },
+                        currentRoute = currentRoute,
+                        onNavigate = { route -> currentRoute = route }
                     )
                 }
                 else -> {
                     HomeContent(
                         paddingValues = paddingValues,
                         uiState = uiState,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { currentRoute = "notifications" }
                     )
                 }
             }
@@ -176,9 +158,8 @@ fun HomeScreen(
 fun HomeContent(
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
     uiState: HomeUiState,
-    onMenuClick: () -> Unit,
-    onNotificationClick: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -189,14 +170,15 @@ fun HomeContent(
         item { Spacer(modifier = Modifier.height(4.dp)) }
 
         item {
-            TopBarSection(
-                onMenuClick = onMenuClick,
-                onNotificationClick = onNotificationClick
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                placeholder = "Tìm kiếm sách, tác giả,...",
+                onFilterClick = null,
+                showMic = true
             )
         }
 
-        item { GreetingSection(user = uiState.currentUser) }
-        item { SearchSection() }
         item {
             BookListSection(
                 title = "Sách phổ biến",
@@ -221,63 +203,6 @@ fun HomeContent(
         item { BorrowStatusSection() }
         item { QRCheckInCard() }
         item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
-}
-
-// ==========================================
-// 3. CÁC THÀNH PHẦN GIAO DIỆN CON (COMPONENTS) CỦA HOME
-// ==========================================
-
-@Composable
-fun TopBarSection(onMenuClick: () -> Unit, onNotificationClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onMenuClick, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextPrimary)
-        }
-
-        Text(
-            text = "Library UTH",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryBlue
-        )
-
-        IconButton(onClick = onNotificationClick, modifier = Modifier.size(36.dp)) {
-            Box {
-                Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = TextPrimary)
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(Error)
-                        .border(1.5.dp, Background, CircleShape)
-                        .align(Alignment.TopEnd)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun GreetingSection(user: User?) {
-    Column {
-        Text(
-            text = "Chào bạn,\n${user?.name ?: "Nam"} \uD83D\uDC4B",
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 34.sp),
-            fontWeight = FontWeight.ExtraBold,
-            color = PrimaryBlue,
-            lineHeight = 42.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Khám phá cuốn sách tiếp theo của bạn",
-            style = MaterialTheme.typography.bodyLarge,
-            color = TextSecondary
-        )
     }
 }
 

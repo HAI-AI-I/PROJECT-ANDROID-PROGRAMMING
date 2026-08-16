@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.dialogs.BorrowConfirmationDialog
 import com.group_7.library_management.components.screens.ConfirmCodeScreen
 import com.group_7.library_management.navigation.AppNavHost
@@ -20,6 +21,8 @@ import com.group_7.library_management.ui.auth.RegisterScreen
 import com.group_7.library_management.ui.auth.RestPassword
 import com.group_7.library_management.ui.borrowing.BorrowingScreen
 import com.group_7.library_management.ui.favorite.FavoriteScreen
+import com.group_7.library_management.ui.home.HomeScreen
+import com.group_7.library_management.ui.home.NotificationsScreen
 import com.group_7.library_management.ui.splash.SplashScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
 
@@ -41,6 +44,8 @@ class MainActivity : ComponentActivity() {
 //                FavoriteScreen()
 //                ConfirmCodeScreen()
 //                RestPassword()
+//                HomeScreen()
+//                MemberBottomBar("home")
             }
         }
     }

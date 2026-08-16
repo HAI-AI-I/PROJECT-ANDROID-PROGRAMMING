@@ -41,7 +41,8 @@ private val LibraryColorScheme = lightColorScheme(
 
     onError = Surface,
 
-    outlineVariant=Color(0xFFC6C5D4)
+    outlineVariant=Color(0xFFC6C5D4),
+
 )
 
 @Composable

@@ -34,7 +34,8 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun LoginScreen(onNavigateToRegister: () -> Unit,
-                onNavigateToForgotPassword:()->Unit) {
+                onNavigateToForgotPassword:()->Unit,
+                onSubmit:()->Unit) {
 
     var textEmailorPassword by remember { mutableStateOf("") }
     var textPassword by remember { mutableStateOf("")}
@@ -101,7 +102,7 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             // Sign In Button
             AuthButton(
                 text = "ĐĂNG NHẬP",
-                onClick = {}
+                onClick = onSubmit
             )
 
             Spacer(modifier = Modifier.weight(1f))
