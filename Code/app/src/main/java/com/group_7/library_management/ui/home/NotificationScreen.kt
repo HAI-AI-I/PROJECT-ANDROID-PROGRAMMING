@@ -2,7 +2,6 @@ package com.group_7.library_management.ui.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -28,7 +26,7 @@ import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -50,31 +48,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.group_7.library_management.models.NotificationItem
-import com.group_7.library_management.models.NotificationType
-import com.group_7.library_management.ui.theme.BackgroundLight
-import com.group_7.library_management.ui.theme.DarkBlue
-import com.group_7.library_management.ui.theme.ErrorColor
-import com.group_7.library_management.ui.theme.InfoColor
-import com.group_7.library_management.ui.theme.SuccessColor
-import com.group_7.library_management.ui.theme.TextGray
-import com.group_7.library_management.ui.theme.WarningColor
 
-// 2. Màn hình chính
+// Import màu từ file Color.kt (Dùng dấu * để lấy hết các màu bạn đã khai báo)
+import com.group_7.library_management.ui.theme.*
+
+// ==========================================
+// THÊM 2 MODEL VÀO TRỰC TIẾP FILE NÀY ĐỂ FIX LỖI "UNRESOLVED REFERENCE"
+// ==========================================
+enum class NotificationType {
+    WARNING, SUCCESS, ERROR, INFO
+}
+
+data class NotificationItem(
+    val id: String,
+    val title: String,
+    val message: String,
+    val time: String,
+    val type: NotificationType
+)
+// ==========================================
+
 @Composable
 fun NotificationsScreen(
     onMenuClick: () -> Unit = {}
 ) {
-    var selectedBottomTab by remember { mutableIntStateOf(0) } // Quản lý bottom nav tạm thời
+    var selectedBottomTab by remember { mutableIntStateOf(0) }
 
-    // Dữ liệu mẫu (Dummy data) giống hệt thiết kế
     val notifications = listOf(
         NotificationItem(
             id = "1",
@@ -107,7 +111,7 @@ fun NotificationsScreen(
     )
 
     Scaffold(
-        containerColor = BackgroundLight, // Sử dụng màu từ HomeScreen
+        containerColor = BackgroundLight,
         topBar = { NotificationTopBar(onMenuClick) },
         bottomBar = {
             NavigationBar(
@@ -128,7 +132,7 @@ fun NotificationsScreen(
                     onClick = { selectedBottomTab = 1 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.LibraryBooks, contentDescription = null) },
+                    icon = { Icon(imageVector = Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null) },
                     label = { Text("My Borrowing", style = MaterialTheme.typography.labelSmall) },
                     selected = selectedBottomTab == 2,
                     onClick = { selectedBottomTab = 2 }
@@ -151,7 +155,6 @@ fun NotificationsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // Header: "Thông báo" và "Đánh dấu đã đọc"
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -188,7 +191,6 @@ fun NotificationsScreen(
 
             item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Danh sách các thẻ thông báo
             items(notifications) { notification ->
                 NotificationCard(notification)
             }
@@ -198,7 +200,6 @@ fun NotificationsScreen(
     }
 }
 
-// 3. UI Cấu trúc một thẻ thông báo
 @Composable
 fun NotificationCard(item: NotificationItem) {
 
@@ -209,7 +210,6 @@ fun NotificationCard(item: NotificationItem) {
         NotificationType.INFO -> InfoColor to Icons.Default.Info
     }
 
-    // Đặc biệt: Nếu là ERROR thì tiêu đề và thời gian hiện màu đỏ
     val titleColor = if (item.type == NotificationType.ERROR) ErrorColor else Color.Black
     val timeColor = if (item.type == NotificationType.ERROR) ErrorColor else TextGray
 
@@ -218,11 +218,9 @@ fun NotificationCard(item: NotificationItem) {
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Color(0xFFF3F4F6)) // Viền xám siêu nhạt
+        border = BorderStroke(1.dp, Color(0xFFF3F4F6))
     ) {
-        // Dùng IntrinsicSize.Min để cột màu bên trái kéo dài bằng đúng nội dung bên phải
         Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            // Cột màu đánh dấu bên trái
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -230,14 +228,12 @@ fun NotificationCard(item: NotificationItem) {
                     .background(indicatorColor)
             )
 
-            // Nội dung
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top // Đã import Alignment để fix
             ) {
-                // Icon trạng thái
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
@@ -247,7 +243,6 @@ fun NotificationCard(item: NotificationItem) {
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Text content
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.title,
@@ -271,9 +266,8 @@ fun NotificationCard(item: NotificationItem) {
                     )
                 }
 
-                // Nút ba chấm
                 IconButton(
-                    onClick = { /* Xử lý mở menu option */ },
+                    onClick = {  },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -287,7 +281,6 @@ fun NotificationCard(item: NotificationItem) {
     }
 }
 
-// 4. Thanh TopBar riêng cho màn hình này
 @Composable
 fun NotificationTopBar(onMenuClick: () -> Unit) {
     Row(
