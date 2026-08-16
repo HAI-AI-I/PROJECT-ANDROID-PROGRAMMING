@@ -27,7 +27,7 @@ class HomeViewModel : ViewModel() {
         _uiState.value = HomeUiState(
             currentUser = User(
                 id = "1",
-                name = "Nguyễn Văn A",
+                name = "Nguyễn Văn An",
                 studentId = "24510000",
                 qrCodeData = "STUDENT_24510000"
             ),
@@ -41,7 +41,7 @@ class HomeViewModel : ViewModel() {
                 ),
                 Book(
                     id = "b2",
-                    title = "Cấu trúc dữ liệu",
+                    title = "Tổng hợp ngôn ngữ lập trình",
                     author = "Author B",
                     remainingDays = 0,
                     isOverdue = true

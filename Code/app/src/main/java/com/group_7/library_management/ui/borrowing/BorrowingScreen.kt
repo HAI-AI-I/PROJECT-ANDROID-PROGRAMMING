@@ -108,24 +108,24 @@ fun BorrowingScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Mượn sách",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = onScanQrClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.QrCodeScanner,
-                            contentDescription = "Quét QR"
-                        )
-                    }
-                }
-            )
+//            TopAppBar(
+//                title = {
+//                    Text(
+//                        text = "Mượn sách",
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                },
+//                actions = {
+//                    IconButton(
+//                        onClick = onScanQrClick
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.QrCodeScanner,
+//                            contentDescription = "Quét QR"
+//                        )
+//                    }
+//                }
+//            )
         }
     ) { paddingValues ->
 

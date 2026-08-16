@@ -69,14 +69,14 @@ fun FavoriteScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Sách yêu thích",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            )
+//            TopAppBar(
+//                title = {
+//                    Text(
+//                        text = "Sách yêu thích",
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                }
+//            )
         }
     ) { paddingValues ->
 

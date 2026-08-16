@@ -17,16 +17,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.group_7.library_management.components.CreateLogoIcon
 import com.group_7.library_management.components.CreateLogoTitle
+import com.group_7.library_management.components.CustomTextField
+import com.group_7.library_management.components.PasswordTextField
+import com.group_7.library_management.components.auth.AuthButton
+import com.group_7.library_management.components.auth.AuthFooter
+import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit = {},
-    onLoginClick: () -> Unit = {}
+    onRegisterClick: () -> Unit ,
+    onNavigateToLogin:()-> Unit
 ) {
 
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var sdt by remember{mutableStateOf("")}
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
@@ -67,183 +73,55 @@ fun RegisterScreen(
                 CreateLogoTitle()
             }
 
-            // Tiêu đề
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
+            AuthHeader(
+                title ="Tạo tài khoản",
+                subtitle="Đăng ký để sử dụng các dịch vụ của thư viện"
+            )
 
-                Text(
-                    text = "Tạo tài khoản",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
+            CustomTextField(
+                value=fullName,
+                onValueChange = {fullName=it},
+                label = "Họ và tên",
+            )
+            Spacer(
+                modifier = Modifier.height(LibrarySpacing.Medium)
+            )
 
-                Text(
-                    text = "Đăng ký để sử dụng các dịch vụ của thư viện",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.padding(
-                        top = LibrarySpacing.Small,
-                        bottom = LibrarySpacing.Large
-                    )
-                )
-            }
-
-            // Họ và tên
-            OutlinedTextField(
-                value = fullName,
-                onValueChange = {
-                    fullName = it
-                    errorMessage = ""
-                },
-                label = {
-                    Text("Họ và tên")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            CustomTextField(
+                value=email,
+                onValueChange = {email=it},
+                label = "Email tài khoản",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             Spacer(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
-
-            // Email
-            OutlinedTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    errorMessage = ""
-                },
-                label = {
-                    Text("Email")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
-                ),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            CustomTextField(
+                value=sdt,
+                onValueChange = {sdt=it},
+                label = "Số điện thoại",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
-
             Spacer(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
-
-            // Mật khẩu
-            OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    errorMessage = ""
-                },
-                label = {
-                    Text("Mật khẩu")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password
-                ),
-                visualTransformation =
-                    if (passwordVisible)
-                        VisualTransformation.None
-                    else
-                        PasswordVisualTransformation(),
-                trailingIcon = {
-
-                    val image =
-                        if (passwordVisible)
-                            Icons.Default.Visibility
-                        else
-                            Icons.Default.VisibilityOff
-
-                    IconButton(
-                        onClick = {
-                            passwordVisible = !passwordVisible
-                        }
-                    ) {
-                        Icon(
-                            imageVector = image,
-                            contentDescription =
-                                if (passwordVisible)
-                                    "Ẩn mật khẩu"
-                                else
-                                    "Hiện mật khẩu"
-                        )
-                    }
-                },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            PasswordTextField(
+                password=password,
+                onPasswordChange = {password=it},
+                label = "Mật khẩu",
+                isPasswordVisible = passwordVisible,
+                onToggleVisibility = {passwordVisible=!passwordVisible}
             )
-
             Spacer(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
-
-            // Nhập lại mật khẩu
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = {
-                    confirmPassword = it
-                    errorMessage = ""
-                },
-                label = {
-                    Text("Nhập lại mật khẩu")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password
-                ),
-                visualTransformation =
-                    if (confirmPasswordVisible)
-                        VisualTransformation.None
-                    else
-                        PasswordVisualTransformation(),
-                trailingIcon = {
-
-                    val image =
-                        if (confirmPasswordVisible)
-                            Icons.Default.Visibility
-                        else
-                            Icons.Default.VisibilityOff
-
-                    IconButton(
-                        onClick = {
-                            confirmPasswordVisible =
-                                !confirmPasswordVisible
-                        }
-                    ) {
-                        Icon(
-                            imageVector = image,
-                            contentDescription =
-                                if (confirmPasswordVisible)
-                                    "Ẩn mật khẩu"
-                                else
-                                    "Hiện mật khẩu"
-                        )
-                    }
-                },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            PasswordTextField(
+                password=confirmPassword,
+                onPasswordChange = {confirmPassword=it},
+                label = "Nhập lại mật khẩu",
+                isPasswordVisible = confirmPasswordVisible,
+                onToggleVisibility = {confirmPasswordVisible=!confirmPasswordVisible}
             )
 
             // Thông báo lỗi
@@ -264,10 +142,9 @@ fun RegisterScreen(
                 modifier = Modifier.height(LibrarySpacing.Large)
             )
 
-            // Nút đăng ký
-            Button(
+            AuthButton(
+                text = "ĐĂNG KÝ",
                 onClick = {
-
                     when {
                         fullName.isBlank() -> {
                             errorMessage = "Vui lòng nhập họ và tên"
@@ -309,58 +186,19 @@ fun RegisterScreen(
                             onRegisterClick()
                         }
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = MaterialTheme.shapes.extraLarge
-            ) {
-                Text(
-                    text = "ĐĂNG KÝ",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        letterSpacing = 1.sp
-                    )
-                )
-            }
+                }
+            )
 
             Spacer(
                 modifier = Modifier.weight(1f)
             )
 
-            // Chuyển sang đăng nhập
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        bottom = LibrarySpacing.Medium
-                    ),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            AuthFooter(
+                descriptionText = "Đã có tài khoản",
+                actionText = "Đăng nhập",
+                onActionClick = onNavigateToLogin
+            )
 
-                Text(
-                    text = "Đã có tài khoản? ",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-
-                TextButton(
-                    onClick = onLoginClick
-                ) {
-                    Text(
-                        text = "Đăng nhập",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-            }
         }
     }
 }

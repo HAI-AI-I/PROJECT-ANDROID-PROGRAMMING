@@ -11,7 +11,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.dialogs.BorrowConfirmationDialog
+import com.group_7.library_management.components.screens.ConfirmCodeScreen
+import com.group_7.library_management.navigation.AppNavHost
+import com.group_7.library_management.ui.auth.ForgotPasswordScreen
+import com.group_7.library_management.ui.auth.LoginScreen
+import com.group_7.library_management.ui.auth.RegisterScreen
+import com.group_7.library_management.ui.auth.RestPassword
+import com.group_7.library_management.ui.borrowing.BorrowingScreen
+import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.home.HomeScreen
+import com.group_7.library_management.ui.home.NotificationsScreen
+import com.group_7.library_management.ui.splash.SplashScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,24 +32,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Library_managementTheme {
-                HomeScreen()
+
+
+//                    SplashScreen()
+//                LoginScreen()
+//                BorrowConfirmationDialog()
+//                RegisterScreen()
+//                BorrowingScreen()
+//                ForgotPasswordScreen()
+                AppNavHost()
+//                FavoriteScreen()
+//                ConfirmCodeScreen()
+//                RestPassword()
+//                HomeScreen()
+//                MemberBottomBar("home")
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Library_managementTheme {
-        Greeting("Android")
     }
 }

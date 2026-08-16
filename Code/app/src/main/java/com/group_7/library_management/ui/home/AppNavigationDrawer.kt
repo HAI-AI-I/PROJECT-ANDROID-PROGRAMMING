@@ -46,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.group_7.library_management.models.User
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.MemberBottomBar
 
 @Composable
 fun AppNavigationDrawer(
@@ -79,7 +81,7 @@ fun AppNavigationDrawer(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = user?.name ?: "Tên người dùng",
+                    text = user?.name ?: "Nguyễn Văn An",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
