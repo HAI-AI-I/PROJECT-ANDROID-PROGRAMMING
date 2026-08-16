@@ -23,14 +23,21 @@ import androidx.compose.ui.unit.sp
 import com.group_7.library_management.R
 import com.group_7.library_management.components.CreateLogoIcon
 import com.group_7.library_management.components.CreateLogoTitle
+import com.group_7.library_management.components.CustomTextField
+import com.group_7.library_management.components.PasswordTextField
+import com.group_7.library_management.components.auth.AuthButton
+import com.group_7.library_management.components.auth.AuthFooter
+import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onNavigateToRegister: () -> Unit,
+                onNavigateToForgotPassword:()->Unit,
+                onSubmit:()->Unit) {
 
-    var textEmail by remember { mutableStateOf("") }
+    var textEmailorPassword by remember { mutableStateOf("") }
     var textPassword by remember { mutableStateOf("")}
     var passwordVisible by remember{mutableStateOf(false)}
 
@@ -52,64 +59,24 @@ fun LoginScreen() {
                 Spacer(modifier = Modifier.width(12.dp))
                 CreateLogoTitle()
             }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = "Chào mừng trở lại",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color=MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                Text(
-                    text = "Đăng nhập để tiếp tục sử dụng thư viện",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color=MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.padding(top = LibrarySpacing.Small, bottom = LibrarySpacing.ExtraLarge)
-                )
-            }
-
-            OutlinedTextField(
-                value =textEmail,
-                onValueChange = {textEmail=it},
-                label = { Text("Email/Id tài khoản") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            AuthHeader(
+                title = "Chào mừng trở lại",
+                subtitle = "Đăng nhập để tiếp tục sử dụng thư viện"
+            )
+            CustomTextField(
+                value=textEmailorPassword,
+                onValueChange = {textEmailorPassword=it},
+                label = "Email/Số điện thoại",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Password Input
-            OutlinedTextField(
-                value = textPassword,
-                onValueChange = { textPassword = it },
-                label = { Text("Mật khẩu") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if (passwordVisible) VisualTransformation.None
-                                        else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val image = if (passwordVisible)
-                        Icons.Default.Visibility
-                    else Icons.Default.VisibilityOff
-
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image,
-                            contentDescription = if (passwordVisible) "Hide password"
-                                                else "Show password")
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                )
+            PasswordTextField(
+                password = textPassword,
+                onPasswordChange = {textPassword=it},
+                label = "Mật khẩu",
+                isPasswordVisible = passwordVisible,
+                onToggleVisibility = {passwordVisible=!passwordVisible},
             )
 
             // Forgot Password
@@ -119,7 +86,7 @@ fun LoginScreen() {
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                TextButton(onClick = {}) {
+                TextButton(onClick =onNavigateToForgotPassword) {
                     Text(
                         text = "Quên mật khẩu?",
                         style = MaterialTheme.typography.labelLarge.copy(
@@ -133,48 +100,18 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             // Sign In Button
-            Button(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = MaterialTheme.shapes.extraLarge
-            ) {
-                Text(
-                    text = "ĐĂNG NHẬP",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        letterSpacing = 1.sp
-                    )
-                )
-            }
+            AuthButton(
+                text = "ĐĂNG NHẬP",
+                onClick = onSubmit
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = LibrarySpacing.Medium),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Chưa có tài khoản? ",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                )
-                TextButton(onClick = {}) {
-                    Text(
-                        text = "Tạo tài khoản",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-            }
+            AuthFooter(
+                descriptionText = "Chưa có tài khoản",
+                actionText = "Tạo tài khoản",
+                onActionClick = onNavigateToRegister
+            )
         }
     }
 }

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">library_management</string>
+    <string name="welcome_back">Chào mừng trở lại</string>
+    <string name="login_description">Đăng nhập để tiếp tục sử dụng thư viện</string>
+    <string name="email_label">Email/Id tài khoản</string>
+    <string name="password_label">Mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="login_button">ĐĂNG NHẬP</string>
+    <string name="no_account">Chưa có tài khoản? </string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
 </resources>
