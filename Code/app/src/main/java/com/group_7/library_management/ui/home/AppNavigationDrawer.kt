@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,10 +43,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.group_7.library_management.models.User
-import com.group_7.library_management.components.MemberTopBar
-import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.navigation.Routes
+import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun AppNavigationDrawer(
@@ -58,175 +56,168 @@ fun AppNavigationDrawer(
 ) {
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp),
-        drawerContainerColor = Color.White
+        drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp)
+                .padding(vertical = LibrarySpacing.Large)
         ) {
             // --- HEADER ---
-            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                // Avatar (Tạm thời dùng Icon, bạn có thể thay bằng AsyncImage của Coil)
+            Column(modifier = Modifier.padding(horizontal = LibrarySpacing.Large)) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Avatar",
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape),
-                    tint = Color.LightGray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
                 Text(
                     text = user?.name ?: "Nguyễn Văn An",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFF0F0F0), RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.extraSmall)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "MSSV: ${user?.studentId ?: "UTH123456"}",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.DarkGray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             Text(
                 text = "MAIN",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Home,
                 label = "Trang chủ",
-                isSelected = currentRoute == "home",
-                onClick = { onItemClick("home") }
+                isSelected = currentRoute == Routes.HOME,
+                onClick = { onItemClick(Routes.HOME) }
             )
             DrawerItem(
                 icon = Icons.Default.Book,
                 label = "Danh sách sách",
-                isSelected = currentRoute == "books",
-                onClick = { onItemClick("books") }
+                isSelected = currentRoute == Routes.BOOKS,
+                onClick = { onItemClick(Routes.BOOKS) }
             )
             DrawerItem(
                 icon = Icons.Default.LibraryBooks,
                 label = "Sách của tôi",
-                isSelected = currentRoute == "my_books",
-                onClick = { onItemClick("my_books") }
+                isSelected = currentRoute == Routes.MY_BOOKS,
+                onClick = { onItemClick(Routes.MY_BOOKS) }
             )
             DrawerItem(
                 icon = Icons.Default.History,
                 label = "Lịch sử mượn",
-                isSelected = currentRoute == "history",
-                onClick = { onItemClick("history") }
+                isSelected = currentRoute == Routes.HISTORY,
+                onClick = { onItemClick(Routes.HISTORY) }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             Text(
                 text = "ACCOUNT",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Person,
                 label = "Hồ sơ cá nhân",
-                isSelected = currentRoute == "profile",
-                onClick = { onItemClick("profile") }
+                isSelected = currentRoute == Routes.PROFILE,
+                onClick = { onItemClick(Routes.PROFILE) }
             )
 
-            // Drawer item đặc biệt cho Thông báo (có dấu chấm đỏ)
             NavigationDrawerItem(
                 label = {
-                    Text(text = "Thông báo", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "Thông báo", style = MaterialTheme.typography.titleSmall)
                 },
                 icon = {
                     Box {
                         Icon(Icons.Default.Notifications, contentDescription = null)
-
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(Color.Red)
+                                .background(MaterialTheme.colorScheme.error)
                                 .align(Alignment.TopEnd)
-                                .border(1.dp, Color.White, CircleShape)
+                                .border(1.dp, MaterialTheme.colorScheme.surface, CircleShape)
                         )
                     }
                 },
-                selected = currentRoute == "notifications",
-                onClick = { onItemClick("notifications") },
+                selected = currentRoute == Routes.NOTIFICATIONS,
+                onClick = { onItemClick(Routes.NOTIFICATIONS) },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = Color.DarkGray,
-                    unselectedTextColor = Color.DarkGray
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
 
             DrawerItem(
                 icon = Icons.Default.Settings,
                 label = "Cài đặt",
-                isSelected = currentRoute == "settings",
-                onClick = { onItemClick("settings") }
+                isSelected = currentRoute == Routes.SETTINGS,
+                onClick = { onItemClick(Routes.SETTINGS) }
             )
             DrawerItem(
                 icon = Icons.Outlined.HelpOutline,
                 label = "Hỗ trợ",
-                isSelected = currentRoute == "help",
-                onClick = { onItemClick("help") }
+                isSelected = currentRoute == Routes.HELP,
+                onClick = { onItemClick(Routes.HELP) }
             )
 
-            Spacer(modifier = Modifier.weight(1f)) // Đẩy nút Đăng xuất xuống dưới cùng
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             // --- FOOTER (Logout) ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onLogout() }
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = LibrarySpacing.Medium),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = "Logout",
-                    tint = Color(0xFFD32F2F)
+                    tint = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
                 Text(
                     text = "Đăng xuất",
-                    color = Color(0xFFD32F2F),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
         }
@@ -242,19 +233,23 @@ fun DrawerItem(
 ) {
     NavigationDrawerItem(
         label = {
-            Text(text = label, fontSize = 16.sp, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+            )
         },
         icon = { Icon(icon, contentDescription = null) },
         selected = isSelected,
         onClick = onClick,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = Color(0xFFE8EAF6),
-            selectedIconColor = Color(0xFF0D1B54),
-            selectedTextColor = Color(0xFF0D1B54),
+            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
             unselectedContainerColor = Color.Transparent,
-            unselectedIconColor = Color.DarkGray,
-            unselectedTextColor = Color.DarkGray
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }

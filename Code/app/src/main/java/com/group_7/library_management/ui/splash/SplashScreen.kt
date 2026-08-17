@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,10 +48,14 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.PrimaryBlue
 
 @Composable
-@Preview
 fun SplashScreen(
+    onNext: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(2000)
+        onNext()
+    }
     Box(
         modifier = modifier
             .fillMaxSize()

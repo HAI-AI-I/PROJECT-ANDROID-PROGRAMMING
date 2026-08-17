@@ -3,7 +3,6 @@ package com.group_7.library_management.ui.home
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
@@ -38,11 +33,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -66,25 +58,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.group_7.library_management.components.CreateLogoIcon
-import com.group_7.library_management.components.CreateLogoTitle
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
-import com.group_7.library_management.models.User
+import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.theme.*
+import com.group_7.library_management.ui.book.BookListContent
+import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
+import com.group_7.library_management.ui.profile.ProfileContent
+import com.group_7.library_management.ui.favorite.FavoriteScreen
 import kotlinx.coroutines.launch
-import java.lang.reflect.Member
 
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(),
+    onLogout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var currentRoute by remember { mutableStateOf("home") }
+    var currentRoute by remember { mutableStateOf(Routes.HOME) }
     var selectedBottomTab by remember { mutableIntStateOf(0) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -93,7 +87,6 @@ fun HomeScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            // Hàm này giờ lấy từ file AppNavigationDrawer.kt
             AppNavigationDrawer(
                 user = uiState.currentUser,
                 currentRoute = currentRoute,
@@ -103,16 +96,17 @@ fun HomeScreen(
                 },
                 onLogout = {
                     scope.launch { drawerState.close() }
+                    onLogout()
                 }
             )
         }
     ) {
         Scaffold(
-            containerColor = Background,
+            containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 MemberTopBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationClick = { currentRoute = "notifications" },
+                    onNotificationClick = { currentRoute = Routes.NOTIFICATIONS },
                     showNotificationBadge = true
                 )
             },
@@ -126,19 +120,43 @@ fun HomeScreen(
             }
         ) { paddingValues ->
             when (currentRoute) {
-                "home" -> {
+                Routes.HOME -> {
                     HomeContent(
                         paddingValues = paddingValues,
                         uiState = uiState
                     )
                 }
-                "notifications" -> {
+                Routes.NOTIFICATIONS -> {
                     NotificationsScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { /* Có thể reload thông báo */ },
+                        onNotificationClick = { },
                         currentRoute = currentRoute,
                         onNavigate = { route -> currentRoute = route }
                     )
+                }
+                Routes.BOOKS -> {
+                    BookListContent(
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                Routes.MY_BOOKS -> {
+                    BorrowRecordListContent(
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                Routes.HISTORY -> {
+                    BorrowRecordListContent(
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                Routes.PROFILE -> {
+                    ProfileContent(
+                        modifier = Modifier.padding(paddingValues),
+                        onLogoutClick = onLogout
+                    )
+                }
+                Routes.FAVORITE -> {
+                    FavoriteScreen()
                 }
                 else -> {
                     HomeContent(
@@ -151,9 +169,6 @@ fun HomeScreen(
     }
 }
 
-// ==========================================
-// 2. GIAO DIỆN TRANG CHỦ (HOME CONTENT)
-// ==========================================
 @Composable
 fun HomeContent(
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
@@ -164,10 +179,10 @@ fun HomeContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = LibrarySpacing.Large),
+        verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
     ) {
-        item { Spacer(modifier = Modifier.height(4.dp)) }
+        item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
 
         item {
             SearchBar(
@@ -190,19 +205,19 @@ fun HomeContent(
             BookListSection(
                 title = "Sách mới",
                 actionText = "Xem tất cả",
-                books = uiState.popularBooks
+                books = uiState.newBooks
             )
         }
         item {
             BookListSection(
                 title = "Sách dành cho bạn",
                 actionText = "",
-                books = uiState.popularBooks
+                books = uiState.recommendedBooks
             )
         }
         item { BorrowStatusSection() }
         item { QRCheckInCard() }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
     }
 }
 
@@ -213,7 +228,7 @@ fun SearchSection() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
     ) {
         OutlinedTextField(
             value = searchQuery,
@@ -222,17 +237,21 @@ fun SearchSection() {
                 .weight(1f)
                 .height(54.dp),
             placeholder = {
-                Text("Tìm kiếm sách, tác giả, ISBN", color = TextTertiary, fontSize = 14.sp)
+                Text(
+                    "Tìm kiếm sách, tác giả, ISBN",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             },
             leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = TextTertiary)
+                Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             },
-            shape = RoundedCornerShape(27.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
-                unfocusedContainerColor = SurfaceVariant,
-                focusedContainerColor = SurfaceVariant
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
             ),
             singleLine = true
         )
@@ -241,7 +260,7 @@ fun SearchSection() {
             modifier = Modifier
                 .size(54.dp)
                 .clip(CircleShape)
-                .background(SurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }
@@ -257,23 +276,21 @@ fun BookListSection(title: String, actionText: String, books: List<Book>) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
             if (actionText.isNotEmpty()) {
                 Text(
                     text = actionText,
                     style = MaterialTheme.typography.labelLarge,
-                    color = PrimaryBlue,
-                    fontWeight = FontWeight.SemiBold
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             items(books) { book ->
                 BookItemCard(book)
@@ -289,16 +306,16 @@ fun BookItemCard(book: Book) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(12.dp)),
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     Icons.Default.Book,
                     contentDescription = null,
-                    tint = PrimaryBlue.copy(alpha = 0.5f),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                     modifier = Modifier.size(48.dp)
                 )
             }
@@ -307,15 +324,14 @@ fun BookItemCard(book: Book) {
         Text(
             text = book.title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
             maxLines = 1,
-            color = TextPrimary
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = book.author,
             style = MaterialTheme.typography.bodySmall,
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1
         )
     }
@@ -328,22 +344,22 @@ fun BorrowStatusSection() {
             icon = Icons.Default.LibraryBooks,
             title = "Đang mượn",
             count = "3",
-            iconTint = SecondaryBlue,
-            bgColor = SurfaceVariant
+            iconTint = MaterialTheme.colorScheme.secondary,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Event,
             title = "Sắp đến hạn",
             count = "1",
             iconTint = Warning,
-            bgColor = SurfaceVariant
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Warning,
             title = "Quá hạn",
             count = "0",
-            iconTint = TextTertiary,
-            bgColor = SurfaceVariant
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
@@ -353,16 +369,16 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(20.dp))
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
+            .padding(horizontal = LibrarySpacing.Large, vertical = LibrarySpacing.Medium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             Box(
                 modifier = Modifier
@@ -376,15 +392,13 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
         Text(
             text = count,
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryBlue
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -393,55 +407,53 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
 fun QRCheckInCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryBlue)
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Column(
-            modifier = Modifier.padding(28.dp),
+            modifier = Modifier.padding(LibrarySpacing.Large),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "QR Check-in",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Surface
+                color = MaterialTheme.colorScheme.onPrimary
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = "Xuất trình mã QR của bạn tại quầy thủ thư hoặc cổng tự động để vào thư viện hoặc mượn sách.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Surface.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 20.sp
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
             Button(
                 onClick = { },
-                colors = ButtonDefaults.buttonColors(containerColor = SecondaryBlue),
-                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = Surface)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Mở QR", color = Surface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
+                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
+                Text("Mở QR", color = MaterialTheme.colorScheme.onSecondary, style = MaterialTheme.typography.labelLarge)
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
 
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(Surface)
-                    .padding(12.dp),
+                    .clip(RoundedCornerShape(topStart = LibrarySpacing.Medium, topEnd = LibrarySpacing.Medium))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(LibrarySpacing.Small),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Icon(
                     Icons.Default.QrCode2,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    tint = TextPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

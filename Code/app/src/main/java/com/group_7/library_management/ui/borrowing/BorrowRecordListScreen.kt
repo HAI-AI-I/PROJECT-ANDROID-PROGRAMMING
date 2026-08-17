@@ -35,24 +35,38 @@ data class BorrowRecord(
     val status: BorrowStatus,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BorrowRecordListScreen(
     title: String,
     onBack: () -> Unit = {},
 ) {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(title) }) },
+    ) { innerPadding ->
+        BorrowRecordListContent(
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+fun BorrowRecordListContent(
+    modifier: Modifier = Modifier
+) {
     // TODO: thay bằng val records by viewModel.borrowRecords.collectAsState()
     val records = remember {
         listOf(
             BorrowRecord(
-                Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180_000, availableCopies = 0),
+                Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 0),
                 "01/08/2026", "15/08/2026", BorrowStatus.OVERDUE,
             ),
             BorrowRecord(
-                Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150_000, availableCopies = 0),
+                Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150000, availableCopies = 0),
                 "05/08/2026", "19/08/2026", BorrowStatus.BORROWING,
             ),
             BorrowRecord(
-                Book("3", "Deep Learning", "Ian Goodfellow", "Khoa học máy tính", borrowFee = 200_000, availableCopies = 1),
+                Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5),
                 "20/07/2026", "03/08/2026", BorrowStatus.RETURNED,
             ),
         )
@@ -66,32 +80,28 @@ fun BorrowRecordListScreen(
         else -> records
     }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text(title) }) },
-    ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, label ->
-                    Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = { Text(label) })
-                }
+    Column(modifier = modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = selectedTab) {
+            tabs.forEachIndexed { index, label ->
+                Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = { Text(label) })
             }
+        }
 
-            if (filtered.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Không có mục nào.", color = TextSecondary)
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.padding(LibrarySpacing.Medium),
-                    verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small),
-                ) {
-                    items(filtered, key = { it.book.id }) { record ->
-                        BookListItemCard(
-                            book = record.book,
-                            subtitleOverride = "Mượn: ${record.borrowDate} · Hạn trả: ${record.dueDate}",
-                            trailingContent = { StatusBadge(record.status) },
-                        )
-                    }
+        if (filtered.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Không có mục nào.", color = TextSecondary)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(LibrarySpacing.Medium),
+                verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small),
+            ) {
+                items(filtered, key = { it.book.id }) { record ->
+                    BookListItemCard(
+                        book = record.book,
+                        subtitleOverride = "Mượn: ${record.borrowDate} · Hạn trả: ${record.dueDate}",
+                        trailingContent = { StatusBadge(record.status) },
+                    )
                 }
             }
         }

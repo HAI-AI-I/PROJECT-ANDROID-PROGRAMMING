@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BookFormat
@@ -43,14 +44,45 @@ fun BookListScreen(
     onNavigateMyBorrowing: () -> Unit = {},
     onNavigateProfile: () -> Unit = {},
 ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = { IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
+                title = { Text("Library UTH 13") },
+                actions = { IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "Thông báo") } },
+            )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(selected = false, onClick = onNavigateHome, icon = { Icon(Icons.Default.Home, contentDescription = null) }, label = { Text("Home") })
+                NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) }, label = { Text("Books") })
+                NavigationBarItem(selected = false, onClick = onNavigateMyBorrowing, icon = { Icon(Icons.Default.Assignment, contentDescription = null) }, label = { Text("My Borrowing") })
+                NavigationBarItem(selected = false, onClick = onNavigateProfile, icon = { Icon(Icons.Default.Person, contentDescription = null) }, label = { Text("Profile") })
+            }
+        },
+    ) { innerPadding ->
+        BookListContent(
+            modifier = Modifier.padding(innerPadding),
+            onBookClick = onBookClick,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookListContent(
+    modifier: Modifier = Modifier,
+    onBookClick: (Book) -> Unit = {},
+) {
     // TODO: thay bằng val allBooks by viewModel.books.collectAsState()
     val allBooks = remember {
         listOf(
-            Book("1", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", borrowFee = 150_000, availableCopies = 3, rating = 4.6),
-            Book("2", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", borrowFee = 120_000, availableCopies = 0, rating = 4.3),
-            Book("3", "Mạng máy tính căn bản và ứng dụng thực tế", "Lê Văn C", "Mạng máy tính", borrowFee = 100_000, availableCopies = 5, rating = 4.5),
-            Book("4", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180_000, availableCopies = 2, format = BookFormat.EBOOK),
-            Book("5", "Trí tuệ nhân tạo nhập môn", "Phạm Thị D", "Khoa học máy tính", borrowFee = 130_000, availableCopies = 0),
+            Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 2, rating = 4.8),
+            Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150000, availableCopies = 5, rating = 4.7),
+            Book("3", "Kotlin in Action", "Dmitry Jemerov", "Lập trình", borrowFee = 120000, availableCopies = 1, rating = 4.9),
+            Book("4", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", borrowFee = 150000, availableCopies = 3, rating = 4.6),
+            Book("5", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", borrowFee = 120000, availableCopies = 0, rating = 4.3),
+            Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5, rating = 4.5)
         )
     }
 
@@ -75,88 +107,69 @@ fun BookListScreen(
         matchesQuery && matchesQuickGenre && matchesQuickStatus && matchesFilterGenre && matchesRating
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = { IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
-                title = { Text("Library UTH 13") },
-                actions = { IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "Thông báo") } },
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = false, onClick = onNavigateHome, icon = { Icon(Icons.Default.Home, contentDescription = null) }, label = { Text("Home") })
-                NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) }, label = { Text("Books") })
-                NavigationBarItem(selected = false, onClick = onNavigateMyBorrowing, icon = { Icon(Icons.Default.Assignment, contentDescription = null) }, label = { Text("My Borrowing") })
-                NavigationBarItem(selected = false, onClick = onNavigateProfile, icon = { Icon(Icons.Default.Person, contentDescription = null) }, label = { Text("Profile") })
-            }
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = LibrarySpacing.Medium),
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = LibrarySpacing.Medium),
+    ) {
+        Spacer(Modifier.height(LibrarySpacing.Small))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(Modifier.height(LibrarySpacing.Small))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("Sách", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                OutlinedButton(onClick = { showFilterSheet = true }) {
-                    Icon(Icons.Default.FilterList, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Thể loại")
-                }
+            Text("Sách", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            OutlinedButton(onClick = { showFilterSheet = true }) {
+                Icon(Icons.Default.FilterList, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Thể loại")
             }
+        }
 
-            Spacer(Modifier.height(LibrarySpacing.Small))
+        Spacer(Modifier.height(LibrarySpacing.Small))
 
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Tìm sách...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true,
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Tìm sách...") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            singleLine = true,
+        )
+
+        Spacer(Modifier.height(LibrarySpacing.Small))
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(QUICK_GENRE_TABS) { tab ->
+                FilterChip(selected = quickGenre == tab, onClick = { quickGenre = tab }, label = { Text(tab) })
+            }
+        }
+
+        Spacer(Modifier.height(LibrarySpacing.Small))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Trạng thái:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(8.dp))
+            FilterChip(selected = quickStatus == "available", onClick = { quickStatus = if (quickStatus == "available") null else "available" }, label = { Text("Sẵn có") })
+            Spacer(Modifier.width(8.dp))
+            FilterChip(selected = quickStatus == "borrowed", onClick = { quickStatus = if (quickStatus == "borrowed") null else "borrowed" }, label = { Text("Đang mượn") })
+        }
+
+        Spacer(Modifier.height(LibrarySpacing.Medium))
+
+        if (filteredBooks.isEmpty()) {
+            EmptyBooksState(
+                onViewPopularClick = {
+                    searchQuery = ""
+                    quickGenre = QUICK_GENRE_TABS.first()
+                    quickStatus = null
+                    filter = BookFilterState()
+                },
             )
-
-            Spacer(Modifier.height(LibrarySpacing.Small))
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(QUICK_GENRE_TABS) { tab ->
-                    FilterChip(selected = quickGenre == tab, onClick = { quickGenre = tab }, label = { Text(tab) })
-                }
-            }
-
-            Spacer(Modifier.height(LibrarySpacing.Small))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Trạng thái:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.width(8.dp))
-                FilterChip(selected = quickStatus == "available", onClick = { quickStatus = if (quickStatus == "available") null else "available" }, label = { Text("Sẵn có") })
-                Spacer(Modifier.width(8.dp))
-                FilterChip(selected = quickStatus == "borrowed", onClick = { quickStatus = if (quickStatus == "borrowed") null else "borrowed" }, label = { Text("Đang mượn") })
-            }
-
-            Spacer(Modifier.height(LibrarySpacing.Medium))
-
-            if (filteredBooks.isEmpty()) {
-                EmptyBooksState(
-                    onViewPopularClick = {
-                        searchQuery = ""
-                        quickGenre = QUICK_GENRE_TABS.first()
-                        quickStatus = null
-                        filter = BookFilterState()
-                    },
-                )
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)) {
-                    items(filteredBooks, key = { it.id }) { book ->
-                        BookListItemCard(book = book, onClick = { onBookClick(book) })
-                    }
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)) {
+                items(filteredBooks, key = { it.id }) { book ->
+                    BookListItemCard(book = book, onClick = { onBookClick(book) })
                 }
             }
         }

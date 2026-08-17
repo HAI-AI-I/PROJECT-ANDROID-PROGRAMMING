@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
@@ -22,17 +23,17 @@ fun MemberBottomBar(
         tonalElevation = LibrarySpacing.Small,
     ) {
         val items = listOf(
-            BottomNavItem("Home", Icons.Default.Home),
-            BottomNavItem("Books", Icons.Default.Book),
-            BottomNavItem("My Borrowing",Icons.AutoMirrored.Filled.LibraryBooks),
-            BottomNavItem("Profile", Icons.Default.Person)
+            BottomNavItem(Routes.HOME, Icons.Default.Home, "Home"),
+            BottomNavItem(Routes.BOOKS, Icons.Default.Book, "Books"),
+            BottomNavItem(Routes.MY_BOOKS, Icons.AutoMirrored.Filled.LibraryBooks, "My books"),
+            BottomNavItem(Routes.PROFILE, Icons.Default.Person, "Profile")
         )
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = { onNavigate(item.route) },
-                icon = { Icon(item.icon, contentDescription = item.route) },
-                label = { Text(text=item.route, style = MaterialTheme.typography.labelLarge) },
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                label = { Text(text=item.label, style = MaterialTheme.typography.labelLarge) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -47,5 +48,6 @@ fun MemberBottomBar(
 
 private data class BottomNavItem(
     val route: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val label: String
 )
