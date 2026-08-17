@@ -127,11 +127,8 @@ fun HomeScreen(
                     )
                 }
                 Routes.NOTIFICATIONS -> {
-                    NotificationsScreen(
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { },
-                        currentRoute = currentRoute,
-                        onNavigate = { route -> currentRoute = route }
+                    NotificationsContent(
+                        modifier = Modifier.padding(paddingValues)
                     )
                 }
                 Routes.BOOKS -> {

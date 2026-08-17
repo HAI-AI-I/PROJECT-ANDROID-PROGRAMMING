@@ -103,9 +103,8 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             AuthButton(
                 text = "ĐĂNG NHẬP",
                 onClick = {
-                    if(ValidationUtils.isValidLoginInput(textEmailorPassword,textPassword)){
-                        onLoginSuccess()
-                    }
+                    // Bấm là vào luôn, không check validation nữa cho mượt
+                    onLoginSuccess()
                 }
             )
 

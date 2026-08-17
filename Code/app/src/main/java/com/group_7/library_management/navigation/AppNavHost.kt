@@ -43,7 +43,7 @@ fun AppNavHost(
                 onNavigateToForgotPassword = {
                     navController.navigate(Routes.FORGOT_PASSWORD)
                 },
-                onSubmit = {
+                onLoginSuccess = {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }

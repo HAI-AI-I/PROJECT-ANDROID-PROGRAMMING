@@ -5,13 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,64 +14,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.group_7.library_management.components.BookListItemCard
-import com.group_7.library_management.components.MemberBottomBar
-import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
-import com.group_7.library_management.models.BookFormat
 import com.group_7.library_management.ui.theme.LibrarySpacing
-import kotlinx.coroutines.launch
 
-/**
- * BookListScreen
- * Trang "Danh sách sách", khớp thiết kế Stitch: TopAppBar (menu + tên app +
- * chuông thông báo), tiêu đề "Sách" + nút "Thể loại" mở bộ lọc, ô tìm kiếm,
- * tabs thể loại nhanh (cuộn ngang), chip trạng thái nhanh, danh sách sách,
- * và Bottom Navigation 4 mục (Home / Books / My Borrowing / Profile).
- *
- * DỮ LIỆU MẪU: thay `allBooks` bằng `val allBooks by viewModel.books.collectAsState()`
- * khi có ViewModel/Repository thật (đánh dấu TODO).
- */
 private val QUICK_GENRE_TABS = listOf("Tất cả", "Lập trình", "Khoa học máy tính", "Cơ sở dữ liệu", "Mạng máy tính")
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BookListScreen(
-    onBookClick: (Book) -> Unit = {},
-    onNavigateHome: () -> Unit = {},
-    onNavigateMyBorrowing: () -> Unit = {},
-    onNavigateProfile: () -> Unit = {},
-) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = { IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
-                title = { Text("Library UTH 13") },
-                actions = { IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "Thông báo") } },
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = false, onClick = onNavigateHome, icon = { Icon(Icons.Default.Home, contentDescription = null) }, label = { Text("Home") })
-                NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) }, label = { Text("Books") })
-                NavigationBarItem(selected = false, onClick = onNavigateMyBorrowing, icon = { Icon(Icons.Default.Assignment, contentDescription = null) }, label = { Text("My Borrowing") })
-                NavigationBarItem(selected = false, onClick = onNavigateProfile, icon = { Icon(Icons.Default.Person, contentDescription = null) }, label = { Text("Profile") })
-            }
-        },
-    ) { innerPadding ->
-        BookListContent(
-            modifier = Modifier.padding(innerPadding),
-            onBookClick = onBookClick,
-        )
-    }
-}
-
+/**
+ * BookListContent
+ * Chỉ chứa nội dung danh sách sách, để HomeScreen có thể nhúng vào Scaffold chung.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookListContent(
     modifier: Modifier = Modifier,
     onBookClick: (Book) -> Unit = {},
 ) {
-    // TODO: thay bằng val allBooks by viewModel.books.collectAsState()
     val allBooks = remember {
         listOf(
             Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 2, rating = 4.8),
@@ -91,10 +42,9 @@ fun BookListContent(
 
     var searchQuery by remember { mutableStateOf("") }
     var quickGenre by remember { mutableStateOf(QUICK_GENRE_TABS.first()) }
-    var quickStatus by remember { mutableStateOf<String?>(null) } // null = tất cả, "available", "borrowed"
+    var quickStatus by remember { mutableStateOf<String?>(null) } 
     var filter by remember { mutableStateOf(BookFilterState()) }
     var showFilterSheet by remember { mutableStateOf(false) }
-    var currentRoute by remember { mutableStateOf("books") }
 
     val filteredBooks = allBooks.filter { book ->
         val matchesQuery = searchQuery.isBlank() ||
@@ -111,94 +61,86 @@ fun BookListContent(
         matchesQuery && matchesQuickGenre && matchesQuickStatus && matchesFilterGenre && matchesRating
     }
 
-    Scaffold(
-        topBar = {
-            MemberTopBar(
-                onMenuClick = { scope.launch { drawerState.open() } },
-                onNotificationClick = { currentRoute = "notifications" },
-                showNotificationBadge = true
-            )
-        },
-        bottomBar = {
-            MemberBottomBar(
-                currentRoute = currentRoute,
-                onNavigate = { route ->
-                    currentRoute = route
-                }
-            )
-        },
-    ) { innerPadding ->
+    Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = LibrarySpacing.Medium),
         ) {
+            Spacer(Modifier.height(LibrarySpacing.Small))
             Text("Sách", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            
             OutlinedButton(onClick = { showFilterSheet = true }) {
                 Icon(Icons.Default.FilterList, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("Thể loại")
             }
-        }
 
-        Spacer(Modifier.height(LibrarySpacing.Small))
+            Spacer(Modifier.height(LibrarySpacing.Small))
 
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Tìm sách...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            singleLine = true,
-        )
-
-        Spacer(Modifier.height(LibrarySpacing.Small))
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(QUICK_GENRE_TABS) { tab ->
-                FilterChip(selected = quickGenre == tab, onClick = { quickGenre = tab }, label = { Text(tab) })
-            }
-        }
-
-        Spacer(Modifier.height(LibrarySpacing.Small))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Trạng thái:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.width(8.dp))
-            FilterChip(selected = quickStatus == "available", onClick = { quickStatus = if (quickStatus == "available") null else "available" }, label = { Text("Sẵn có") })
-            Spacer(Modifier.width(8.dp))
-            FilterChip(selected = quickStatus == "borrowed", onClick = { quickStatus = if (quickStatus == "borrowed") null else "borrowed" }, label = { Text("Đang mượn") })
-        }
-
-        Spacer(Modifier.height(LibrarySpacing.Medium))
-
-        if (filteredBooks.isEmpty()) {
-            EmptyBooksState(
-                onViewPopularClick = {
-                    searchQuery = ""
-                    quickGenre = QUICK_GENRE_TABS.first()
-                    quickStatus = null
-                    filter = BookFilterState()
-                },
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Tìm sách...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
             )
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)) {
-                items(filteredBooks, key = { it.id }) { book ->
-                    BookListItemCard(book = book, onClick = { onBookClick(book) })
+
+            Spacer(Modifier.height(LibrarySpacing.Small))
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(QUICK_GENRE_TABS) { tab ->
+                    FilterChip(
+                        selected = quickGenre == tab, 
+                        onClick = { quickGenre = tab }, 
+                        label = { Text(tab) }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(LibrarySpacing.Small))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Trạng thái:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.width(8.dp))
+                FilterChip(selected = quickStatus == "available", onClick = { quickStatus = if (quickStatus == "available") null else "available" }, label = { Text("Sẵn có") })
+                Spacer(Modifier.width(8.dp))
+                FilterChip(selected = quickStatus == "borrowed", onClick = { quickStatus = if (quickStatus == "borrowed") null else "borrowed" }, label = { Text("Đang mượn") })
+            }
+
+            Spacer(Modifier.height(LibrarySpacing.Medium))
+
+            if (filteredBooks.isEmpty()) {
+                EmptyBooksState(
+                    onViewPopularClick = {
+                        searchQuery = ""
+                        quickGenre = QUICK_GENRE_TABS.first()
+                        quickStatus = null
+                        filter = BookFilterState()
+                    },
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
+                ) {
+                    items(filteredBooks, key = { it.id }) { book ->
+                        BookListItemCard(book = book, onClick = { onBookClick(book) })
+                    }
                 }
             }
         }
-    }
 
-    if (showFilterSheet) {
-        BookFilterBottomSheet(
-            initialFilter = filter,
-            onDismiss = { showFilterSheet = false },
-            onApply = { newFilter ->
-                filter = newFilter
-                showFilterSheet = false
-            },
-        )
+        if (showFilterSheet) {
+            BookFilterBottomSheet(
+                initialFilter = filter,
+                onDismiss = { showFilterSheet = false },
+                onApply = { newFilter ->
+                    filter = newFilter
+                    showFilterSheet = false
+                },
+            )
+        }
     }
 }
