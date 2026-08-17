@@ -23,6 +23,7 @@ import com.group_7.library_management.ui.borrowing.BorrowingScreen
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.home.HomeScreen
 import com.group_7.library_management.ui.home.NotificationsScreen
+import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.splash.SplashScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
 
@@ -40,12 +41,13 @@ class MainActivity : ComponentActivity() {
 //                RegisterScreen()
 //                BorrowingScreen()
 //                ForgotPasswordScreen()
-                AppNavHost()
+//                AppNavHost()
 //                FavoriteScreen()
 //                ConfirmCodeScreen()
 //                RestPassword()
 //                HomeScreen()
 //                MemberBottomBar("home")
+                ProfileScreen()
             }
         }
     }

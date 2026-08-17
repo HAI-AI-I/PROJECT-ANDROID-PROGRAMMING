@@ -20,9 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.group_7.library_management.components.BookListItemCard
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BookFormat
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import kotlinx.coroutines.launch
 
 /**
  * BookListScreen
@@ -91,6 +94,7 @@ fun BookListContent(
     var quickStatus by remember { mutableStateOf<String?>(null) } // null = tất cả, "available", "borrowed"
     var filter by remember { mutableStateOf(BookFilterState()) }
     var showFilterSheet by remember { mutableStateOf(false) }
+    var currentRoute by remember { mutableStateOf("books") }
 
     val filteredBooks = allBooks.filter { book ->
         val matchesQuery = searchQuery.isBlank() ||
@@ -107,16 +111,28 @@ fun BookListContent(
         matchesQuery && matchesQuickGenre && matchesQuickStatus && matchesFilterGenre && matchesRating
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = LibrarySpacing.Medium),
-    ) {
-        Spacer(Modifier.height(LibrarySpacing.Small))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+    Scaffold(
+        topBar = {
+            MemberTopBar(
+                onMenuClick = { scope.launch { drawerState.open() } },
+                onNotificationClick = { currentRoute = "notifications" },
+                showNotificationBadge = true
+            )
+        },
+        bottomBar = {
+            MemberBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    currentRoute = route
+                }
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = LibrarySpacing.Medium),
         ) {
             Text("Sách", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             OutlinedButton(onClick = { showFilterSheet = true }) {

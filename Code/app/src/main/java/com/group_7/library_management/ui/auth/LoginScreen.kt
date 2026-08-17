@@ -29,13 +29,13 @@ import com.group_7.library_management.components.auth.AuthButton
 import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.ui.theme.LibrarySpacing
-
+import com.group_7.library_management.utils.ValidationUtils
 
 
 @Composable
 fun LoginScreen(onNavigateToRegister: () -> Unit,
                 onNavigateToForgotPassword:()->Unit,
-                onSubmit:()->Unit) {
+                onLoginSuccess:()->Unit) {
 
     var textEmailorPassword by remember { mutableStateOf("") }
     var textPassword by remember { mutableStateOf("")}
@@ -102,7 +102,11 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             // Sign In Button
             AuthButton(
                 text = "ĐĂNG NHẬP",
-                onClick = onSubmit
+                onClick = {
+                    if(ValidationUtils.isValidLoginInput(textEmailorPassword,textPassword)){
+                        onLoginSuccess()
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.weight(1f))
