@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.group_7.library_management.ui.book.BookScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
+import com.group_7.library_management.ui.book.TransactionQrScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
