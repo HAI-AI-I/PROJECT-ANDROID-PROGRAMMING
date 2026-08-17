@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,21 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.group_7.library_management.models.User
-import com.group_7.library_management.ui.theme.BackgroundLight
-import com.group_7.library_management.ui.theme.Border
-import com.group_7.library_management.ui.theme.DarkBlue
-import com.group_7.library_management.ui.theme.Error
-import com.group_7.library_management.ui.theme.PrimaryBlue
-import com.group_7.library_management.ui.theme.SecondaryContainerBlue
-import com.group_7.library_management.ui.theme.Surface
-import com.group_7.library_management.ui.theme.SurfaceGray
-import com.group_7.library_management.ui.theme.TextPrimary
-import com.group_7.library_management.ui.theme.TextSecondary
-import com.group_7.library_management.ui.theme.TextTertiary
 
 @Composable
 fun AppNavigationDrawer(
@@ -73,26 +59,24 @@ fun AppNavigationDrawer(
             modifier = Modifier
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp)
+                .padding(vertical = LibrarySpacing.Large)
         ) {
             // --- HEADER ---
-            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                // Avatar (Tạm thời dùng Icon, bạn có thể thay bằng AsyncImage của Coil)
+            Column(modifier = Modifier.padding(horizontal = LibrarySpacing.Large)) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Avatar",
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape),
-                    tint = TextTertiary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
                 Text(
                     text = user?.name ?: "Nguyễn Văn An",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -100,7 +84,7 @@ fun AppNavigationDrawer(
 
                 Box(
                     modifier = Modifier
-                        .background(SurfaceGray, RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.extraSmall)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
@@ -111,18 +95,17 @@ fun AppNavigationDrawer(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Border, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             Text(
                 text = "MAIN",
                 style = MaterialTheme.typography.labelMedium,
-                color = TextTertiary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Home,
@@ -149,18 +132,17 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick("history") }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = Border, thickness = 1.dp, modifier = Modifier.padding(horizontal = 24.dp))
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             Text(
                 text = "ACCOUNT",
                 style = MaterialTheme.typography.labelMedium,
-                color = TextTertiary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 28.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Person,
@@ -169,15 +151,13 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick("profile") }
             )
 
-            // Drawer item đặc biệt cho Thông báo (có dấu chấm đỏ)
             NavigationDrawerItem(
                 label = {
-                    Text(text = "Thông báo", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "Thông báo", style = MaterialTheme.typography.titleSmall)
                 },
                 icon = {
                     Box {
                         Icon(Icons.Default.Notifications, contentDescription = null)
-
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -193,8 +173,8 @@ fun AppNavigationDrawer(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = TextSecondary,
-                    unselectedTextColor = TextSecondary
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
 
@@ -212,16 +192,16 @@ fun AppNavigationDrawer(
             )
 
             Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Border, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             // --- FOOTER (Logout) ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onLogout() }
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = LibrarySpacing.Medium),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -230,12 +210,11 @@ fun AppNavigationDrawer(
                     contentDescription = "Logout",
                     tint = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
                 Text(
                     text = "Đăng xuất",
                     color = MaterialTheme.colorScheme.error,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
         }
@@ -251,19 +230,23 @@ fun DrawerItem(
 ) {
     NavigationDrawerItem(
         label = {
-            Text(text = label, fontSize = 16.sp, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+            )
         },
         icon = { Icon(icon, contentDescription = null) },
         selected = isSelected,
         onClick = onClick,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = SecondaryContainerBlue,
-            selectedIconColor = DarkBlue,
-            selectedTextColor = DarkBlue,
+            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
             unselectedContainerColor = Color.Transparent,
-            unselectedIconColor = TextSecondary,
-            unselectedTextColor = TextSecondary
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }

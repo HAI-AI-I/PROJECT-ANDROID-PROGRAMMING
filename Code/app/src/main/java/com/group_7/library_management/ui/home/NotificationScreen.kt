@@ -1,65 +1,31 @@
 package com.group_7.library_management.ui.home
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-// Import màu từ file Color.kt (Dùng dấu * để lấy hết các màu bạn đã khai báo)
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.NotificationCard
 import com.group_7.library_management.ui.theme.*
 
-// ==========================================
-// THÊM 2 MODEL VÀO TRỰC TIẾP FILE NÀY ĐỂ FIX LỖI "UNRESOLVED REFERENCE"
-// ==========================================
 enum class NotificationType {
     WARNING, SUCCESS, ERROR, INFO
 }
@@ -71,14 +37,14 @@ data class NotificationItem(
     val time: String,
     val type: NotificationType
 )
-// ==========================================
 
 @Composable
 fun NotificationsScreen(
-    onMenuClick: () -> Unit = {}
+    onMenuClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    currentRoute: String,
+    onNavigate: (String) -> Unit
 ) {
-    var selectedBottomTab by remember { mutableIntStateOf(0) }
-
     val notifications = listOf(
         NotificationItem(
             id = "1",
@@ -112,48 +78,26 @@ fun NotificationsScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { NotificationTopBar(onMenuClick) },
+        topBar = { MemberTopBar(
+            onMenuClick = onMenuClick,
+            onNotificationClick = onNotificationClick,
+            showNotificationBadge = true
+        ) },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp,
-                modifier = Modifier.height(80.dp)
-            ) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
-                    selected = selectedBottomTab == 0,
-                    onClick = { selectedBottomTab = 0 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Book, contentDescription = null) },
-                    label = { Text("Books", style = MaterialTheme.typography.labelSmall) },
-                    selected = selectedBottomTab == 1,
-                    onClick = { selectedBottomTab = 1 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(imageVector = Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null) },
-                    label = { Text("My Borrowing", style = MaterialTheme.typography.labelSmall) },
-                    selected = selectedBottomTab == 2,
-                    onClick = { selectedBottomTab = 2 }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                    label = { Text("Profile", style = MaterialTheme.typography.labelSmall) },
-                    selected = selectedBottomTab == 3,
-                    onClick = { selectedBottomTab = 3 }
-                )
-            }
+            MemberBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = onNavigate
+            )
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = LibrarySpacing.Large),
+            verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(LibrarySpacing.Small)) }
 
             item {
                 Row(
@@ -164,26 +108,24 @@ fun NotificationsScreen(
                     Text(
                         text = "Thông báo",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = DarkBlue
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Row(
-                        modifier = Modifier.clickable { /* Xử lý đánh dấu đã đọc */ },
+                        modifier = Modifier.clickable { },
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.ExtraSmall)
                     ) {
                         Icon(
                             imageVector = Icons.Default.DoneAll,
                             contentDescription = "Mark as read",
-                            tint = InfoColor,
-                            modifier = Modifier.size(16.dp)
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(LibrarySpacing.Medium)
                         )
                         Text(
                             text = "Đánh dấu đã đọc tất cả",
                             style = MaterialTheme.typography.labelLarge,
-                            color = InfoColor,
-                            fontWeight = FontWeight.Medium
+                            color = MaterialTheme.colorScheme.secondary,
                         )
                     }
                 }
@@ -194,115 +136,6 @@ fun NotificationsScreen(
             items(notifications) { notification ->
                 NotificationCard(notification)
             }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-        }
-    }
-}
-
-@Composable
-fun NotificationCard(item: NotificationItem) {
-
-    val (indicatorColor, icon) = when (item.type) {
-        NotificationType.WARNING -> WarningColor to Icons.Default.WarningAmber
-        NotificationType.SUCCESS -> SuccessColor to Icons.Default.CheckCircleOutline
-        NotificationType.ERROR -> ErrorColor to Icons.Default.ErrorOutline
-        NotificationType.INFO -> InfoColor to Icons.Default.Info
-    }
-
-    val titleColor = if (item.type == NotificationType.ERROR) ErrorColor else MaterialTheme.colorScheme.onSurface
-    val timeColor = if (item.type == NotificationType.ERROR) ErrorColor else TextGray
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Border)
-    ) {
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(indicatorColor)
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.Top // Đã import Alignment để fix
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = indicatorColor,
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = titleColor,
-                        lineHeight = 22.sp
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = item.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextGray,
-                        lineHeight = 20.sp
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = item.time,
-                        style = MaterialTheme.typography.labelMedium.copy(fontFamily = FontFamily.Monospace),
-                        color = timeColor
-                    )
-                }
-
-                IconButton(
-                    onClick = {  },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Options",
-                        tint = TextTertiary
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NotificationTopBar(onMenuClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onMenuClick, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
-        }
-
-        Text(
-            text = "Library UTH 13",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        IconButton(onClick = { }, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

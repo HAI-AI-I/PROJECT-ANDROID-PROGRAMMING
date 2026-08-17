@@ -3,7 +3,6 @@ package com.group_7.library_management.ui.home
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
@@ -38,11 +33,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -66,14 +58,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
-import com.group_7.library_management.models.User
 import com.group_7.library_management.ui.theme.*
 import kotlinx.coroutines.launch
 
-// ==========================================
-// 1. MÀN HÌNH CHÍNH (CONTAINER QUẢN LÝ ĐIỀU HƯỚNG)
-// ==========================================
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
@@ -89,7 +81,6 @@ fun HomeScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            // Hàm này giờ lấy từ file AppNavigationDrawer.kt
             AppNavigationDrawer(
                 user = uiState.currentUser,
                 currentRoute = currentRoute,
@@ -105,63 +96,41 @@ fun HomeScreen(
     ) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
+            topBar = {
+                MemberTopBar(
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onNotificationClick = { currentRoute = "notifications" },
+                    showNotificationBadge = true
+                )
+            },
             bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp,
-                    modifier = Modifier.height(80.dp)
-                ) {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 0 && currentRoute == "home",
-                        onClick = {
-                            selectedBottomTab = 0
-                            currentRoute = "home"
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Book, contentDescription = null) },
-                        label = { Text("Books", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 1,
-                        onClick = { selectedBottomTab = 1 }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.LibraryBooks, contentDescription = null) },
-                        label = { Text("My Borrowing", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 2,
-                        onClick = { selectedBottomTab = 2 }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                        label = { Text("Profile", style = MaterialTheme.typography.labelSmall) },
-                        selected = selectedBottomTab == 3,
-                        onClick = { selectedBottomTab = 3 }
-                    )
-                }
+                MemberBottomBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        currentRoute = route
+                    }
+                )
             }
         ) { paddingValues ->
             when (currentRoute) {
                 "home" -> {
                     HomeContent(
                         paddingValues = paddingValues,
-                        uiState = uiState,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { currentRoute = "notifications" }
+                        uiState = uiState
                     )
                 }
                 "notifications" -> {
-                    // Gọi sang màn hình NotificationsScreen nằm ở file NotificationScreen.kt
                     NotificationsScreen(
-                        onMenuClick = { scope.launch { drawerState.open() } }
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onNotificationClick = { },
+                        currentRoute = currentRoute,
+                        onNavigate = { route -> currentRoute = route }
                     )
                 }
                 else -> {
                     HomeContent(
                         paddingValues = paddingValues,
                         uiState = uiState,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { currentRoute = "notifications" }
                     )
                 }
             }
@@ -169,34 +138,31 @@ fun HomeScreen(
     }
 }
 
-// ==========================================
-// 2. GIAO DIỆN TRANG CHỦ (HOME CONTENT)
-// ==========================================
 @Composable
 fun HomeContent(
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
     uiState: HomeUiState,
-    onMenuClick: () -> Unit,
-    onNotificationClick: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = LibrarySpacing.Large),
+        verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
     ) {
-        item { Spacer(modifier = Modifier.height(4.dp)) }
+        item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
 
         item {
-            TopBarSection(
-                onMenuClick = onMenuClick,
-                onNotificationClick = onNotificationClick
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                placeholder = "Tìm kiếm sách, tác giả,...",
+                onFilterClick = null,
+                showMic = true
             )
         }
 
-        item { GreetingSection(user = uiState.currentUser) }
-        item { SearchSection() }
         item {
             BookListSection(
                 title = "Sách phổ biến",
@@ -220,64 +186,7 @@ fun HomeContent(
         }
         item { BorrowStatusSection() }
         item { QRCheckInCard() }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
-}
-
-// ==========================================
-// 3. CÁC THÀNH PHẦN GIAO DIỆN CON (COMPONENTS) CỦA HOME
-// ==========================================
-
-@Composable
-fun TopBarSection(onMenuClick: () -> Unit, onNotificationClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onMenuClick, modifier = Modifier.size(36.dp)) {
-            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
-        }
-
-        Text(
-            text = "Library UTH",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        IconButton(onClick = onNotificationClick, modifier = Modifier.size(36.dp)) {
-            Box {
-                Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.onSurface)
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.error)
-                        .border(1.5.dp, MaterialTheme.colorScheme.background, CircleShape)
-                        .align(Alignment.TopEnd)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun GreetingSection(user: User?) {
-    Column {
-        Text(
-            text = "Chào bạn,\n${user?.name ?: "Nam"} \uD83D\uDC4B",
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 34.sp),
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary,
-            lineHeight = 42.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Khám phá cuốn sách tiếp theo của bạn",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
     }
 }
 
@@ -288,7 +197,7 @@ fun SearchSection() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
     ) {
         OutlinedTextField(
             value = searchQuery,
@@ -297,12 +206,16 @@ fun SearchSection() {
                 .weight(1f)
                 .height(54.dp),
             placeholder = {
-                Text("Tìm kiếm sách, tác giả, ISBN", color = TextTertiary, fontSize = 14.sp)
+                Text(
+                    "Tìm kiếm sách, tác giả, ISBN",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             },
             leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = TextTertiary)
+                Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             },
-            shape = RoundedCornerShape(27.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
@@ -316,7 +229,7 @@ fun SearchSection() {
             modifier = Modifier
                 .size(54.dp)
                 .clip(CircleShape)
-                .background(SurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }
@@ -332,23 +245,21 @@ fun BookListSection(title: String, actionText: String, books: List<Book>) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onBackground
             )
             if (actionText.isNotEmpty()) {
                 Text(
                     text = actionText,
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             items(books) { book ->
                 BookItemCard(book)
@@ -364,9 +275,9 @@ fun BookItemCard(book: Book) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, Border, RoundedCornerShape(12.dp)),
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -382,9 +293,8 @@ fun BookItemCard(book: Book) {
         Text(
             text = book.title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
             maxLines = 1,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
@@ -417,7 +327,7 @@ fun BorrowStatusSection() {
             icon = Icons.Default.Warning,
             title = "Quá hạn",
             count = "0",
-            iconTint = TextTertiary,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
             bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
@@ -428,16 +338,16 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(MaterialTheme.shapes.extraLarge)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, Border, RoundedCornerShape(20.dp))
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
+            .padding(horizontal = LibrarySpacing.Large, vertical = LibrarySpacing.Medium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             Box(
                 modifier = Modifier
@@ -451,14 +361,12 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
         Text(
             text = count,
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
     }
@@ -468,55 +376,53 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
 fun QRCheckInCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryBlue)
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Column(
-            modifier = Modifier.padding(28.dp),
+            modifier = Modifier.padding(LibrarySpacing.Large),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "QR Check-in",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Surface
+                color = MaterialTheme.colorScheme.onPrimary
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = "Xuất trình mã QR của bạn tại quầy thủ thư hoặc cổng tự động để vào thư viện hoặc mượn sách.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Surface.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 20.sp
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
             Button(
                 onClick = { },
-                colors = ButtonDefaults.buttonColors(containerColor = SecondaryBlue),
-                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = Surface)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Mở QR", color = Surface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
+                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
+                Text("Mở QR", color = MaterialTheme.colorScheme.onSecondary, style = MaterialTheme.typography.labelLarge)
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
 
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(Surface)
-                    .padding(12.dp),
+                    .clip(RoundedCornerShape(topStart = LibrarySpacing.Medium, topEnd = LibrarySpacing.Medium))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(LibrarySpacing.Small),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Icon(
                     Icons.Default.QrCode2,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    tint = TextPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
