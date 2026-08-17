@@ -35,6 +35,7 @@ data class BorrowRecord(
     val status: BorrowStatus,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BorrowRecordListScreen(
     title: String,

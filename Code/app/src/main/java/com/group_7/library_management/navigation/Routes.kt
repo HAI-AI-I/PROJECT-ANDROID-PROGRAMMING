@@ -10,7 +10,7 @@ object Routes {
     const val RESET_PASSWORD_AUTH="reset_password_auth"
 
     const val HOME="home"
-    const val BOOKS="boos"
+    const val BOOKS="books"
     const val MY_BORROWING="my_borrowing"
     const val PROFILE="profile"
 

@@ -18,10 +18,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.group_7.library_management.components.BookListItemCard
+import com.group_7.library_management.components.MemberBottomBar
+import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BookFormat
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import kotlinx.coroutines.launch
 
 /**
  * BookListScreen
@@ -59,6 +63,7 @@ fun BookListScreen(
     var quickStatus by remember { mutableStateOf<String?>(null) } // null = tất cả, "available", "borrowed"
     var filter by remember { mutableStateOf(BookFilterState()) }
     var showFilterSheet by remember { mutableStateOf(false) }
+    var currentRoute by remember { mutableStateOf("books") }
 
     val filteredBooks = allBooks.filter { book ->
         val matchesQuery = searchQuery.isBlank() ||
@@ -77,19 +82,19 @@ fun BookListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                navigationIcon = { IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
-                title = { Text("Library UTH 13") },
-                actions = { IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "Thông báo") } },
+            MemberTopBar(
+                onMenuClick = { scope.launch { drawerState.open() } },
+                onNotificationClick = { currentRoute = "notifications" },
+                showNotificationBadge = true
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = false, onClick = onNavigateHome, icon = { Icon(Icons.Default.Home, contentDescription = null) }, label = { Text("Home") })
-                NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) }, label = { Text("Books") })
-                NavigationBarItem(selected = false, onClick = onNavigateMyBorrowing, icon = { Icon(Icons.Default.Assignment, contentDescription = null) }, label = { Text("My Borrowing") })
-                NavigationBarItem(selected = false, onClick = onNavigateProfile, icon = { Icon(Icons.Default.Person, contentDescription = null) }, label = { Text("Profile") })
-            }
+            MemberBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    currentRoute = route
+                }
+            )
         },
     ) { innerPadding ->
         Column(
