@@ -50,7 +50,7 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 @Composable
 fun AppNavigationDrawer(
     user: User?,
-    currentRoute: String = "home",
+    currentRoute: String = Routes.HOME,
     onItemClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
@@ -60,8 +60,7 @@ fun AppNavigationDrawer(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
+                .weight(1f)
                 .padding(vertical = LibrarySpacing.Large)
         ) {
             // --- HEADER ---
@@ -91,7 +90,7 @@ fun AppNavigationDrawer(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "MSSV: ${user?.studentId ?: "UTH123456"}",
+                        text = "Id tài khoản: ${user?.phone ?: "Chưa cập nhật"}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -101,14 +100,6 @@ fun AppNavigationDrawer(
             Spacer(modifier = Modifier.height(LibrarySpacing.Large))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
-
-            Text(
-                text = "MAIN",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 28.dp)
-            )
-            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Home,
@@ -123,12 +114,6 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick(Routes.BOOKS) }
             )
             DrawerItem(
-                icon = Icons.Default.LibraryBooks,
-                label = "Sách của tôi",
-                isSelected = currentRoute == Routes.MY_BOOKS,
-                onClick = { onItemClick(Routes.MY_BOOKS) }
-            )
-            DrawerItem(
                 icon = Icons.Default.History,
                 label = "Lịch sử mượn",
                 isSelected = currentRoute == Routes.HISTORY,
@@ -139,13 +124,6 @@ fun AppNavigationDrawer(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
-            Text(
-                text = "ACCOUNT",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 28.dp)
-            )
-            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Person,
@@ -194,32 +172,35 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick(Routes.HELP) }
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             // --- FOOTER (Logout) ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onLogout() }
-                    .padding(vertical = LibrarySpacing.Medium),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout",
-                    tint = MaterialTheme.colorScheme.error
+            NavigationDrawerItem(
+                label = {
+                    Text(
+                        text = "Đăng xuất",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout"
+                    )
+                },
+                selected = false,
+                onClick = onLogout,
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent,
+                    unselectedIconColor = MaterialTheme.colorScheme.error,
+                    unselectedTextColor = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
-                Text(
-                    text = "Đăng xuất",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
+            )
         }
     }
 }

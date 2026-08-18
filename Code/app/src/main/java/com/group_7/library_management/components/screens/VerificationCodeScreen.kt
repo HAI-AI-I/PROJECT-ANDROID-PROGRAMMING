@@ -19,13 +19,14 @@ import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.components.dialogs.VerificationMethodDialog
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import com.group_7.library_management.utils.ValidationUtils
 
 @Composable
 fun VerificationCodeScreen(
     title: String,
     subtitle: String,
     onNavigateBack: () -> Unit,
-    onSubmit: (String) -> Unit
+    onSubmit: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var textEmailOrPhone by remember { mutableStateOf("") }
@@ -109,8 +110,21 @@ fun VerificationCodeScreen(
             AuthButton(
                 text = "GỬI YÊU CẦU",
                 onClick = {
-                    if (textEmailOrPhone.isNotBlank()) {
-                        onSubmit(textEmailOrPhone)
+                    if(isEmail){
+                        if(ValidationUtils.checkExitsEmail(textEmailOrPhone)){
+                            onSubmit()
+                        }
+                        else{
+                            textEmailOrPhone=""
+                        }
+                    }
+                    else{
+                        if(ValidationUtils.checkExitsPhone(textEmailOrPhone)){
+                            onSubmit()
+                        }
+                        else{
+                            textEmailOrPhone=""
+                        }
                     }
                 }
             )

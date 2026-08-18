@@ -8,42 +8,53 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 
 @Composable
 fun BookScreen(
-    bookId: String = "clean_code",
+    bookId: String = "1",
     viewModel: BookViewModel = viewModel()
 ) {
     val navController = rememberNavController()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+//        color = MaterialTheme.colorScheme.background
+        color= Color.Red
     ) {
         NavHost(
             navController = navController,
             startDestination = BookRoute.Detail.createRoute(bookId)
         ) {
             // 1. Màn hình Chi tiết sách
-            composable(BookRoute.Detail.route) {
+            composable(
+                route = BookRoute.Detail.route,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val currentBookId = backStackEntry.arguments?.getString("bookId") ?: bookId
                 BookDetailScreen(
-                    bookId = bookId,
+                    bookId = currentBookId,
                     onBack = { navController.popBackStack() },
                     onNavigateToReviews = {
-                        navController.navigate(BookRoute.Reviews.createRoute(bookId))
+                        navController.navigate(BookRoute.Reviews.createRoute(currentBookId))
                     },
                     onNavigateToBorrow = {
-                        navController.navigate(BookRoute.ConfirmBorrow.createRoute(bookId))
+                        navController.navigate(BookRoute.ConfirmBorrow.createRoute(currentBookId))
                     }
                 )
             }
 
             // 2. Màn hình Đánh giá & Bình luận
-            composable(BookRoute.Reviews.route) {
+            composable(
+                route = BookRoute.Reviews.route,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) {
                 BookReviewsScreen(
                     onBack = { navController.popBackStack() },
                     onWriteReview = { }
@@ -51,9 +62,13 @@ fun BookScreen(
             }
 
             // 3. Màn hình Xác nhận mượn sách
-            composable(BookRoute.ConfirmBorrow.route) {
+            composable(
+                route = BookRoute.ConfirmBorrow.route,
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val currentBookId = backStackEntry.arguments?.getString("bookId") ?: bookId
                 BorrowConfirmScreen(
-                    bookId = bookId,
+                    bookId = currentBookId,
                     viewModel = viewModel,
                     onSuccess = { transactionId: String ->
                         navController.navigate(BookRoute.Success.createRoute(transactionId)) {
@@ -68,8 +83,11 @@ fun BookScreen(
             }
 
             // 4. Màn hình Mượn thành công
-            composable(BookRoute.Success.route) { backStackEntry ->
-                val transactionId = backStackEntry.arguments?.getString("id") ?: "TX-998823"
+            composable(
+                route = BookRoute.Success.route,
+                arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val transactionId = backStackEntry.arguments?.getString("transactionId") ?: "TX-998823"
                 BorrowSuccessScreen(
                     transactionId = transactionId,
                     onViewQrCode = { id: String ->
@@ -82,7 +100,10 @@ fun BookScreen(
             }
 
             // 5. Màn hình Mã QR Giao dịch
-            composable(BookRoute.QRCode.route) {
+            composable(
+                route = BookRoute.QRCode.route,
+                arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+            ) {
                 PlaceholderScreen("Màn hình Mã QR Giao dịch")
             }
 

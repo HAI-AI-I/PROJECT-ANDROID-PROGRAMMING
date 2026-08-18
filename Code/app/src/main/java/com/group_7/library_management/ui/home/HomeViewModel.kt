@@ -6,9 +6,9 @@ import com.group_7.library_management.models.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 data class HomeUiState(
-    val currentUser: User? = null,
     val borrowedBooks: List<Book> = emptyList(),
     val popularBooks: List<Book> = emptyList(),
     val newBooks: List<Book> = emptyList(),
@@ -34,17 +34,14 @@ class HomeViewModel : ViewModel() {
             Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5, rating = 4.5)
         )
 
-        _uiState.value = HomeUiState(
-            currentUser = User(
-                id = "1",
-                name = "Nguyễn Văn An",
-                studentId = "UTH123456",
-                qrCodeData = "STUDENT_UTH123456"
-            ),
-            borrowedBooks = listOf(allBooks[0], allBooks[1]),
-            popularBooks = allBooks.take(4),
-            newBooks = allBooks.takeLast(3),
-            recommendedBooks = listOf(allBooks[2], allBooks[4])
-        )
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                borrowedBooks = listOf(allBooks[0], allBooks[1]),
+                popularBooks = allBooks.take(4),
+                newBooks = allBooks.takeLast(3),
+                recommendedBooks = listOf(allBooks[2], allBooks[4])
+            )
+        }
     }
 }

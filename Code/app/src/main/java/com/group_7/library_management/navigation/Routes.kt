@@ -14,6 +14,7 @@ object Routes {
     // Main group
     const val HOME = "home"
     const val BOOKS = "books"
+    const val SCAN_QR="scan_qr"
     const val MY_BOOKS = "my_books"
     const val HISTORY = "history"
     const val PROFILE = "profile"
@@ -24,4 +25,6 @@ object Routes {
 
     // Book Flow
     const val BOOK_DETAIL = "book_detail/{bookId}"
+
+    const val DASHBOARD="dashboard"
 }

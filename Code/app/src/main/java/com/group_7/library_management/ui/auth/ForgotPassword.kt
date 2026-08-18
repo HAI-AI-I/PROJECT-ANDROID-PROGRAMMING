@@ -38,8 +38,8 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun ForgotPasswordScreen(
-    onNavigateBack: () -> Unit={},
-    onSubmit: (String) -> Unit = {}
+    onNavigateBack: () -> Unit,
+    onSubmit: () -> Unit
 ) {
     VerificationCodeScreen(
         title = "Khôi phục mật khẩu",

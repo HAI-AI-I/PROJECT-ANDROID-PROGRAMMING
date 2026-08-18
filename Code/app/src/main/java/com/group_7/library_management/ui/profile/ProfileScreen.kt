@@ -78,7 +78,7 @@ fun ProfileContent(
         mutableStateOf(
             UserProfile(
                 id = "US001",
-                name = "Nguyễn Văn A",
+                name = "Nguyễn Văn hair",
                 email = "nguyenvana@example.com",
                 phone = "0123456789",
                 joinDate = "15/08/2024",

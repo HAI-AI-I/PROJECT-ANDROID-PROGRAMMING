@@ -19,13 +19,15 @@ import com.group_7.library_management.ui.auth.ForgotPasswordScreen
 import com.group_7.library_management.ui.auth.LoginScreen
 import com.group_7.library_management.ui.auth.RegisterScreen
 import com.group_7.library_management.ui.auth.RestPassword
+import com.group_7.library_management.ui.book.BookDetailScreen
 import com.group_7.library_management.ui.borrowing.BorrowingScreen
 import com.group_7.library_management.ui.favorite.FavoriteScreen
-import com.group_7.library_management.ui.home.HomeScreen
+import com.group_7.library_management.ui.home.UserScreen
 import com.group_7.library_management.ui.home.NotificationsContent
 import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.splash.SplashScreen
 import com.group_7.library_management.ui.theme.Library_managementTheme
+import com.group_7.library_management.ui_admin.dashboard.DashBoardScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,8 @@ class MainActivity : ComponentActivity() {
 
 
                 AppNavHost()
+//                BookDetailScreen ()
+//                DashBoardScreen()
             }
         }
     }

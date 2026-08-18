@@ -25,11 +25,6 @@ data class NotificationItem(
     val time: String,
     val type: NotificationType
 )
-
-/**
- * NotificationsContent
- * Chỉ chứa nội dung thông báo, bỏ Scaffold để dùng chung với HomeScreen.
- */
 @Composable
 fun NotificationsContent(
     modifier: Modifier = Modifier

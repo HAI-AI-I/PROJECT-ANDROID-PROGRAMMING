@@ -23,10 +23,11 @@ fun MemberBottomBar(
         tonalElevation = LibrarySpacing.Small,
     ) {
         val items = listOf(
-            BottomNavItem(Routes.HOME, Icons.Default.Home, "Home"),
-            BottomNavItem(Routes.BOOKS, Icons.Default.Book, "Books"),
-            BottomNavItem(Routes.MY_BOOKS, Icons.AutoMirrored.Filled.LibraryBooks, "My books"),
-            BottomNavItem(Routes.PROFILE, Icons.Default.Person, "Profile")
+            BottomNavItem(Routes.HOME, Icons.Default.Home, "Trang Chủ"),
+            BottomNavItem(Routes.BOOKS, Icons.Default.Book, "Sách"),
+            BottomNavItem(Routes.SCAN_QR,Icons.Default.QrCodeScanner,"Quét QR"),
+            BottomNavItem(Routes.MY_BOOKS, Icons.AutoMirrored.Filled.LibraryBooks, "Mượn Sách"),
+            BottomNavItem(Routes.PROFILE, Icons.Default.Person, "Hồ Sơ")
         )
         items.forEach { item ->
             NavigationBarItem(

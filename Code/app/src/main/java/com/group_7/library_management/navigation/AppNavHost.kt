@@ -5,16 +5,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavController
-import androidx.navigation.NavOptionsBuilder
 import com.group_7.library_management.ui.auth.ConfirmCodeRegisAuthScreen
 import com.group_7.library_management.ui.auth.ConfirmCodeResetAuthScreen
 import com.group_7.library_management.ui.auth.ForgotPasswordScreen
 import com.group_7.library_management.ui.auth.LoginScreen
 import com.group_7.library_management.ui.auth.RegisterScreen
 import com.group_7.library_management.ui.auth.RestPassword
-import com.group_7.library_management.ui.home.HomeScreen
+import com.group_7.library_management.ui.home.UserScreen
 import com.group_7.library_management.ui.splash.SplashScreen
+import com.group_7.library_management.ui_admin.dashboard.DashBoardScreen
 
 
 @Composable
@@ -45,7 +44,12 @@ fun AppNavHost(
                 },
                 onLoginSuccess = {
                     navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onLoginSuccessAdmin = {
+                    navController.navigate(Routes.DASHBOARD){
+                        popUpTo(0){inclusive=true}
                     }
                 }
             )
@@ -104,13 +108,17 @@ fun AppNavHost(
         }
 
         composable(route= Routes.HOME) {
-            HomeScreen(
+            UserScreen(
                 onLogout = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.HOME) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
+        }
+
+        composable(route= Routes.DASHBOARD){
+            DashBoardScreen()
         }
     }
 }

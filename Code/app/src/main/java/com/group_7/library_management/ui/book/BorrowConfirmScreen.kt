@@ -26,11 +26,11 @@ fun BorrowConfirmScreen(
     LaunchedEffect(borrowState) {
         when (val state = borrowState) {
             is BorrowUiState.Success -> {
-                viewModel.resetState()
+                viewModel.resetBorrowState()
                 onSuccess(state.transactionId)
             }
             is BorrowUiState.Error -> {
-                viewModel.resetState()
+                viewModel.resetBorrowState()
                 onFailure()
             }
             else -> {}
