@@ -1,10 +1,13 @@
 package com.group_7.library_management.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.ui.auth.ConfirmCodeRegisAuthScreen
 import com.group_7.library_management.ui.auth.ConfirmCodeResetAuthScreen
 import com.group_7.library_management.ui.auth.ForgotPasswordScreen
@@ -20,6 +23,9 @@ import com.group_7.library_management.ui_admin.dashboard.DashBoardScreen
 fun AppNavHost(
     navController: NavHostController = rememberNavController()
 ) {
+    val context= LocalContext.current
+    val checkLogin= remember { CheckLogin(context) }
+
     NavHost(
         navController = navController,
         startDestination = Routes.SPLASH
@@ -27,8 +33,15 @@ fun AppNavHost(
         composable(route = Routes.SPLASH) {
             SplashScreen(
                 onNext = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    if(checkLogin.isLogin()){
+                        navController.navigate(Routes.HOME){
+                            popUpTo (Routes.SPLASH){inclusive=true}
+                        }
+                    }
+                    else{
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -43,11 +56,14 @@ fun AppNavHost(
                     navController.navigate(Routes.FORGOT_PASSWORD)
                 },
                 onLoginSuccess = {
+                    checkLogin.saveLogin("1")
                     navController.navigate(Routes.HOME) {
                         popUpTo(0) { inclusive = true }
                     }
+
                 },
                 onLoginSuccessAdmin = {
+                    checkLogin.saveLogin("2")
                     navController.navigate(Routes.DASHBOARD){
                         popUpTo(0){inclusive=true}
                     }
@@ -110,6 +126,7 @@ fun AppNavHost(
         composable(route= Routes.HOME) {
             UserScreen(
                 onLogout = {
+                    checkLogin.clearLogin()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
