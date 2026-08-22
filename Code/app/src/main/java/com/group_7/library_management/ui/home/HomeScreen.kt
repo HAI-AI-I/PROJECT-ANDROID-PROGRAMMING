@@ -1,6 +1,5 @@
 package com.group_7.library_management.ui.home
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,10 +33,9 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -53,101 +50,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.group_7.library_management.components.MemberBottomBar
-import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
+
 import com.group_7.library_management.ui.theme.*
-import kotlinx.coroutines.launch
+
+
 
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel()
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = viewModel(), // 1. Tự khởi tạo ViewModel
+    onBookClick: (Book) -> Unit = {},
+    onViewAllClick: (String) -> Unit = {},
+    onOpenQRClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    var currentRoute by remember { mutableStateOf("home") }
-    var selectedBottomTab by remember { mutableIntStateOf(0) }
-
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            AppNavigationDrawer(
-                user = uiState.currentUser,
-                currentRoute = currentRoute,
-                onItemClick = { route ->
-                    currentRoute = route
-                    scope.launch { drawerState.close() }
-                },
-                onLogout = {
-                    scope.launch { drawerState.close() }
-                }
-            )
-        }
-    ) {
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
-                MemberTopBar(
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationClick = { currentRoute = "notifications" },
-                    showNotificationBadge = true
-                )
-            },
-            bottomBar = {
-                MemberBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        currentRoute = route
-                    }
-                )
-            }
-        ) { paddingValues ->
-            when (currentRoute) {
-                "home" -> {
-                    HomeContent(
-                        paddingValues = paddingValues,
-                        uiState = uiState
-                    )
-                }
-                "notifications" -> {
-                    NotificationsScreen(
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNotificationClick = { },
-                        currentRoute = currentRoute,
-                        onNavigate = { route -> currentRoute = route }
-                    )
-                }
-                else -> {
-                    HomeContent(
-                        paddingValues = paddingValues,
-                        uiState = uiState,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HomeContent(
-    paddingValues: androidx.compose.foundation.layout.PaddingValues,
-    uiState: HomeUiState,
-) {
     var searchQuery by remember { mutableStateOf("") }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
             .padding(horizontal = LibrarySpacing.Large),
         verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
     ) {
@@ -166,76 +93,41 @@ fun HomeContent(
         item {
             BookListSection(
                 title = "Sách phổ biến",
-                actionText = "Tất cả thể loại >",
-                books = uiState.popularBooks
+                actionText = "Xem tất cả>",
+                books = uiState.popularBooks ,
+                onBookClick = onBookClick,
+                onActionClick = { onViewAllClick("popular") }
             )
         }
         item {
             BookListSection(
                 title = "Sách mới",
                 actionText = "Xem tất cả",
-                books = uiState.popularBooks
+                books = uiState.newBooks,
+                onBookClick = onBookClick,
+                onActionClick = { onViewAllClick("new")}
             )
         }
         item {
             BookListSection(
                 title = "Sách dành cho bạn",
                 actionText = "",
-                books = uiState.popularBooks
+                books = uiState.recommendedBooks,
+                onBookClick = onBookClick,
+                onActionClick = {}
             )
         }
-        item { BorrowStatusSection() }
-        item { QRCheckInCard() }
+//        item { BorrowStatusSection(borrowedCount = uiState.borrowedBooks.size) }
+        item{BorrowStatusSection()}
+        item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
         item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
     }
 }
 
 @Composable
-fun SearchSection() {
-    var searchQuery by remember { mutableStateOf("") }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
-    ) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier
-                .weight(1f)
-                .height(54.dp),
-            placeholder = {
-                Text(
-                    "Tìm kiếm sách, tác giả, ISBN",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            },
-            shape = MaterialTheme.shapes.extraLarge,
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            singleLine = true
-        )
-
-        Box(
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        )
-    }
-}
-
-@Composable
-fun BookListSection(title: String, actionText: String, books: List<Book>) {
+fun BookListSection(title: String, actionText: String, books: List<Book>,
+                    onBookClick: (Book) -> Unit = {},
+                    onActionClick: () -> Unit = {}) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -248,11 +140,15 @@ fun BookListSection(title: String, actionText: String, books: List<Book>) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             if (actionText.isNotEmpty()) {
-                Text(
-                    text = actionText,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                TextButton(
+                    onClick = {onActionClick()}
+                ){
+                    Text(
+                        text = actionText,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
 
@@ -262,14 +158,15 @@ fun BookListSection(title: String, actionText: String, books: List<Book>) {
             horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             items(books) { book ->
-                BookItemCard(book)
+                BookItemCard(book=book,onClick={onBookClick(book)})
             }
         }
     }
 }
 
 @Composable
-fun BookItemCard(book: Book) {
+fun BookItemCard(book: Book,
+                 onClick:()->Unit={} ){
     Column(modifier = Modifier.width(130.dp)) {
         Box(
             modifier = Modifier
@@ -307,7 +204,8 @@ fun BookItemCard(book: Book) {
 }
 
 @Composable
-fun BorrowStatusSection() {
+fun BorrowStatusSection(
+) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StatusRowItem(
             icon = Icons.Default.LibraryBooks,
@@ -320,7 +218,7 @@ fun BorrowStatusSection() {
             icon = Icons.Default.Event,
             title = "Sắp đến hạn",
             count = "1",
-            iconTint = Warning,
+            iconTint = WarningColor,
             bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
@@ -373,7 +271,9 @@ fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Col
 }
 
 @Composable
-fun QRCheckInCard() {
+fun QRCheckInCard(
+    onOpenQRClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -397,7 +297,7 @@ fun QRCheckInCard() {
             )
             Spacer(modifier = Modifier.height(LibrarySpacing.Large))
             Button(
-                onClick = { },
+                onClick =onOpenQRClick,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier

@@ -41,13 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.group_7.library_management.models.User
+import com.group_7.library_management.navigation.Routes
+import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun AppNavigationDrawer(
     user: User?,
-    currentRoute: String = "home",
+    currentRoute: String = Routes.HOME,
     onItemClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
@@ -57,8 +60,7 @@ fun AppNavigationDrawer(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
+                .weight(1f)
                 .padding(vertical = LibrarySpacing.Large)
         ) {
             // --- HEADER ---
@@ -88,7 +90,7 @@ fun AppNavigationDrawer(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "MSSV: ${user?.studentId ?: "UTH123456"}",
+                        text = "Id tài khoản: ${user?.phone ?: "Chưa cập nhật"}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -99,56 +101,35 @@ fun AppNavigationDrawer(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
-            Text(
-                text = "MAIN",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 28.dp)
-            )
-            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
-
             DrawerItem(
                 icon = Icons.Default.Home,
                 label = "Trang chủ",
-                isSelected = currentRoute == "home",
-                onClick = { onItemClick("home") }
+                isSelected = currentRoute == Routes.HOME,
+                onClick = { onItemClick(Routes.HOME) }
             )
             DrawerItem(
                 icon = Icons.Default.Book,
                 label = "Danh sách sách",
-                isSelected = currentRoute == "books",
-                onClick = { onItemClick("books") }
-            )
-            DrawerItem(
-                icon = Icons.Default.LibraryBooks,
-                label = "Sách của tôi",
-                isSelected = currentRoute == "my_books",
-                onClick = { onItemClick("my_books") }
+                isSelected = currentRoute == Routes.BOOKS,
+                onClick = { onItemClick(Routes.BOOKS) }
             )
             DrawerItem(
                 icon = Icons.Default.History,
                 label = "Lịch sử mượn",
-                isSelected = currentRoute == "history",
-                onClick = { onItemClick("history") }
+                isSelected = currentRoute == Routes.HISTORY,
+                onClick = { onItemClick(Routes.HISTORY) }
             )
 
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
-            Text(
-                text = "ACCOUNT",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 28.dp)
-            )
-            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             DrawerItem(
                 icon = Icons.Default.Person,
                 label = "Hồ sơ cá nhân",
-                isSelected = currentRoute == "profile",
-                onClick = { onItemClick("profile") }
+                isSelected = currentRoute == Routes.PROFILE,
+                onClick = { onItemClick(Routes.PROFILE) }
             )
 
             NavigationDrawerItem(
@@ -168,8 +149,8 @@ fun AppNavigationDrawer(
                         )
                     }
                 },
-                selected = currentRoute == "notifications",
-                onClick = { onItemClick("notifications") },
+                selected = currentRoute == Routes.NOTIFICATIONS,
+                onClick = { onItemClick(Routes.NOTIFICATIONS) },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent,
@@ -181,42 +162,45 @@ fun AppNavigationDrawer(
             DrawerItem(
                 icon = Icons.Default.Settings,
                 label = "Cài đặt",
-                isSelected = currentRoute == "settings",
-                onClick = { onItemClick("settings") }
+                isSelected = currentRoute == Routes.SETTINGS,
+                onClick = { onItemClick(Routes.SETTINGS) }
             )
             DrawerItem(
                 icon = Icons.Outlined.HelpOutline,
                 label = "Hỗ trợ",
-                isSelected = currentRoute == "help",
-                onClick = { onItemClick("help") }
+                isSelected = currentRoute == Routes.HELP,
+                onClick = { onItemClick(Routes.HELP) }
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = LibrarySpacing.Large))
+            Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
             // --- FOOTER (Logout) ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onLogout() }
-                    .padding(vertical = LibrarySpacing.Medium),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout",
-                    tint = MaterialTheme.colorScheme.error
+            NavigationDrawerItem(
+                label = {
+                    Text(
+                        text = "Đăng xuất",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout"
+                    )
+                },
+                selected = false,
+                onClick = onLogout,
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent,
+                    unselectedIconColor = MaterialTheme.colorScheme.error,
+                    unselectedTextColor = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
-                Text(
-                    text = "Đăng xuất",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
+            )
         }
     }
 }

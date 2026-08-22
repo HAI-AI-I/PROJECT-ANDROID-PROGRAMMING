@@ -48,20 +48,20 @@ fun FavoriteScreen() {
         mutableStateListOf(
             FavoriteBook(
                 id = 1,
-                title = "Đắc Nhân Tâm",
-                author = "Dale Carnegie",
-                category = "Kỹ năng sống"
+                title = "Clean Architecture",
+                author = "Robert C. Martin",
+                category = "Lập trình"
             ),
             FavoriteBook(
                 id = 2,
-                title = "Nhà Giả Kim",
-                author = "Paulo Coelho",
-                category = "Tiểu thuyết"
+                title = "Design Patterns",
+                author = "Gang of Four",
+                category = "Lập trình"
             ),
             FavoriteBook(
                 id = 3,
-                title = "Clean Code",
-                author = "Robert C. Martin",
+                title = "Kotlin in Action",
+                author = "Dmitry Jemerov",
                 category = "Lập trình"
             )
         )
@@ -69,14 +69,14 @@ fun FavoriteScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Sách yêu thích",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            )
+//            TopAppBar(
+//                title = {
+//                    Text(
+//                        text = "Sách yêu thích",
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                }
+//            )
         }
     ) { paddingValues ->
 
