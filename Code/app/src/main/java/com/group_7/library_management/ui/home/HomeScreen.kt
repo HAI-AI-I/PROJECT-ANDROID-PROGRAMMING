@@ -2,6 +2,7 @@ package com.group_7.library_management.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,21 +30,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,25 +50,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
-
+import com.group_7.library_management.ui.borrowing.BorrowTab
 import com.group_7.library_management.ui.theme.*
-
-
-
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(), // 1. Tự khởi tạo ViewModel
+    viewModel: HomeViewModel = viewModel(),
     onBookClick: (Book) -> Unit = {},
     onViewAllClick: (String) -> Unit = {},
-    onOpenQRClick: () -> Unit = {}
+    onOpenQRClick: () -> Unit = {},
+    onBorrowStatusClick: (BorrowTab) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = LibrarySpacing.Large),
         verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
@@ -117,10 +110,93 @@ fun HomeScreen(
                 onActionClick = {}
             )
         }
-//        item { BorrowStatusSection(borrowedCount = uiState.borrowedBooks.size) }
-        item{BorrowStatusSection()}
+
+        item {
+            BorrowStatusSection(
+                borrowingCount = uiState.borrowingCount,
+                dueSoonCount = uiState.dueSoonCount,
+                overdueCount = uiState.overdueCount,
+                onStatusClick = onBorrowStatusClick
+            )
+        }
+
         item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
         item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
+    }
+}
+
+@Composable
+fun BorrowStatusSection(
+    borrowingCount: Int,
+    dueSoonCount: Int,
+    overdueCount: Int,
+    onStatusClick: (BorrowTab) -> Unit = {}
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        StatusRowItem(
+            icon = Icons.Default.LibraryBooks,
+            title = "Đang mượn",
+            count = borrowingCount.toString(),
+            iconTint = MaterialTheme.colorScheme.secondary,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant,
+            onClick = { onStatusClick(BorrowTab.BORROWING) }
+        )
+        StatusRowItem(
+            icon = Icons.Default.Event,
+            title = "Sắp đến hạn",
+            count = dueSoonCount.toString(),
+            iconTint = WarningColor,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant,
+            onClick = { onStatusClick(BorrowTab.BORROWING) } // Vẫn thuộc Tab Đang mượn
+        )
+        StatusRowItem(
+            icon = Icons.Default.Warning,
+            title = "Quá hạn",
+            count = overdueCount.toString(),
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            bgColor = MaterialTheme.colorScheme.surfaceVariant,
+            onClick = { onStatusClick(BorrowTab.BORROWING) } // Vẫn thuộc Tab Đang mượn
+        )
+    }
+}
+
+@Composable
+fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Color, bgColor: Color, onClick: () -> Unit = {}) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
+            .clickable { onClick() }
+            .padding(horizontal = LibrarySpacing.Large, vertical = LibrarySpacing.Medium),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(bgColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        Text(
+            text = count,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -199,74 +275,7 @@ fun BookItemCard(book: Book,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1
-        )
-    }
-}
-
-@Composable
-fun BorrowStatusSection(
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        StatusRowItem(
-            icon = Icons.Default.LibraryBooks,
-            title = "Đang mượn",
-            count = "3",
-            iconTint = MaterialTheme.colorScheme.secondary,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-        StatusRowItem(
-            icon = Icons.Default.Event,
-            title = "Sắp đến hạn",
-            count = "1",
-            iconTint = WarningColor,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-        StatusRowItem(
-            icon = Icons.Default.Warning,
-            title = "Quá hạn",
-            count = "0",
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    }
-}
-
-@Composable
-fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Color, bgColor: Color) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
-            .padding(horizontal = LibrarySpacing.Large, vertical = LibrarySpacing.Medium),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(bgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        Text(
-            text = count,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
+      )
     }
 }
 

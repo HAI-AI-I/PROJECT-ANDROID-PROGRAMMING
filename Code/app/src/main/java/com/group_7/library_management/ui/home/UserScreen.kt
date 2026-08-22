@@ -22,12 +22,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
+import com.group_7.library_management.ui.borrowing.BorrowTab
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.ProfileContent
 import kotlinx.coroutines.launch
@@ -103,7 +106,13 @@ fun UserScreen(
                 modifier = Modifier.padding(paddingValues)
             ) {
                 composable(Routes.HOME) {
-                    HomeScreen()
+                    HomeScreen(
+                        onBorrowStatusClick = { tabIndex ->
+                            userNavController.navigate("${Routes.MY_BOOKS}?tab=$tabIndex") {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
                 composable(Routes.NOTIFICATIONS) {
                     NotificationsContent()
@@ -111,8 +120,18 @@ fun UserScreen(
                 composable(Routes.BOOKS) {
                     BookListScreen()
                 }
-                composable(Routes.MY_BOOKS) {
-                    BorrowRecordListContent()
+                composable(
+                    route = "${Routes.MY_BOOKS}?tab={tab}",
+                    arguments = listOf(
+                        navArgument("tab") {
+                            type = NavType.StringType
+                            defaultValue = BorrowTab.ALL.name
+                        }
+                    )
+                ) { backStackEntry ->
+                    val tabName = backStackEntry.arguments?.getString("tab") ?: BorrowTab.ALL.name
+                    val tab = try { BorrowTab.valueOf(tabName) } catch (e: Exception) { BorrowTab.ALL }
+                    BorrowRecordListContent(initialTab = tab)
                 }
                 composable(Routes.HISTORY) {
                     BorrowRecordListContent()

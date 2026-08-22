@@ -3,30 +3,21 @@ package com.group_7.library_management.ui.borrowing
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.group_7.library_management.components.BookListItemCard
+import com.group_7.library_management.components.BorrowingTopBar
 import com.group_7.library_management.models.Book
-import com.group_7.library_management.ui.theme.Error
 import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.Success
-import com.group_7.library_management.ui.theme.TextSecondary
 
-/**
- * BorrowRecordListScreen
- * Theo đúng lời leader: "Lịch sử mượn sách" và "Sách của tôi" dùng CHUNG 1
- * file này (view giống nhau), chỉ khác tiêu đề trang — truyền qua tham số
- * `title`. Tái dùng thẳng `BookListItemCard` (component dùng chung) với
- * `subtitleOverride` (ngày mượn/trả) + `trailingContent` (badge Đã trả/Quá hạn).
- *
- * Gọi cho "Lịch sử mượn sách":  BorrowRecordListScreen(title = "Lịch sử mượn sách", records = ...)
- * Gọi cho "Sách của tôi":       BorrowRecordListScreen(title = "Sách của tôi", records = ...)
- */
-
-enum class BorrowStatus { BORROWING, RETURNED, OVERDUE }
+enum class BorrowStatus { PENDING, BORROWING, RETURNED, OVERDUE }
 
 data class BorrowRecord(
     val book: Book,
@@ -42,7 +33,19 @@ fun BorrowRecordListScreen(
     onBack: () -> Unit = {},
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(title) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        },
     ) { innerPadding ->
         BorrowRecordListContent(
             modifier = Modifier.padding(innerPadding)
@@ -52,9 +55,9 @@ fun BorrowRecordListScreen(
 
 @Composable
 fun BorrowRecordListContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialTab: BorrowTab = BorrowTab.ALL
 ) {
-    // TODO: thay bằng val records by viewModel.borrowRecords.collectAsState()
     val records = remember {
         listOf(
             BorrowRecord(
@@ -69,27 +72,38 @@ fun BorrowRecordListContent(
                 Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5),
                 "20/07/2026", "03/08/2026", BorrowStatus.RETURNED,
             ),
+            BorrowRecord(
+                Book("7", "Code Dạo Ký Sự", "Phạm Huy Hoàng", "Lập trình", borrowFee = 50000, availableCopies = 2),
+                "22/08/2026", "05/09/2026", BorrowStatus.PENDING,
+            )
         )
     }
 
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Tất cả", "Đang mượn", "Đã trả")
+    var selectedTab by remember { mutableStateOf(initialTab) }
+
+    LaunchedEffect(initialTab) {
+        selectedTab = initialTab
+    }
+
     val filtered = when (selectedTab) {
-        1 -> records.filter { it.status == BorrowStatus.BORROWING || it.status == BorrowStatus.OVERDUE }
-        2 -> records.filter { it.status == BorrowStatus.RETURNED }
-        else -> records
+        BorrowTab.PENDING -> records.filter { it.status == BorrowStatus.PENDING }
+        BorrowTab.BORROWING -> records.filter { it.status == BorrowStatus.BORROWING || it.status == BorrowStatus.OVERDUE }
+        BorrowTab.HISTORY -> records.filter { it.status == BorrowStatus.RETURNED }
+        BorrowTab.ALL -> records
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTab) {
-            tabs.forEachIndexed { index, label ->
-                Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = { Text(label) })
-            }
-        }
+        BorrowingTopBar(
+            selectedTab = selectedTab,
+            onTabSelected = { selectedTab = it }
+        )
 
         if (filtered.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Không có mục nào.", color = TextSecondary)
+                Text(
+                    text = "Không có mục nào.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(
@@ -111,9 +125,21 @@ fun BorrowRecordListContent(
 @Composable
 private fun StatusBadge(status: BorrowStatus) {
     val (label, color) = when (status) {
-        BorrowStatus.BORROWING -> "Đang mượn" to TextSecondary
+        BorrowStatus.PENDING -> "Chờ nhận" to MaterialTheme.colorScheme.outline
+        BorrowStatus.BORROWING -> "Đang mượn" to MaterialTheme.colorScheme.onSurfaceVariant
         BorrowStatus.RETURNED -> "Đã trả" to Success
-        BorrowStatus.OVERDUE -> "Quá hạn" to Error
+        BorrowStatus.OVERDUE -> "Quá hạn" to MaterialTheme.colorScheme.error
     }
-    Text(label, style = MaterialTheme.typography.labelSmall, color = color, fontWeight = FontWeight.Bold)
+    Surface(
+        color = color.copy(alpha = 0.1f),
+        shape = MaterialTheme.shapes.extraSmall
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
 }

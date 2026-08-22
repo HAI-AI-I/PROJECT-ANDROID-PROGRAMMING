@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class HomeUiState(
-    val borrowedBooks: List<Book> = emptyList(),
+    val borrowingCount: Int = 0,
+    val dueSoonCount: Int = 0,
+    val overdueCount: Int = 0,
     val popularBooks: List<Book> = emptyList(),
     val newBooks: List<Book> = emptyList(),
     val recommendedBooks: List<Book> = emptyList(),
@@ -37,7 +39,9 @@ class HomeViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 isLoading = false,
-                borrowedBooks = listOf(allBooks[0], allBooks[1]),
+                borrowingCount = 2,
+                dueSoonCount = 1,
+                overdueCount = 1,
                 popularBooks = allBooks.take(4),
                 newBooks = allBooks.takeLast(3),
                 recommendedBooks = listOf(allBooks[2], allBooks[4])
