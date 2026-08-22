@@ -104,10 +104,10 @@ fun HomeScreen(
         item {
             BookListSection(
                 title = "Sách dành cho bạn",
-                actionText = "",
+                actionText = "Xem tất cả",
                 books = uiState.recommendedBooks,
                 onBookClick = onBookClick,
-                onActionClick = {}
+                onActionClick = { onViewAllClick("recommended") }
             )
         }
 

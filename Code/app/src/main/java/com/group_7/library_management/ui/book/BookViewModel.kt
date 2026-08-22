@@ -17,7 +17,8 @@ data class BookListUiState(
     val quickStatus: String? = null,
     val filter: BookFilterState = BookFilterState(),
     val showFilterSheet: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val screenTitle: String = "Sách"
 )
 data class BookFilterState(
     val selectedGenres: Set<String> = emptySet(),
@@ -101,11 +102,57 @@ class BookViewModel : ViewModel() {
                 searchQuery = "",
                 quickGenre = "Tất cả",
                 quickStatus = null,
-                filter = BookFilterState()
+                filter = BookFilterState(),
+                screenTitle = "Sách"
             )
         }
         applyFilters()
     }
+
+    fun applyInitialFilter(filter: String) {
+        when (filter) {
+            "popular" -> {
+                _uiState.update { 
+                    it.copy(
+                        filter = it.filter.copy(minRating = 4),
+                        screenTitle = "Sách phổ biến"
+                    ) 
+                }
+                applyFilters()
+                _uiState.update { state ->
+                    state.copy(filteredBooks = state.filteredBooks.sortedByDescending { it.rating })
+                }
+            }
+            "new" -> {
+                _uiState.update {
+                    it.copy(
+                        searchQuery = "",
+                        quickGenre = "Tất cả",
+                        quickStatus = null,
+                        filter = BookFilterState(),
+                        screenTitle = "Sách mới"
+                    )
+                }
+                applyFilters()
+                _uiState.update { state ->
+                    state.copy(filteredBooks = state.filteredBooks.sortedByDescending { it.id.toIntOrNull() ?: 0 })
+                }
+            }
+            "recommended" -> {
+                _uiState.update {
+                    it.copy(
+                        screenTitle = "Sách dành cho bạn"
+                    )
+                }
+                // Giả lập logic: lấy các sách có rating cao hoặc thể loại lập trình
+                applyFilters()
+                _uiState.update { state ->
+                    state.copy(filteredBooks = state.allBooks.filter { it.rating >= 4.5 }.shuffled())
+                }
+            }
+        }
+    }
+
     fun confirmBorrowBook(bookId: String) {
         viewModelScope.launch {
             _borrowState.value = BorrowUiState.Loading

@@ -111,14 +111,29 @@ fun UserScreen(
                             userNavController.navigate("${Routes.MY_BOOKS}?tab=$tabIndex") {
                                 launchSingleTop = true
                             }
+                        },
+                        onViewAllClick = { filter ->
+                            userNavController.navigate("${Routes.BOOKS}?filter=$filter") {
+                                launchSingleTop = true
+                            }
                         }
                     )
                 }
                 composable(Routes.NOTIFICATIONS) {
                     NotificationsContent()
                 }
-                composable(Routes.BOOKS) {
-                    BookListScreen()
+                composable(
+                    route = "${Routes.BOOKS}?filter={filter}",
+                    arguments = listOf(
+                        navArgument("filter") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
+                ) { backStackEntry ->
+                    val filter = backStackEntry.arguments?.getString("filter")
+                    BookListScreen(initialFilter = filter)
                 }
                 composable(
                     route = "${Routes.MY_BOOKS}?tab={tab}",

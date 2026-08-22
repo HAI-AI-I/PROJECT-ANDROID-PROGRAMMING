@@ -22,9 +22,18 @@ private val QUICK_GENRE_TABS = listOf("Tất cả", "Lập trình", "Khoa học 
 fun BookListScreen(
     modifier: Modifier = Modifier,
     viewModel: BookViewModel = viewModel(),
+    initialFilter: String? = null,
     onBookClick: (Book) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(initialFilter) {
+        if (initialFilter != null) {
+            viewModel.applyInitialFilter(initialFilter)
+        } else {
+            viewModel.resetFilters()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -33,7 +42,7 @@ fun BookListScreen(
                 .padding(horizontal = LibrarySpacing.Medium),
         ) {
             Spacer(Modifier.height(LibrarySpacing.Small))
-            Text("Sách", style = MaterialTheme.typography.headlineSmall)
+            Text(uiState.screenTitle, style = MaterialTheme.typography.headlineSmall)
 
             SearchBar(
                 query = uiState.searchQuery,
