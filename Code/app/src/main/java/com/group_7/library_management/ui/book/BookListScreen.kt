@@ -9,7 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
@@ -21,7 +21,7 @@ private val QUICK_GENRE_TABS = listOf("Tất cả", "Lập trình", "Khoa học 
 @Composable
 fun BookListScreen(
     modifier: Modifier = Modifier,
-    viewModel: BookViewModel = viewModel(),
+    viewModel: BookViewModel = hiltViewModel(),
     onBookClick: (Book) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -39,7 +39,8 @@ fun BookListScreen(
                 query = uiState.searchQuery,
                 onQueryChange = viewModel::onSearchQueryChange,
                 placeholder = "Tìm sách, tác giả...",
-                onFilterClick = { viewModel.setFilterSheetVisible(true) },
+                onFilterClick = { viewModel.setFilterSheetVisible(true)
+                                },
                 showMic = true
             )
 

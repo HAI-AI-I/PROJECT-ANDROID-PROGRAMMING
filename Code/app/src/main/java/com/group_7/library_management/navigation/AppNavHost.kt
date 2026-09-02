@@ -16,7 +16,6 @@ import com.group_7.library_management.ui.auth.RegisterScreen
 import com.group_7.library_management.ui.auth.RestPassword
 import com.group_7.library_management.ui.home.UserScreen
 import com.group_7.library_management.ui.splash.SplashScreen
-import com.group_7.library_management.ui_admin.dashboard.DashBoardScreen
 
 
 @Composable
@@ -24,7 +23,8 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController()
 ) {
     val context= LocalContext.current
-    val checkLogin= remember { CheckLogin(context) }
+    val
+            checkLogin= remember { CheckLogin(context) }
 
     NavHost(
         navController = navController,
@@ -62,12 +62,6 @@ fun AppNavHost(
                     }
 
                 },
-                onLoginSuccessAdmin = {
-                    checkLogin.saveLogin("2")
-                    navController.navigate(Routes.DASHBOARD){
-                        popUpTo(0){inclusive=true}
-                    }
-                }
             )
         }
         composable(route = Routes.REGISTER) {
@@ -132,10 +126,6 @@ fun AppNavHost(
                     }
                 }
             )
-        }
-
-        composable(route= Routes.DASHBOARD){
-            DashBoardScreen()
         }
     }
 }

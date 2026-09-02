@@ -2,6 +2,7 @@ package com.group_7.library_management.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -29,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,75 +57,89 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
+import com.group_7.library_management.models.UserBorrowSummary
 
 import com.group_7.library_management.ui.theme.*
-
-
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(), // 1. Tự khởi tạo ViewModel
-    onBookClick: (Book) -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel(),
+    onBookClick: (Book) -> Unit,
     onViewAllClick: (String) -> Unit = {},
     onOpenQRClick: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = LibrarySpacing.Large),
-        verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
-    ) {
-        item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
+    if(uiState.isLoadingBooks){
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+    }else{
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = LibrarySpacing.Large),
+            verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
+        ) {
+            item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
 
-        item {
-            SearchBar(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                placeholder = "Tìm kiếm sách, tác giả,...",
-                onFilterClick = null,
-                showMic = true
-            )
-        }
+            item {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = "Tìm kiếm sách, tác giả,...",
+                    onFilterClick = null,
+                    showMic = true
+                )
+            }
 
-        item {
-            BookListSection(
-                title = "Sách phổ biến",
-                actionText = "Xem tất cả>",
-                books = uiState.popularBooks ,
-                onBookClick = onBookClick,
-                onActionClick = { onViewAllClick("popular") }
-            )
-        }
-        item {
-            BookListSection(
-                title = "Sách mới",
-                actionText = "Xem tất cả",
-                books = uiState.newBooks,
-                onBookClick = onBookClick,
-                onActionClick = { onViewAllClick("new")}
-            )
-        }
-        item {
-            BookListSection(
-                title = "Sách dành cho bạn",
-                actionText = "",
-                books = uiState.recommendedBooks,
-                onBookClick = onBookClick,
-                onActionClick = {}
-            )
-        }
+            item {
+                BookListSection(
+                    title = "Sách phổ biến",
+                    actionText = "Xem tất cả",
+                    books = uiState.popularBooks ,
+                    onBookClick = onBookClick,
+                    onActionClick = { onViewAllClick("popular") }
+                )
+            }
+            item {
+                BookListSection(
+                    title = "Sách mới",
+                    actionText = "Xem tất cả",
+                    books = uiState.newBooks,
+                    onBookClick = onBookClick,
+                    onActionClick = { onViewAllClick("new")}
+                )
+            }
+            item {
+                BookListSection(
+                    title = "Sách dành cho bạn",
+                    actionText = "",
+                    books = uiState.recommendedBooks,
+                    onBookClick = onBookClick,
+                    onActionClick = {}
+                )
+            }
 //        item { BorrowStatusSection(borrowedCount = uiState.borrowedBooks.size) }
-        item{BorrowStatusSection()}
-        item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
-        item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
+            item{BorrowStatusSection(
+                summary=uiState.borrowSummary,
+                isLoading = uiState.isLoadingSummary
+            )}
+            item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
+            item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
+        }
     }
 }
 
@@ -139,7 +158,7 @@ fun BookListSection(title: String, actionText: String, books: List<Book>,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            if (actionText.isNotEmpty()) {
+            if (actionText.isNotEmpty() && books.isNotEmpty()) {
                 TextButton(
                     onClick = {onActionClick()}
                 ){
@@ -154,20 +173,41 @@ fun BookListSection(title: String, actionText: String, books: List<Book>,
 
         Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
+        if (books.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Không có ${title.lowercase()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
             items(books) { book ->
-                BookItemCard(book=book,onClick={onBookClick(book)})
+                BookItemCard(
+                    book = book,
+                    onClick = { onBookClick(book) }
+                )
             }
         }
+    }
     }
 }
 
 @Composable
 fun BookItemCard(book: Book,
                  onClick:()->Unit={} ){
-    Column(modifier = Modifier.width(130.dp)) {
+    Column(modifier = Modifier.width(130.dp)
+        .clickable{onClick()}) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,34 +245,52 @@ fun BookItemCard(book: Book,
 
 @Composable
 fun BorrowStatusSection(
+    summary: UserBorrowSummary,
+    isLoading:Boolean=false
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StatusRowItem(
             icon = Icons.Default.LibraryBooks,
             title = "Đang mượn",
-            count = "3",
+            count = summary.borrowingCount.toString(),
             iconTint = MaterialTheme.colorScheme.secondary,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Event,
             title = "Sắp đến hạn",
-            count = "1",
+            count = summary.dueSoonCount.toString(),
+            iconTint = WarningColor
+        )
+        StatusRowItem(
+            icon = Icons.Default.AddCircle,
+            title = "Chờ lấy",
+            count = summary.pendingPickupCount.toString(),
             iconTint = WarningColor,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
         )
         StatusRowItem(
             icon = Icons.Default.Warning,
             title = "Quá hạn",
-            count = "0",
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            bgColor = MaterialTheme.colorScheme.surfaceVariant
+            count =summary.overdueCount.toString(),
+            iconTint = ErrorColor,
+        )
+        StatusRowItem(
+            icon=Icons.Default.Favorite,
+            title="Yêu thích",
+            count = summary.favoriteCount.toString(),
+            iconTint = ErrorColor
+        )
+        StatusRowItem(
+            icon=Icons.Default.Done,
+            title = "Đã mượn",
+            count=summary.returnedCount.toString(),
+            iconTint =SuccessColor
         )
     }
 }
 
 @Composable
-fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Color, bgColor: Color) {
+fun StatusRowItem(icon: ImageVector, title: String, count: String, iconTint: Color,
+                  bgColor: Color=MaterialTheme.colorScheme.surfaceVariant) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

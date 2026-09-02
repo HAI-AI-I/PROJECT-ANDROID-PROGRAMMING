@@ -1,5 +1,6 @@
 package com.group_7.library_management.ui.book
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,20 +30,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.res.painterResource
 import com.group_7.library_management.R
+import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.models.Book
+import com.group_7.library_management.ui.theme.LibrarySpacing
+import com.group_7.library_management.ui.theme.StarColor
+
 @Composable
 fun BookDetailScreen(
-    bookId: String = "clean_code",
-    onBack: () -> Unit = {},
+    book: Book?=null,
+    isFavorite:Boolean=false,
+    onBack: () -> Unit ,
+    onToggleFavorite:()->Unit={},
     onNavigateToReviews: () -> Unit = {},
-    onNavigateToBorrow: () -> Unit = {}
+    onNavigateToBorrow: () -> Unit = {},
+    onRelatedBookClick:(String)->Unit={}
 ) {
+
+    val title = book?.title ?: "Clean Code"
+    val author = book?.author ?: "Robert C. Martin"
+    val rating = book?.rating ?: 4.8
+    val availableCopies = book?.availableCopies ?: 3
+    val totalCopies = 10
+    val borrowFee = book?.borrowFee ?: 150000
+
     Scaffold(
+        topBar = {
+            MemberTopBar(
+                leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                onLeftClick = onBack,
+                rightIcon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                onRightClick =onToggleFavorite,
+                showNotificationBadge = false
+            )
+        },
         bottomBar = {
             Surface(
                 shadowElevation = 12.dp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.background,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -50,19 +77,19 @@ fun BookDetailScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     // Nút Chuông góc trái
                     OutlinedIconButton(
                         onClick = { },
                         modifier = Modifier.size(48.dp),
                         shape = CircleShape,
-                        colors = IconButtonDefaults.outlinedIconButtonColors(containerColor = Color(0xFFF2F2F7))
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Notifications,
                             contentDescription = "Notification",
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
 
@@ -72,27 +99,14 @@ fun BookDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF060B50))
+                        shape = MaterialTheme.shapes.large,
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Bookmark,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = Color.White
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Mượn sách",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        Text(
+                            text = "Mượn sách",
+                            style= MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 }
             }
@@ -102,7 +116,7 @@ fun BookDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF8F8FC))
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
             // Header Bìa Sách
@@ -110,33 +124,9 @@ fun BookDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(310.dp)
-                    .background(Color(0xFFEBEBF2)),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .align(Alignment.TopCenter),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            tint = Color.White
-                        )
-                    }
-                }
-
                 Image(
                     painter = painterResource(id = R.drawable.cleancode),
                     contentDescription = "Cover",
@@ -147,30 +137,27 @@ fun BookDetailScreen(
                 )
             }
 
-            // Phần thông tin chi tiết (Bo góc trắng)
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset(y = (-24).dp),
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = Color(0xFFF8F8FC)
+                color = MaterialTheme.colorScheme.background
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                        .padding(LibrarySpacing.Large)
                 ) {
                     Text(
                         text = "Clean Code",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        style= MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "Robert C. Martin",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF202773)
+                        style= MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.secondaryContainer
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -184,13 +171,15 @@ fun BookDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = Color(0xFFFFB300),
-                                modifier = Modifier.size(18.dp)
+                                tint = StarColor,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "4.8/5 ", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text(text = "(128 lượt đánh giá)", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = "4.8/5 ",
+                            style= MaterialTheme.typography.titleSmall)
+                        Text(text = "(128 lượt đánh giá)",
+                            style= MaterialTheme.typography.titleSmall, color = Color.Gray)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

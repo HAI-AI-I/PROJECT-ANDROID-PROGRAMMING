@@ -10,14 +10,9 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,15 +21,17 @@ import androidx.navigation.compose.rememberNavController
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.navigation.Routes
+import com.group_7.library_management.ui.book.BookDetailScreen
+import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
-import com.group_7.library_management.ui.profile.ProfileContent
+import com.group_7.library_management.ui.profile.ProfileScreen
 import kotlinx.coroutines.launch
 
 @Composable
 fun UserScreen(
-    userViewModel: UserRootViewModel = viewModel(),
+    userViewModel: UserRootViewModel = hiltViewModel(),
     userNavController: NavHostController = rememberNavController(),
     onLogout: () -> Unit = {}
 ) {
@@ -54,6 +51,15 @@ fun UserScreen(
             restoreState = true
         }
     }
+
+    val mainTabs=listOf(
+        Routes.HOME,
+        Routes.BOOKS,
+        Routes.BORROW,
+        Routes.PROFILE,
+        Routes.NOTIFICATIONS
+    )
+    val shouldShowBar=currentRoute in mainTabs
 
     BackHandler(enabled = drawerState.isOpen) {
         scope.launch {
@@ -82,19 +88,23 @@ fun UserScreen(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                MemberTopBar(
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationClick = { navigateTab(Routes.NOTIFICATIONS) },
-                    showNotificationBadge = true
-                )
+                if(shouldShowBar){
+                    MemberTopBar(
+                        onLeftClick = { scope.launch { drawerState.open() } },
+                        onRightClick = { navigateTab(Routes.NOTIFICATIONS) },
+                        showNotificationBadge = true
+                    )
+                }
             },
             bottomBar = {
-                MemberBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navigateTab(route)
-                    }
-                )
+                if(shouldShowBar){
+                    MemberBottomBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navigateTab(route)
+                        }
+                    )
+                }
             }
         ) { paddingValues ->
             NavHost(
@@ -103,7 +113,14 @@ fun UserScreen(
                 modifier = Modifier.padding(paddingValues)
             ) {
                 composable(Routes.HOME) {
-                    HomeScreen()
+                    HomeScreen(
+                        onBookClick = {book -> userNavController.navigate(Routes.BOOK_DETAIL)}
+                    )
+                }
+                composable(Routes.BOOK_DETAIL) {
+                    BookDetailScreen (
+                        onBack={userNavController.popBackStack()}
+                    )
                 }
                 composable(Routes.NOTIFICATIONS) {
                     NotificationsContent()
@@ -111,17 +128,27 @@ fun UserScreen(
                 composable(Routes.BOOKS) {
                     BookListScreen()
                 }
-                composable(Routes.MY_BOOKS) {
+                composable(Routes.BORROW) {
                     BorrowRecordListContent()
                 }
                 composable(Routes.HISTORY) {
                     BorrowRecordListContent()
                 }
                 composable(Routes.PROFILE) {
-                    ProfileContent(onLogoutClick = onLogout)
+                    ProfileScreen(onLogoutClick = onLogout)
                 }
                 composable(Routes.FAVORITE) {
                     FavoriteScreen()
+                }
+                composable(Routes.SCAN_QR) {
+                    ScanScreen(
+                        onBack = { userNavController.popBackStack() }
+//                        onNavigateToBookDetail = { bookId ->
+                            // Sau khi quét trúng ID sách, quay lại hoặc mở chi tiết sách
+//                            userNavController.popBackStack()
+                            // userNavController.navigate("${Routes.BOOK_DETAIL}/$bookId")
+//                        }
+                    )
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.group_7.library_management.ui.borrowing
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.models.Book
@@ -80,7 +82,7 @@ fun BorrowRecordListContent(
         else -> records
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TabRow(selectedTabIndex = selectedTab) {
             tabs.forEachIndexed { index, label ->
                 Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = { Text(label) })

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.group_7.library_management.R
@@ -29,15 +30,13 @@ import com.group_7.library_management.components.auth.AuthButton
 import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.ui.theme.LibrarySpacing
-import com.group_7.library_management.ui_admin.dashboard.DashBoardScreen
 import com.group_7.library_management.utils.ValidationUtils
 
 
 @Composable
 fun LoginScreen(onNavigateToRegister: () -> Unit,
                 onNavigateToForgotPassword:()->Unit,
-                onLoginSuccess:()->Unit,
-                onLoginSuccessAdmin:()->Unit) {
+                onLoginSuccess:()->Unit, ) {
 
     var textEmailorPassword by remember { mutableStateOf("") }
     var textPassword by remember { mutableStateOf("")}
@@ -103,18 +102,12 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             AuthButton(
                 text = "ĐĂNG NHẬP",
                 onClick = {
-//                    if(ValidationUtils.isValidLoginInput(textEmailorPassword,textPassword )){
-//                        onLoginSuccess()
-//                    }
-//                    else{
-//                        textEmailorPassword=""
-//                        textPassword=""
-//                    }
-                    if(textEmailorPassword=="1"){
-                        onLoginSuccessAdmin()
+                    if(ValidationUtils.isValidLoginInput(textEmailorPassword,textPassword )){
+                        onLoginSuccess()
                     }
                     else{
-                        onLoginSuccess()
+                        textEmailorPassword=""
+                        textPassword=""
                     }
 
                 }
