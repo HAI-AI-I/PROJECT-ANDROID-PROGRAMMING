@@ -11,6 +11,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,7 +28,9 @@ import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
+import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
+import com.group_7.library_management.ui.profile.ProfileViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -137,8 +140,24 @@ fun UserScreen(
                 composable(Routes.HISTORY) {
                     BorrowRecordListContent()
                 }
-                composable(Routes.PROFILE) {
-                    ProfileScreen(onLogoutClick = onLogout)
+                composable(Routes.PROFILE) { backStackEntry ->
+                    val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
+                    ProfileScreen(
+                        viewModel = profileViewModel,
+                        onEditProfileClick = { userNavController.navigate(Routes.EDIT_PROFILE) },
+                        onLogoutClick = onLogout
+                    )
+                }
+                composable(Routes.EDIT_PROFILE) {
+                    val profileBackStackEntry = remember(userNavController) {
+                        userNavController.getBackStackEntry(Routes.PROFILE)
+                    }
+                    val profileViewModel: ProfileViewModel = hiltViewModel(profileBackStackEntry)
+                    EditProfileScreen(
+                        viewModel = profileViewModel,
+                        onNavigateBack = { userNavController.popBackStack() },
+                        onSaved = { userNavController.popBackStack() }
+                    )
                 }
                 composable(Routes.FAVORITE) {
                     FavoriteScreen()
@@ -146,11 +165,6 @@ fun UserScreen(
                 composable(Routes.SCAN_QR) {
                     ScanScreen(
                         onBack = { userNavController.popBackStack() }
-//                        onNavigateToBookDetail = { bookId ->
-                            // Sau khi quét trúng ID sách, quay lại hoặc mở chi tiết sách
-//                            userNavController.popBackStack()
-                            // userNavController.navigate("${Routes.BOOK_DETAIL}/$bookId")
-//                        }
                     )
                 }
             }
