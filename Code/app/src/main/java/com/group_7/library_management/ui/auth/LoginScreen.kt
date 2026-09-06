@@ -1,27 +1,15 @@
 package com.group_7.library_management.ui.auth
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.group_7.library_management.R
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.CreateLogoIcon
 import com.group_7.library_management.components.CreateLogoTitle
 import com.group_7.library_management.components.CustomTextField
@@ -30,17 +18,22 @@ import com.group_7.library_management.components.auth.AuthButton
 import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
 import com.group_7.library_management.ui.theme.LibrarySpacing
-import com.group_7.library_management.utils.ValidationUtils
-
 
 @Composable
-fun LoginScreen(onNavigateToRegister: () -> Unit,
-                onNavigateToForgotPassword:()->Unit,
-                onLoginSuccess:()->Unit, ) {
+fun LoginScreen(
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
+    onLoginSuccess: (Long) -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
+    val uiState by authViewModel.uiState.collectAsState()
 
     var textEmailorPassword by remember { mutableStateOf("") }
-    var textPassword by remember { mutableStateOf("")}
-    var passwordVisible by remember{mutableStateOf(false)}
+    var textPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var localError by remember { mutableStateOf("") }
+
+    val displayError = localError.ifEmpty { uiState.errorMessage ?: "" }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -54,7 +47,7 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top=40.dp, bottom = 40.dp)
+                modifier = Modifier.padding(top = 40.dp, bottom = 40.dp)
             ) {
                 CreateLogoIcon()
                 Spacer(modifier = Modifier.width(12.dp))
@@ -65,8 +58,12 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
                 subtitle = "Đăng nhập để tiếp tục sử dụng thư viện"
             )
             CustomTextField(
-                value=textEmailorPassword,
-                onValueChange = {textEmailorPassword=it},
+                value = textEmailorPassword,
+                onValueChange = {
+                    textEmailorPassword = it
+                    localError = ""
+                    authViewModel.clearError()
+                },
                 label = "Email/Số điện thoại",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
@@ -74,11 +71,27 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             Spacer(modifier = Modifier.height(16.dp))
             PasswordTextField(
                 password = textPassword,
-                onPasswordChange = {textPassword=it},
+                onPasswordChange = {
+                    textPassword = it
+                    localError = ""
+                    authViewModel.clearError()
+                },
                 label = "Mật khẩu",
                 isPasswordVisible = passwordVisible,
-                onToggleVisibility = {passwordVisible=!passwordVisible},
+                onToggleVisibility = { passwordVisible = !passwordVisible },
             )
+
+            if (displayError.isNotEmpty()) {
+                Text(
+                    text = displayError,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.error
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = LibrarySpacing.Small)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -86,7 +99,7 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                TextButton(onClick =onNavigateToForgotPassword) {
+                TextButton(onClick = onNavigateToForgotPassword) {
                     Text(
                         text = "Quên mật khẩu?",
                         style = MaterialTheme.typography.labelLarge.copy(
@@ -100,16 +113,26 @@ fun LoginScreen(onNavigateToRegister: () -> Unit,
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
             AuthButton(
-                text = "ĐĂNG NHẬP",
+                text = if (uiState.isLoading) "ĐANG XỬ LÝ..." else "ĐĂNG NHẬP",
                 onClick = {
-                    if(ValidationUtils.isValidLoginInput(textEmailorPassword,textPassword )){
-                        onLoginSuccess()
+                    when {
+                        textEmailorPassword.isBlank() -> {
+                            localError = "Vui lòng nhập Email hoặc Số điện thoại"
+                        }
+                        textPassword.isBlank() -> {
+                            localError = "Vui lòng nhập mật khẩu"
+                        }
+                        else -> {
+                            localError = ""
+                            authViewModel.login(
+                                emailOrPhone = textEmailorPassword,
+                                password = textPassword,
+                                onSuccess = { userId ->
+                                    onLoginSuccess(userId)
+                                }
+                            )
+                        }
                     }
-                    else{
-                        textEmailorPassword=""
-                        textPassword=""
-                    }
-
                 }
             )
 

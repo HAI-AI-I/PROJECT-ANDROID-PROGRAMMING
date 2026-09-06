@@ -4,18 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.NotificationCard
 import com.group_7.library_management.ui.theme.*
 
 enum class NotificationType {
-    WARNING, SUCCESS, ERROR, INFO
+    WARNING, SUCCESS, ERROR, INFO,BOOK
 }
 
 data class NotificationItem(
@@ -23,42 +27,25 @@ data class NotificationItem(
     val title: String,
     val message: String,
     val time: String,
-    val type: NotificationType
+    val date: String,
+    val type: NotificationType,
+    val isRead: Boolean = false
 )
+
 @Composable
 fun NotificationsContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: NotificationViewModel = hiltViewModel()
 ) {
-    val notifications = listOf(
-        NotificationItem(
-            id = "1",
-            title = "Clean Architecture còn 2 ngày nữa đến hạn trả",
-            message = "Vui lòng sắp xếp thời gian trả sách để tránh bị phạt phí quá hạn.",
-            time = "15 phút trước",
-            type = NotificationType.WARNING
-        ),
-        NotificationItem(
-            id = "2",
-            title = "Bạn đã mượn sách thành công",
-            message = "Sách \"Design Patterns\" đã được thêm vào tài khoản của bạn. Hạn trả: 19/08/2026.",
-            time = "2 giờ trước",
-            type = NotificationType.SUCCESS
-        ),
-        NotificationItem(
-            id = "3",
-            title = "Sách Kotlin in Action đã quá hạn 3 ngày",
-            message = "Tài khoản của bạn đang bị tính phí phạt. Vui lòng hoàn trả sách ngay lập tức.",
-            time = "Hôm qua",
-            type = NotificationType.ERROR
-        ),
-        NotificationItem(
-            id = "4",
-            title = "Bảo trì hệ thống",
-            message = "Hệ thống thư viện sẽ tạm ngưng hoạt động từ 22:00 đến 02:00 ngày mai để bảo trì định kỳ.",
-            time = "3 ngày trước",
-            type = NotificationType.INFO
-        )
-    )
+    val notifications by viewModel.notificationsFlow.collectAsState()
+
+    val groupedNotifications = remember(notifications) {
+        notifications.groupBy { it.date }
+    }
+
+    val unreadCount = remember(notifications) {
+        notifications.count { !it.isRead }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -68,20 +55,43 @@ fun NotificationsContent(
     ) {
         item { Spacer(modifier = Modifier.height(LibrarySpacing.Small)) }
 
+        // Header
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Thông báo",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Thông báo",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (unreadCount > 0) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ) {
+                            Text(
+                                text = "$unreadCount",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
 
                 Row(
-                    modifier = Modifier.clickable { },
+                    modifier = Modifier.clickable {
+                        viewModel.markAllAsRead()
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.ExtraSmall)
                 ) {
@@ -94,7 +104,7 @@ fun NotificationsContent(
                     Text(
                         text = "Đánh dấu đã đọc tất cả",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
             }
@@ -102,8 +112,66 @@ fun NotificationsContent(
 
         item { Spacer(modifier = Modifier.height(4.dp)) }
 
-        items(notifications) { notification ->
-            NotificationCard(notification)
+        if (notifications.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.NotificationsOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Text(
+                            text = "Không có thông báo nào",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
+        } else {
+            groupedNotifications.forEach { (date, itemsForDate) ->
+                // Phân nhóm theo ngày
+                item(key = "header_$date") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = LibrarySpacing.Small, bottom = LibrarySpacing.ExtraSmall),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = date,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                items(itemsForDate, key = { it.id }) { notification ->
+                    NotificationCard(
+                        item = notification,
+                        onClick = {
+                            viewModel.markAsRead(notification.id)
+                        },
+                        onDelete = {
+                            viewModel.deleteNotification(notification.id)
+                        }
+                    )
+                }
+            }
         }
+
+        item { Spacer(modifier = Modifier.height(LibrarySpacing.Large)) }
     }
 }

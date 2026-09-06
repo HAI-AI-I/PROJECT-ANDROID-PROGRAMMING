@@ -1,11 +1,14 @@
 package com.group_7.library_management.di
 
-
 import android.content.Context
 import androidx.room.Room
 import com.group_7.library_management.data.local.AppDatabase
 import com.group_7.library_management.data.local.dao.BookDAO
+import com.group_7.library_management.data.local.dao.NotificationDAO
+import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.repository.BookRepository
+import com.group_7.library_management.data.repository.NotificationRepository
+import com.group_7.library_management.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,7 +28,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "library_management_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration(true)
+        .build()
     }
 
     @Provides
@@ -39,4 +44,25 @@ object DatabaseModule {
         return BookRepository(bookDao)
     }
 
+    @Provides
+    fun provideNotificationDao(database: AppDatabase): NotificationDAO {
+        return database.getNotificationDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationRepository(notificationDao: NotificationDAO): NotificationRepository {
+        return NotificationRepository(notificationDao)
+    }
+
+    @Provides
+    fun provideUserDao(database: AppDatabase): UserDAO {
+        return database.getUserDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(userDao: UserDAO): UserRepository {
+        return UserRepository(userDao)
+    }
 }

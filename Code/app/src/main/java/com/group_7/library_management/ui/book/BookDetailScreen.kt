@@ -20,6 +20,10 @@ import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +41,7 @@ import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.StarColor
+import com.group_7.library_management.ui.theme.WarningColor
 
 @Composable
 fun BookDetailScreen(
@@ -56,13 +61,19 @@ fun BookDetailScreen(
     val totalCopies = 10
     val borrowFee = book?.borrowFee ?: 150000
 
+    var isFav by remember(isFavorite) { mutableStateOf(isFavorite) }
+
     Scaffold(
         topBar = {
             MemberTopBar(
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onLeftClick = onBack,
-                rightIcon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                onRightClick =onToggleFavorite,
+                rightIcon = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                rightIconTint = if (isFav) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                onRightClick = {
+                    isFav = !isFav
+                    onToggleFavorite()
+                },
                 showNotificationBadge = false
             )
         },

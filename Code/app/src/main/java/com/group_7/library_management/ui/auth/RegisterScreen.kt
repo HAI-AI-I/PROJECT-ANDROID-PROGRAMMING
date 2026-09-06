@@ -2,19 +2,12 @@ package com.group_7.library_management.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.CreateLogoIcon
 import com.group_7.library_management.components.CreateLogoTitle
 import com.group_7.library_management.components.CustomTextField
@@ -26,13 +19,15 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit ,
-    onNavigateToLogin:()-> Unit
+    onRegisterClick: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val uiState by authViewModel.uiState.collectAsState()
 
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var sdt by remember{mutableStateOf("")}
+    var sdt by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
@@ -41,11 +36,12 @@ fun RegisterScreen(
 
     var errorMessage by remember { mutableStateOf("") }
 
+    val displayError = errorMessage.ifEmpty { uiState.errorMessage ?: "" }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -74,13 +70,17 @@ fun RegisterScreen(
             }
 
             AuthHeader(
-                title ="Tạo tài khoản",
-                subtitle="Đăng ký để sử dụng các dịch vụ của thư viện"
+                title = "Tạo tài khoản",
+                subtitle = "Đăng ký để sử dụng các dịch vụ của thư viện"
             )
 
             CustomTextField(
-                value=fullName,
-                onValueChange = {fullName=it},
+                value = fullName,
+                onValueChange = {
+                    fullName = it
+                    errorMessage = ""
+                    authViewModel.clearError()
+                },
                 label = "Họ và tên",
             )
             Spacer(
@@ -88,8 +88,12 @@ fun RegisterScreen(
             )
 
             CustomTextField(
-                value=email,
-                onValueChange = {email=it},
+                value = email,
+                onValueChange = {
+                    email = it
+                    errorMessage = ""
+                    authViewModel.clearError()
+                },
                 label = "Email tài khoản",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
@@ -98,8 +102,12 @@ fun RegisterScreen(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
             CustomTextField(
-                value=sdt,
-                onValueChange = {sdt=it},
+                value = sdt,
+                onValueChange = {
+                    sdt = it
+                    errorMessage = ""
+                    authViewModel.clearError()
+                },
                 label = "Số điện thoại",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
@@ -107,28 +115,35 @@ fun RegisterScreen(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
             PasswordTextField(
-                password=password,
-                onPasswordChange = {password=it},
+                password = password,
+                onPasswordChange = {
+                    password = it
+                    errorMessage = ""
+                    authViewModel.clearError()
+                },
                 label = "Mật khẩu",
                 isPasswordVisible = passwordVisible,
-                onToggleVisibility = {passwordVisible=!passwordVisible}
+                onToggleVisibility = { passwordVisible = !passwordVisible }
             )
             Spacer(
                 modifier = Modifier.height(LibrarySpacing.Medium)
             )
             PasswordTextField(
-                password=confirmPassword,
-                onPasswordChange = {confirmPassword=it},
+                password = confirmPassword,
+                onPasswordChange = {
+                    confirmPassword = it
+                    errorMessage = ""
+                    authViewModel.clearError()
+                },
                 label = "Nhập lại mật khẩu",
                 isPasswordVisible = confirmPasswordVisible,
-                onToggleVisibility = {confirmPasswordVisible=!confirmPasswordVisible}
+                onToggleVisibility = { confirmPasswordVisible = !confirmPasswordVisible }
             )
 
             // Thông báo lỗi
-            if (errorMessage.isNotEmpty()) {
-
+            if (displayError.isNotEmpty()) {
                 Text(
-                    text = errorMessage,
+                    text = displayError,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.error
                     ),
@@ -143,7 +158,7 @@ fun RegisterScreen(
             )
 
             AuthButton(
-                text = "ĐĂNG KÝ",
+                text = if (uiState.isLoading) "ĐANG XỬ LÝ..." else "ĐĂNG KÝ",
                 onClick = {
                     when {
                         fullName.isBlank() -> {
@@ -160,30 +175,35 @@ fun RegisterScreen(
                             errorMessage = "Email không hợp lệ"
                         }
 
+                        sdt.isBlank() -> {
+                            errorMessage = "Vui lòng nhập số điện thoại"
+                        }
+
                         password.isBlank() -> {
                             errorMessage = "Vui lòng nhập mật khẩu"
                         }
 
                         password.length < 6 -> {
-                            errorMessage =
-                                "Mật khẩu phải có ít nhất 6 ký tự"
+                            errorMessage = "Mật khẩu phải có ít nhất 6 ký tự"
                         }
 
                         confirmPassword.isBlank() -> {
-                            errorMessage =
-                                "Vui lòng nhập lại mật khẩu"
+                            errorMessage = "Vui lòng nhập lại mật khẩu"
                         }
 
                         password != confirmPassword -> {
-                            errorMessage =
-                                "Mật khẩu nhập lại không khớp"
+                            errorMessage = "Mật khẩu nhập lại không khớp"
                         }
 
                         else -> {
                             errorMessage = ""
-
-                            // Sau này nối với database
-                            onRegisterClick()
+                            authViewModel.register(
+                                name = fullName,
+                                email = email,
+                                phone = sdt,
+                                password = password,
+                                onSuccess = onRegisterClick
+                            )
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 package com.group_7.library_management.ui.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -73,6 +74,7 @@ fun UserScreen(
         drawerContent = {
             AppNavigationDrawer(
                 user = userState.currentUser,
+                unreadNotificationCount = userState.unreadNotificationCount,
                 currentRoute = currentRoute,
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
@@ -87,12 +89,13 @@ fun UserScreen(
     ) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 if(shouldShowBar){
                     MemberTopBar(
                         onLeftClick = { scope.launch { drawerState.open() } },
                         onRightClick = { navigateTab(Routes.NOTIFICATIONS) },
-                        showNotificationBadge = true
+                        showNotificationBadge = userState.unreadNotificationCount > 0
                     )
                 }
             },
