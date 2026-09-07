@@ -39,7 +39,6 @@ fun BookScreen(
             ) { backStackEntry ->
                 val currentBookId = backStackEntry.arguments?.getString("bookId") ?: bookId
                 BookDetailScreen(
-                    bookId = currentBookId,
                     onBack = { navController.popBackStack() },
                     onNavigateToReviews = {
                         navController.navigate(BookRoute.Reviews.createRoute(currentBookId))

@@ -15,7 +15,6 @@ fun NavGraphBuilder.addBookNavGraph(navController: NavController) {
         val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
 
         BookDetailScreen(
-            bookId = bookId,
             onBack = {
                 navController.popBackStack()
             },

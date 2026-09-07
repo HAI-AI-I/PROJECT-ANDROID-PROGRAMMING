@@ -2,12 +2,15 @@ package com.group_7.library_management.ui.book
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.models.Book
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class BookListUiState(
     val allBooks: List<Book> = emptyList(),
@@ -20,10 +23,6 @@ data class BookListUiState(
     val isLoading: Boolean = false,
     val screenTitle: String = "Sách"
 )
-data class BookFilterState(
-    val selectedGenres: Set<String> = emptySet(),
-    val minRating: Int = 0
-)
 
 sealed interface BorrowUiState {
     object Idle : BorrowUiState
@@ -32,24 +31,33 @@ sealed interface BorrowUiState {
     data class Error(val message: String) : BorrowUiState
 }
 
-class BookViewModel : ViewModel() {
+@HiltViewModel
+class BookViewModel @Inject constructor(
+    private val bookRepository: BookRepository
+) : ViewModel() {
     private val _uiState=MutableStateFlow(BookListUiState())
     val uiState:StateFlow<BookListUiState> = _uiState.asStateFlow()
     private val _borrowState = MutableStateFlow<BorrowUiState>(BorrowUiState.Idle)
     val borrowState: StateFlow<BorrowUiState> = _borrowState
+
     init{
         loadBooks()
     }
+
     private fun loadBooks() {
-        val sampleBooks = listOf(
-            Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 2, rating = 4.8),
-            Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150000, availableCopies = 5, rating = 4.7),
-            Book("3", "Kotlin in Action", "Dmitry Jemerov", "Lập trình", borrowFee = 120000, availableCopies = 1, rating = 4.9),
-            Book("4", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", borrowFee = 150000, availableCopies = 3, rating = 4.6),
-            Book("5", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", borrowFee = 120000, availableCopies = 0, rating = 4.3),
-            Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5, rating = 4.5)
-        )
-        _uiState.update { it.copy(allBooks = sampleBooks, filteredBooks = sampleBooks) }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            bookRepository.getPopularBooks(limit = 50).collect { books ->
+                _uiState.update { 
+                    it.copy(
+                        allBooks = books, 
+                        filteredBooks = books,
+                        isLoading = false
+                    ) 
+                }
+                applyFilters()
+            }
+        }
     }
     private fun applyFilters() {
         _uiState.update { state ->

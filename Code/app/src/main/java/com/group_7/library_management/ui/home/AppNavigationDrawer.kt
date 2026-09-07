@@ -1,5 +1,7 @@
 package com.group_7.library_management.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryBooks
@@ -41,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.group_7.library_management.models.User
@@ -50,10 +54,13 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 @Composable
 fun AppNavigationDrawer(
     user: User?,
+    unreadNotificationCount: Int = 0,
     currentRoute: String = Routes.HOME,
     onItemClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
+
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface
@@ -116,8 +123,8 @@ fun AppNavigationDrawer(
             DrawerItem(
                 icon = Icons.Default.History,
                 label = "Lịch sử mượn",
-                isSelected = currentRoute == Routes.HISTORY,
-                onClick = { onItemClick(Routes.HISTORY) }
+                isSelected = currentRoute == Routes.BORROW,
+                onClick = { onItemClick(Routes.BORROW) }
             )
 
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
@@ -139,14 +146,16 @@ fun AppNavigationDrawer(
                 icon = {
                     Box {
                         Icon(Icons.Default.Notifications, contentDescription = null)
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.error)
-                                .align(Alignment.TopEnd)
-                                .border(1.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                        )
+                        if (unreadNotificationCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error)
+                                    .align(Alignment.TopEnd)
+                                    .border(1.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                            )
+                        }
                     }
                 },
                 selected = currentRoute == Routes.NOTIFICATIONS,
@@ -166,11 +175,30 @@ fun AppNavigationDrawer(
                 onClick = { onItemClick(Routes.SETTINGS) }
             )
             DrawerItem(
+                icon = Icons.Default.Chat,
+                label = "Chat với Admin",
+                isSelected = false,
+                onClick = {
+                    val phoneNumber = "0345115421"
+                    val zaloUri = Uri.parse("https://zalo.me/$phoneNumber")
+                    val intent = Intent(Intent.ACTION_VIEW, zaloUri).apply {
+                        setPackage("com.zing.zalo")
+                    }
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        val fallbackIntent = Intent(Intent.ACTION_VIEW, zaloUri)
+                        context.startActivity(fallbackIntent)
+                    }
+                }
+            )
+            DrawerItem(
                 icon = Icons.Outlined.HelpOutline,
                 label = "Hỗ trợ",
                 isSelected = currentRoute == Routes.HELP,
                 onClick = { onItemClick(Routes.HELP) }
             )
+
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant,
                 thickness = 1.dp,

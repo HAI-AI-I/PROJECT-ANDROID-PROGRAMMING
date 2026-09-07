@@ -15,7 +15,7 @@ object Routes {
     const val HOME = "home"
     const val BOOKS = "books"
     const val SCAN_QR="scan_qr"
-    const val MY_BOOKS = "my_books"
+    const val BORROW = "borrow"
     const val HISTORY = "history"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"
@@ -24,7 +24,7 @@ object Routes {
     const val HELP = "help"
 
     // Book Flow
-    const val BOOK_DETAIL = "book_detail/{bookId}"
+    const val BOOK_DETAIL = "book_detail"
 
     const val DASHBOARD="dashboard"
 }

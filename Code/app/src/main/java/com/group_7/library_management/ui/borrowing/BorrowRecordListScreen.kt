@@ -1,10 +1,12 @@
 package com.group_7.library_management.ui.borrowing
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -80,36 +82,82 @@ fun BorrowRecordListContent(
     }
 
     var selectedTab by remember { mutableStateOf(initialTab) }
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(initialTab) {
         selectedTab = initialTab
     }
 
-    val filtered = when (selectedTab) {
+    val tabFiltered = when (selectedTab) {
         BorrowTab.PENDING -> records.filter { it.status == BorrowStatus.PENDING }
         BorrowTab.BORROWING -> records.filter { it.status == BorrowStatus.BORROWING || it.status == BorrowStatus.OVERDUE }
-        BorrowTab.HISTORY -> records.filter { it.status == BorrowStatus.RETURNED }
         BorrowTab.ALL -> records
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        BorrowingTopBar(
-            selectedTab = selectedTab,
-            onTabSelected = { selectedTab = it }
-        )
+    val filtered = if (searchQuery.isBlank()) {
+        tabFiltered
+    } else {
+        tabFiltered.filter {
+            it.book.title.contains(searchQuery, ignoreCase = true) ||
+                    it.book.author.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    val tabs = BorrowTab.entries
+
+    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        TabRow(selectedTabIndex = selectedTab.ordinal) {
+            tabs.forEach { tab ->
+                Tab(
+                    selected = selectedTab == tab,
+                    onClick = { selectedTab = tab },
+                    text = { Text(tab.title, fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(LibrarySpacing.Small))
+
+
+        Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
         if (filtered.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "Không có mục nào.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(LibrarySpacing.Large),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+                    Text(
+                        text = "Không tìm thấy phiếu mượn sách phù hợp",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
+                    Text(
+                        text = "Hãy thử tìm kiếm với từ khóa khác hoặc chuyển sang tab khác.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         } else {
             LazyColumn(
-                modifier = Modifier.padding(LibrarySpacing.Medium),
-                verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = LibrarySpacing.Medium),
+                verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium),
             ) {
+                item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
                 items(filtered, key = { it.book.id }) { record ->
                     BookListItemCard(
                         book = record.book,
@@ -117,6 +165,7 @@ fun BorrowRecordListContent(
                         trailingContent = { StatusBadge(record.status) },
                     )
                 }
+                item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
             }
         }
     }
@@ -125,7 +174,7 @@ fun BorrowRecordListContent(
 @Composable
 private fun StatusBadge(status: BorrowStatus) {
     val (label, color) = when (status) {
-        BorrowStatus.PENDING -> "Chờ nhận" to MaterialTheme.colorScheme.outline
+        BorrowStatus.PENDING -> "Chờ lấy" to MaterialTheme.colorScheme.outline
         BorrowStatus.BORROWING -> "Đang mượn" to MaterialTheme.colorScheme.onSurfaceVariant
         BorrowStatus.RETURNED -> "Đã trả" to Success
         BorrowStatus.OVERDUE -> "Quá hạn" to MaterialTheme.colorScheme.error

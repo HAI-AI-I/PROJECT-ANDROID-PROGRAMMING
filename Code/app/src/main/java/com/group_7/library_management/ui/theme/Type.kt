@@ -33,7 +33,7 @@ val LibraryTypography = Typography(
     titleLarge = TextStyle(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
+        fontSize = 24.sp,
         lineHeight = 28.sp
     ),
 

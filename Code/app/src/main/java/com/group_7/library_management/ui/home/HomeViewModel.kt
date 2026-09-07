@@ -1,51 +1,77 @@
 package com.group_7.library_management.ui.home
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.repository.BookRepository
+import com.group_7.library_management.data.repository.BorrowRepository
 import com.group_7.library_management.models.Book
-import com.group_7.library_management.models.User
+import com.group_7.library_management.models.UserBorrowSummary
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class HomeUiState(
-    val borrowingCount: Int = 0,
-    val dueSoonCount: Int = 0,
-    val overdueCount: Int = 0,
+    val borrowedBooks: List<Book> = emptyList(),
     val popularBooks: List<Book> = emptyList(),
     val newBooks: List<Book> = emptyList(),
     val recommendedBooks: List<Book> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoadingBooks: Boolean = true,
+    val borrowSummary: UserBorrowSummary= UserBorrowSummary(),
+    val isLoadingSummary:Boolean=true
 )
 
-class HomeViewModel : ViewModel() {
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val bookRepository: BookRepository,
+    private val borrowRepository: BorrowRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadHomeData()
+        loadBooksData()
+        loadBorrowSummary()
     }
 
-    private fun loadHomeData() {
-        val allBooks = listOf(
-            Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 2, rating = 4.8),
-            Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150000, availableCopies = 5, rating = 4.7),
-            Book("3", "Kotlin in Action", "Dmitry Jemerov", "Lập trình", borrowFee = 120000, availableCopies = 1, rating = 4.9),
-            Book("4", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", borrowFee = 150000, availableCopies = 3, rating = 4.6),
-            Book("5", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", borrowFee = 120000, availableCopies = 0, rating = 4.3),
-            Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5, rating = 4.5)
-        )
+    private fun loadBooksData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingBooks = true) }
 
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                borrowingCount = 2,
-                dueSoonCount = 1,
-                overdueCount = 1,
-                popularBooks = allBooks.take(4),
-                newBooks = allBooks.takeLast(3),
-                recommendedBooks = listOf(allBooks[2], allBooks[4])
-            )
+            combine(
+                bookRepository.getPopularBooks(limit = 5),
+                bookRepository.getNewestBooks(limit = 5),
+                bookRepository.getRecommendedBooks(limit = 5)
+            ) { popular, newest ,recommended->
+                Triple(popular, newest,recommended)
+            }.collect { (popular, newest,recommended) ->
+                _uiState.update {
+                    it.copy(
+                        popularBooks = popular,
+                        newBooks = newest,
+                        recommendedBooks = recommended,
+                        isLoadingBooks = false
+                    )
+                }
+            }
+        }
+    }
+    private fun loadBorrowSummary(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingSummary = true) }
+            borrowRepository.getBorrowSummary().collect { summary ->
+                _uiState.update {
+                    it.copy(
+                        borrowSummary = summary,
+                        isLoadingSummary = false
+                    )
+                }
+            }
         }
     }
 }

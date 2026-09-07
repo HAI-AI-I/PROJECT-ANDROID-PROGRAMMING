@@ -10,7 +10,8 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 data class UserProfile(
@@ -34,60 +36,43 @@ data class UserProfile(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    viewModel: ProfileViewModel = hiltViewModel(),
     onEditProfileClick: () -> Unit = {},
     onChangePasswordClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Hồ Sơ Cá Nhân",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-        }
     ) { paddingValues ->
-        ProfileContent(
-            modifier = Modifier.padding(paddingValues),
-            onEditProfileClick = onEditProfileClick,
-            onChangePasswordClick = onChangePasswordClick,
-            onSettingsClick = onSettingsClick,
-            onLogoutClick = onLogoutClick
-        )
+        uiState.userProfile?.let { profile ->
+            ProfileContent(
+                modifier = Modifier.padding(paddingValues),
+                userProfile = profile,
+                onEditProfileClick = onEditProfileClick,
+                onChangePasswordClick = onChangePasswordClick,
+                onSettingsClick = onSettingsClick,
+                onLogoutClick = onLogoutClick
+            )
+        } ?: Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
 @Composable
 fun ProfileContent(
     modifier: Modifier = Modifier,
+    userProfile: UserProfile,
     onEditProfileClick: () -> Unit = {},
     onChangePasswordClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
-    val userProfile = remember {
-        mutableStateOf(
-            UserProfile(
-                id = "US001",
-                name = "Nguyễn Văn hair",
-                email = "nguyenvana@example.com",
-                phone = "0123456789",
-                joinDate = "15/08/2024",
-                borrowedBooksCount = 5,
-                totalBooksRead = 12
-            )
-        )
-    }
-
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -116,14 +101,14 @@ fun ProfileContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ProfileAvatar(
-                        initial = userProfile.value.name.first(),
+                        initial = userProfile.name.first(),
                         modifier = Modifier.size(80.dp)
                     )
 
                     Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
 
                     Text(
-                        text = userProfile.value.name,
+                        text = userProfile.name,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -132,7 +117,7 @@ fun ProfileContent(
                     Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
 
                     Text(
-                        text = "ID: ${userProfile.value.id}",
+                        text = "ID: ${userProfile.id}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -152,11 +137,11 @@ fun ProfileContent(
                     ) {
                         StatItem(
                             label = "Sách đang mượn",
-                            value = userProfile.value.borrowedBooksCount.toString()
+                            value = userProfile.borrowedBooksCount.toString()
                         )
                         StatItem(
                             label = "Tổng đã đọc",
-                            value = userProfile.value.totalBooksRead.toString()
+                            value = userProfile.totalBooksRead.toString()
                         )
                     }
 
@@ -189,7 +174,7 @@ fun ProfileContent(
         }
 
         item {
-            ProfileInfoSection(userProfile.value)
+            ProfileInfoSection(userProfile)
         }
 
         item {

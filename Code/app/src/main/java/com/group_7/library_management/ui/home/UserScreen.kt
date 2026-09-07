@@ -1,6 +1,7 @@
 package com.group_7.library_management.ui.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -10,34 +11,28 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.navigation.Routes
+import com.group_7.library_management.ui.book.BookDetailScreen
+import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
-import com.group_7.library_management.ui.borrowing.BorrowTab
 import com.group_7.library_management.ui.favorite.FavoriteScreen
-import com.group_7.library_management.ui.profile.ProfileContent
+import com.group_7.library_management.ui.profile.ProfileScreen
 import kotlinx.coroutines.launch
 
 @Composable
 fun UserScreen(
-    userViewModel: UserRootViewModel = viewModel(),
+    userViewModel: UserRootViewModel = hiltViewModel(),
     userNavController: NavHostController = rememberNavController(),
     onLogout: () -> Unit = {}
 ) {
@@ -58,6 +53,17 @@ fun UserScreen(
         }
     }
 
+    val mainTabs=listOf(
+        Routes.HOME,
+        Routes.BOOKS,
+        Routes.BORROW,
+        Routes.PROFILE,
+        Routes.NOTIFICATIONS,
+        Routes.FAVORITE,
+        Routes.SCAN_QR
+    )
+    val shouldShowBar=currentRoute in mainTabs
+
     BackHandler(enabled = drawerState.isOpen) {
         scope.launch {
             drawerState.close() // Đóng menu lại khi bấm Back
@@ -70,6 +76,7 @@ fun UserScreen(
         drawerContent = {
             AppNavigationDrawer(
                 user = userState.currentUser,
+                unreadNotificationCount = userState.unreadNotificationCount,
                 currentRoute = currentRoute,
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
@@ -84,20 +91,25 @@ fun UserScreen(
     ) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
-                MemberTopBar(
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationClick = { navigateTab(Routes.NOTIFICATIONS) },
-                    showNotificationBadge = true
-                )
+                if(shouldShowBar){
+                    MemberTopBar(
+                        onLeftClick = { scope.launch { drawerState.open() } },
+                        onRightClick = { navigateTab(Routes.NOTIFICATIONS) },
+                        showNotificationBadge = userState.unreadNotificationCount > 0
+                    )
+                }
             },
             bottomBar = {
-                MemberBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navigateTab(route)
-                    }
-                )
+                if(shouldShowBar){
+                    MemberBottomBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navigateTab(route)
+                        }
+                    )
+                }
             }
         ) { paddingValues ->
             NavHost(
@@ -107,55 +119,45 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
-                        onBorrowStatusClick = { tabIndex ->
-                            userNavController.navigate("${Routes.MY_BOOKS}?tab=$tabIndex") {
-                                launchSingleTop = true
-                            }
+                        onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onOpenQRClick = { userNavController.navigate(Routes.SCAN_QR) },
+                        onNavigateToBorrowTab = { tabKey ->
+                            userNavController.navigate(Routes.BORROW)
                         },
-                        onViewAllClick = { filter ->
-                            userNavController.navigate("${Routes.BOOKS}?filter=$filter") {
-                                launchSingleTop = true
-                            }
+                        onNavigateToFavorite = {
+                            userNavController.navigate(Routes.FAVORITE)
                         }
+                    )
+                }
+                composable(Routes.BOOK_DETAIL) {
+                    BookDetailScreen (
+                        onBack={userNavController.popBackStack()}
                     )
                 }
                 composable(Routes.NOTIFICATIONS) {
                     NotificationsContent()
                 }
-                composable(
-                    route = "${Routes.BOOKS}?filter={filter}",
-                    arguments = listOf(
-                        navArgument("filter") {
-                            type = NavType.StringType
-                            nullable = true
-                            defaultValue = null
-                        }
-                    )
-                ) { backStackEntry ->
-                    val filter = backStackEntry.arguments?.getString("filter")
-                    BookListScreen(initialFilter = filter)
+                composable(Routes.BOOKS) {
+                    BookListScreen()
                 }
-                composable(
-                    route = "${Routes.MY_BOOKS}?tab={tab}",
-                    arguments = listOf(
-                        navArgument("tab") {
-                            type = NavType.StringType
-                            defaultValue = BorrowTab.ALL.name
-                        }
-                    )
-                ) { backStackEntry ->
-                    val tabName = backStackEntry.arguments?.getString("tab") ?: BorrowTab.ALL.name
-                    val tab = try { BorrowTab.valueOf(tabName) } catch (e: Exception) { BorrowTab.ALL }
-                    BorrowRecordListContent(initialTab = tab)
-                }
-                composable(Routes.HISTORY) {
+                composable(Routes.BORROW) {
                     BorrowRecordListContent()
                 }
                 composable(Routes.PROFILE) {
-                    ProfileContent(onLogoutClick = onLogout)
+                    ProfileScreen(onLogoutClick = onLogout)
                 }
                 composable(Routes.FAVORITE) {
                     FavoriteScreen()
+                }
+                composable(Routes.SCAN_QR) {
+                    ScanScreen(
+                        onBack = { userNavController.popBackStack() }
+//                        onNavigateToBookDetail = { bookId ->
+                            // Sau khi quét trúng ID sách, quay lại hoặc mở chi tiết sách
+//                            userNavController.popBackStack()
+                            // userNavController.navigate("${Routes.BOOK_DETAIL}/$bookId")
+//                        }
+                    )
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.group_7.library_management.components
 
+import android.media.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,14 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun MemberTopBar(
-    onMenuClick: () -> Unit,
-    onNotificationClick: () -> Unit,
-    showNotificationBadge: Boolean = true, // Cho phép tắt badge nếu không có thông báo
+    leftIcon: ImageVector=Icons.Default.Menu,
+    leftIconTint:Color= MaterialTheme.colorScheme.onSurface,
+    onLeftClick: () -> Unit,
+    rightIcon:ImageVector=Icons.Default.Notifications,
+    rightIconTint: Color= MaterialTheme.colorScheme.onSurface,
+    onRightClick: () -> Unit,
+    showNotificationBadge: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -28,17 +35,15 @@ fun MemberTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = onMenuClick,
+            onClick = onLeftClick,
             modifier = Modifier.size(LibrarySpacing.Huge)
         ) {
             Icon(
-                Icons.Default.Menu,
-                contentDescription = "Menu",
-                tint = MaterialTheme.colorScheme.onSurface
+                imageVector=leftIcon,
+                contentDescription =null,
+                tint = leftIconTint
             )
         }
-
-        // Logo và tên ứng dụng
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -49,14 +54,14 @@ fun MemberTopBar(
 
         // Nút thông báo
         IconButton(
-            onClick = onNotificationClick,
+            onClick = onRightClick,
             modifier = Modifier.size(LibrarySpacing.Huge)
         ) {
             Box {
                 Icon(
-                    Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    imageVector = rightIcon,
+                    contentDescription =null,
+                    tint = rightIconTint
                 )
                 if (showNotificationBadge) {
                     Box(
