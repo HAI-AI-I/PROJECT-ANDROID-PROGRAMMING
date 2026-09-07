@@ -28,6 +28,7 @@ import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
+import com.group_7.library_management.ui.support.*
 import kotlinx.coroutines.launch
 
 @Composable
@@ -152,11 +153,47 @@ fun UserScreen(
                 composable(Routes.SCAN_QR) {
                     ScanScreen(
                         onBack = { userNavController.popBackStack() }
-//                        onNavigateToBookDetail = { bookId ->
-                            // Sau khi quét trúng ID sách, quay lại hoặc mở chi tiết sách
-//                            userNavController.popBackStack()
-                            // userNavController.navigate("${Routes.BOOK_DETAIL}/$bookId")
-//                        }
+                    )
+                }
+                composable(Routes.HELP) {
+                    SupportScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onNavigateToBorrowHelp = { userNavController.navigate(Routes.BORROW_HELP) },
+                        onNavigateToContact = { userNavController.navigate(Routes.CONTACT_LIBRARIAN) },
+                        onNavigateToMyRequests = { userNavController.navigate(Routes.MY_SUPPORT_REQUESTS) }
+                    )
+                }
+                composable(Routes.BORROW_HELP) {
+                    BorrowHelpScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onNavigateToFAQ = { userNavController.navigate(Routes.FAQ) },
+                        onNavigateToContact = { userNavController.navigate(Routes.CONTACT_LIBRARIAN) }
+                    )
+                }
+                composable(Routes.FAQ) {
+                    FAQScreen(
+                        onBack = { userNavController.popBackStack() }
+                    )
+                }
+                composable(Routes.CREATE_SUPPORT_REQUEST) {
+                    val supportViewModel: SupportViewModel = hiltViewModel()
+                    CreateSupportRequestScreen(
+                        viewModel = supportViewModel,
+                        onBack = { userNavController.popBackStack() },
+                        onSubmitSuccess = { userNavController.navigate(Routes.MY_SUPPORT_REQUESTS) }
+                    )
+                }
+                composable(Routes.MY_SUPPORT_REQUESTS) {
+                    val supportViewModel: SupportViewModel = hiltViewModel()
+                    MySupportRequestsScreen(
+                        viewModel = supportViewModel,
+                        onBack = { userNavController.popBackStack() }
+                    )
+                }
+                composable(Routes.CONTACT_LIBRARIAN) {
+                    ContactLibrarianScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onNavigateToCreateRequest = { userNavController.navigate(Routes.CREATE_SUPPORT_REQUEST) }
                     )
                 }
             }
