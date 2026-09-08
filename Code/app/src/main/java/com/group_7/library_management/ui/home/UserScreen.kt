@@ -27,6 +27,9 @@ import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
+import android.net.Uri
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.support.*
 import kotlinx.coroutines.launch
@@ -158,20 +161,25 @@ fun UserScreen(
                 composable(Routes.HELP) {
                     SupportScreen(
                         onBack = { userNavController.popBackStack() },
-                        onNavigateToBorrowHelp = { userNavController.navigate(Routes.BORROW_HELP) },
+                        onNavigateToTopic = { topic ->
+                            userNavController.navigate("faq/${Uri.encode(topic)}")
+                        },
                         onNavigateToContact = { userNavController.navigate(Routes.CONTACT_LIBRARIAN) },
                         onNavigateToMyRequests = { userNavController.navigate(Routes.MY_SUPPORT_REQUESTS) }
                     )
                 }
-                composable(Routes.BORROW_HELP) {
-                    BorrowHelpScreen(
-                        onBack = { userNavController.popBackStack() },
-                        onNavigateToFAQ = { userNavController.navigate(Routes.FAQ) },
-                        onNavigateToContact = { userNavController.navigate(Routes.CONTACT_LIBRARIAN) }
+                composable(
+                    route = "faq/{topic}?selectedId={selectedId}",
+                    arguments = listOf(
+                        navArgument("topic") { type = NavType.StringType },
+                        navArgument("selectedId") { type = NavType.StringType; nullable = true; defaultValue = null }
                     )
-                }
-                composable(Routes.FAQ) {
+                ) { backStackEntry ->
+                    val topic = backStackEntry.arguments?.getString("topic") ?: "Mượn sách"
+                    val selectedId = backStackEntry.arguments?.getString("selectedId")
                     FAQScreen(
+                        topic = topic,
+                        initialSelectedId = selectedId,
                         onBack = { userNavController.popBackStack() }
                     )
                 }

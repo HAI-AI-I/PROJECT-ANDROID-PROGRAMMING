@@ -21,13 +21,14 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 @Composable
 fun SupportScreen(
     onBack: () -> Unit = {},
-    onNavigateToBorrowHelp: () -> Unit = {},
+    onNavigateToTopic: (String) -> Unit = {},
     onNavigateToContact: () -> Unit = {},
     onNavigateToMyRequests: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Hỗ trợ mượn - trả sách", fontWeight = FontWeight.Bold) },
@@ -47,19 +48,12 @@ fun SupportScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .padding(LibrarySpacing.Medium),
             verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
-            item {
-                SearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    placeholder = "Tìm kiếm câu hỏi, vấn đề...",
-                    onFilterClick = null,
-                    showMic = false
-                )
-            }
+
 
             item {
                 Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
@@ -80,13 +74,13 @@ fun SupportScreen(
                         title = "Mượn sách",
                         icon = Icons.Default.MenuBook,
                         modifier = Modifier.weight(1f),
-                        onClick = onNavigateToBorrowHelp
+                        onClick = { onNavigateToTopic("Mượn sách") }
                     )
                     SupportTopicCard(
                         title = "Trả sách",
                         icon = Icons.Default.AssignmentReturn,
                         modifier = Modifier.weight(1f),
-                        onClick = onNavigateToBorrowHelp
+                        onClick = { onNavigateToTopic("Trả sách") }
                     )
                 }
             }
@@ -100,13 +94,13 @@ fun SupportScreen(
                         title = "Gia hạn sách",
                         icon = Icons.Default.Update,
                         modifier = Modifier.weight(1f),
-                        onClick = onNavigateToBorrowHelp
+                        onClick = { onNavigateToTopic("Gia hạn sách") }
                     )
                     SupportTopicCard(
                         title = "Quá hạn / Mất / Hỏng",
                         icon = Icons.Default.Warning,
                         modifier = Modifier.weight(1f),
-                        onClick = onNavigateToBorrowHelp
+                        onClick = { onNavigateToTopic("Quá hạn / Mất / Hỏng") }
                     )
                 }
             }

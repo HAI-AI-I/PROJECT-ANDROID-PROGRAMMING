@@ -41,14 +41,28 @@ data class SupportUiState(
         BorrowedBookItem("3", "Mạng máy tính căn bản", "Lê Văn C", "Hạn trả: 03/08/2026"),
         BorrowedBookItem("4", "Code Dạo Ký Sự", "Phạm Huy Hoàng", "Hạn trả: 05/09/2026")
     ),
-    val faqs: List<FaqItem> = listOf(
-        FaqItem("1", "Làm thế nào để mượn sách?", "Bạn có thể mượn sách bằng cách tìm kiếm sách trên ứng dụng, quét mã QR tại quầy thư viện hoặc liên hệ thủ thư.", "Mượn sách", "Quy trình, thủ tục, điều kiện mượn"),
-        FaqItem("2", "Tôi không thể mượn sách", "Kiểm tra lại số lượng sách đang mượn tối đa, tài khoản có bị quá hạn phạt hay không, hoặc liên hệ admin.", "Mượn sách", "Lý do, cách khắc phục"),
-        FaqItem("3", "Sách đang được mượn", "Nếu sách đã hết bản sao, bạn có thể thực hiện đặt chỗ (reservation) để được thông báo khi sách được trả.", "Mượn sách", "Kiểm tra tình trạng, đặt chỗ"),
-        FaqItem("4", "Điều kiện mượn sách là gì?", "Thẻ thư viện còn hiệu lực, không có sách quá hạn chưa thanh toán tiền phạt.", "Mượn sách", "Điều kiện"),
-        FaqItem("5", "Mỗi lần được mượn bao nhiêu cuốn?", "Mỗi thành viên được mượn tối đa 5 cuốn sách trong thời gian 14 ngày.", "Mượn sách", "Số lượng"),
-        FaqItem("6", "Làm sao biết sách còn hay không?", "Trang chi tiết sách hiển thị số lượng bản sao sẵn có tại thư viện.", "Mượn sách", "Tình trạng"),
-        FaqItem("7", "Đặt chỗ sách như thế nào?", "Nhấn vào nút 'Đặt chỗ' ở trang chi tiết sách khi sách đã được mượn hết.", "Mượn sách", "Đặt chỗ")
+    val categoryFaqs: Map<String, List<FaqItem>> = mapOf(
+        "Mượn sách" to listOf(
+            FaqItem("m1", "Cách thức mượn sách?", "Bạn có thể mượn sách bằng cách tìm kiếm sách trên ứng dụng, quét mã QR tại quầy thư viện hoặc liên hệ admin để được hướng dẫn chi tiết.", "Mượn sách", "Quy trình, thủ tục, điều kiện mượn"),
+            FaqItem("m2", "Tại sao tôi không thể mượn sách", "Kiểm tra lại số lượng sách đang mượn tối đa, tài khoản có bị quá hạn phạt hay không, hoặc liên hệ admin.", "Mượn sách", "Lý do, cách khắc phục"),
+            FaqItem("m3", "Sách đang được mượn", "Nếu sách đã hết bản sao, bạn có thể thực hiện đặt chỗ (reservation) để được thông báo khi sách được trả.", "Mượn sách", "Kiểm tra tình trạng, đặt chỗ"),
+            FaqItem("m4", "Điều kiện mượn sách ?", "Thẻ thành viên thư viện còn hiệu lực, tài khoản không có sách quá hạn chưa thanh toán tiền phạt.", "Mượn sách", "Điều kiện")
+        ),
+        "Trả sách" to listOf(
+            FaqItem("t1", "Quy trình trả sách như thế nào?", "Bạn mang sách đến quầy thủ thư hoặc bỏ vào tủ trả sách tự động của thư viện trước hoặc đúng hạn trả.", "Trả sách", "Địa điểm, thời gian, thủ tục trả"),
+            FaqItem("t2", "Có thể trả sách hộ người khác được không?", "Được, người trả hộ cần mang theo thẻ thư viện của bạn hoặc cung cấp mã số sinh viên/thành viên chính xác.", "Trả sách", "Quy định ủy quyền trả sách"),
+            FaqItem("t3", "Trả sách ngoài giờ hành chính được không?", "Có, bạn có thể sử dụng tủ trả sách tự động đặt tại sảnh chính thư viện hoạt động 24/7.", "Trả sách", "Hướng dẫn bỏ tủ trả sách tự động")
+        ),
+        "Gia hạn sách" to listOf(
+            FaqItem("g1", "Làm sao để gia hạn thời gian mượn sách?", "Vào mục 'Mượn sách' trên app, chọn sách cần gia hạn và nhấn 'Gia hạn' trước khi đến hạn trả ít nhất 1 ngày.", "Gia hạn sách", "Thao tác trên app hoặc tại quầy"),
+            FaqItem("g2", "Mỗi cuốn sách được gia hạn tối đa mấy lần?", "Mỗi cuốn sách được phép gia hạn tối đa 2 lần, mỗi lần thêm 7 ngày (với điều kiện không có người khác đặt chỗ).", "Gia hạn sách", "Quy định số lần và thời gian"),
+            FaqItem("g3", "Tại sao tôi không thể gia hạn sách?", "Sách đã quá hạn, hoặc đã hết số lần gia hạn cho phép, hoặc có thành viên khác đã đặt chỗ trước.", "Gia hạn sách", "Điều kiện gia hạn")
+        ),
+        "Quá hạn / Mất / Hỏng" to listOf(
+            FaqItem("q1", "Phí phạt quá hạn sách được tính như thế nào?", "Phí phạt quá hạn là 5.000đ/ngày/cuốn đối với sách thường và 10.000đ/ngày/cuốn đối với sách giáo trình/tham khảo.", "Quá hạn / Mất / Hỏng", "Biểu phí phạt theo ngày"),
+            FaqItem("q2", "Làm gì khi làm mất sách thư viện?", "Bạn cần đến ngay quầy thủ thư khai báo mất sách để tiến hành thủ tục đền bù bằng tiền mặt theo giá bìa hoặc mua sách mới đền bù.", "Quá hạn / Mất / Hỏng", "Thủ tục đền bù mất sách"),
+            FaqItem("q3", "Sách bị rách, hỏng trang thì xử lý ra sao?", "Thủ thư sẽ kiểm tra mức độ hư hỏng để quyết định mức phạt đền bù phục chế hoặc đền sách mới.", "Quá hạn / Mất / Hỏng", "Quy định xử lý hư hỏng")
+        )
     ),
     val supportRequests: List<SupportRequestItem> = listOf(
         SupportRequestItem("1", "Clean Architecture", "Sách bị hỏng / lỗi", "Sách bị rách bìa, khó đọc.", "16/08/2026", "Đang xử lý"),
@@ -126,6 +140,9 @@ class SupportViewModel @Inject constructor() : ViewModel() {
         }
         onSuccess()
     }
+
+    val selectedCategoryFaqs: List<FaqItem>
+        get() = _uiState.value.categoryFaqs[_uiState.value.selectedCategory] ?: emptyList()
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
