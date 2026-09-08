@@ -44,9 +44,9 @@ data class SupportUiState(
     val categoryFaqs: Map<String, List<FaqItem>> = mapOf(
         "Mượn sách" to listOf(
             FaqItem("m1", "Cách thức mượn sách?", "Bạn có thể mượn sách bằng cách tìm kiếm sách trên ứng dụng, quét mã QR tại quầy thư viện hoặc liên hệ admin để được hướng dẫn chi tiết.", "Mượn sách", "Quy trình, thủ tục, điều kiện mượn"),
-            FaqItem("m2", "Tại sao tôi không thể mượn sách", "Kiểm tra lại số lượng sách đang mượn tối đa, tài khoản có bị quá hạn phạt hay không, hoặc liên hệ admin.", "Mượn sách", "Lý do, cách khắc phục"),
+            FaqItem("m2", "Tại sao tôi không thể mượn sách?", "Kiểm tra lại số lượng sách đang mượn tối đa, tài khoản có bị quá hạn phạt hay không, hoặc liên hệ admin.", "Mượn sách", "Lý do, cách khắc phục"),
             FaqItem("m3", "Sách đang được mượn", "Nếu sách đã hết bản sao, bạn có thể thực hiện đặt chỗ (reservation) để được thông báo khi sách được trả.", "Mượn sách", "Kiểm tra tình trạng, đặt chỗ"),
-            FaqItem("m4", "Điều kiện mượn sách ?", "Thẻ thành viên thư viện còn hiệu lực, tài khoản không có sách quá hạn chưa thanh toán tiền phạt.", "Mượn sách", "Điều kiện")
+            FaqItem("m4", "Điều kiện mượn sách?", "Thẻ thành viên thư viện còn hiệu lực, tài khoản không có sách quá hạn chưa thanh toán tiền phạt.", "Mượn sách", "Điều kiện")
         ),
         "Trả sách" to listOf(
             FaqItem("t1", "Quy trình trả sách như thế nào?", "Bạn mang sách đến quầy thủ thư hoặc bỏ vào tủ trả sách tự động của thư viện trước hoặc đúng hạn trả.", "Trả sách", "Địa điểm, thời gian, thủ tục trả"),
@@ -54,9 +54,9 @@ data class SupportUiState(
             FaqItem("t3", "Trả sách ngoài giờ hành chính được không?", "Có, bạn có thể sử dụng tủ trả sách tự động đặt tại sảnh chính thư viện hoạt động 24/7.", "Trả sách", "Hướng dẫn bỏ tủ trả sách tự động")
         ),
         "Gia hạn sách" to listOf(
-            FaqItem("g1", "Làm sao để gia hạn thời gian mượn sách?", "Vào mục 'Mượn sách' trên app, chọn sách cần gia hạn và nhấn 'Gia hạn' trước khi đến hạn trả ít nhất 1 ngày.", "Gia hạn sách", "Thao tác trên app hoặc tại quầy"),
+            FaqItem("g1", "Làm sao để gia hạn thời gian mượn sách?", "Người dùng vào mục mượn sách trên app, chọn sách cần gia hạn và nhấn gia hạn trước khi đến hạn trả ít nhất 1 ngày.", "Gia hạn sách", "Thao tác trên app hoặc tại quầy"),
             FaqItem("g2", "Mỗi cuốn sách được gia hạn tối đa mấy lần?", "Mỗi cuốn sách được phép gia hạn tối đa 2 lần, mỗi lần thêm 7 ngày (với điều kiện không có người khác đặt chỗ).", "Gia hạn sách", "Quy định số lần và thời gian"),
-            FaqItem("g3", "Tại sao tôi không thể gia hạn sách?", "Sách đã quá hạn, hoặc đã hết số lần gia hạn cho phép, hoặc có thành viên khác đã đặt chỗ trước.", "Gia hạn sách", "Điều kiện gia hạn")
+            FaqItem("g3", "Tại sao tôi không thể gia hạn sách?", "Sách đã quá hạn hoặc đã hết số lần gia hạn cho phép, hoặc có thành viên khác đã đặt chỗ trước.", "Gia hạn sách", "Điều kiện gia hạn")
         ),
         "Quá hạn / Mất / Hỏng" to listOf(
             FaqItem("q1", "Phí phạt quá hạn sách được tính như thế nào?", "Phí phạt quá hạn là 5.000đ/ngày/cuốn đối với sách thường và 10.000đ/ngày/cuốn đối với sách giáo trình/tham khảo.", "Quá hạn / Mất / Hỏng", "Biểu phí phạt theo ngày"),

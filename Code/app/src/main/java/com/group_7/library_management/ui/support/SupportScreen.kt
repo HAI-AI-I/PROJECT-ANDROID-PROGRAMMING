@@ -12,9 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,8 +25,6 @@ fun SupportScreen(
     onNavigateToContact: () -> Unit = {},
     onNavigateToMyRequests: () -> Unit = {}
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -53,8 +51,6 @@ fun SupportScreen(
                 .padding(LibrarySpacing.Medium),
             verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
         ) {
-
-
             item {
                 Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
                 Text(
@@ -65,43 +61,49 @@ fun SupportScreen(
                 )
             }
 
+            // Grid 2x2
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
                 ) {
-                    SupportTopicCard(
-                        title = "Mượn sách",
-                        icon = Icons.Default.MenuBook,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigateToTopic("Mượn sách") }
-                    )
-                    SupportTopicCard(
-                        title = "Trả sách",
-                        icon = Icons.Default.AssignmentReturn,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigateToTopic("Trả sách") }
-                    )
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
-                ) {
-                    SupportTopicCard(
-                        title = "Gia hạn sách",
-                        icon = Icons.Default.Update,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigateToTopic("Gia hạn sách") }
-                    )
-                    SupportTopicCard(
-                        title = "Quá hạn / Mất / Hỏng",
-                        icon = Icons.Default.Warning,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigateToTopic("Quá hạn / Mất / Hỏng") }
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
+                    ) {
+                        SupportTopicCard(
+                            title = "Mượn sách",
+                            icon = Icons.Default.MenuBook,
+                            iconTint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onNavigateToTopic("Mượn sách") }
+                        )
+                        SupportTopicCard(
+                            title = "Trả sách",
+                            icon = Icons.Default.AssignmentReturn,
+                            iconTint = Color(0xFF2E7D32),
+                            modifier = Modifier.weight(1f),
+                            onClick = { onNavigateToTopic("Trả sách") }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
+                    ) {
+                        SupportTopicCard(
+                            title = "Gia hạn sách",
+                            icon = Icons.Default.Update,
+                            iconTint = Color(0xFFEF6C00),
+                            modifier = Modifier.weight(1f),
+                            onClick = { onNavigateToTopic("Gia hạn sách") }
+                        )
+                        SupportTopicCard(
+                            title = "Quá hạn / Mất / Hỏng",
+                            icon = Icons.Default.Warning,
+                            iconTint = Color(0xFFC62828),
+                            modifier = Modifier.weight(1f),
+                            onClick = { onNavigateToTopic("Quá hạn / Mất / Hỏng") }
+                        )
+                    }
                 }
             }
 
@@ -117,9 +119,9 @@ fun SupportScreen(
 
             item {
                 ActionSupportCard(
-                    title = "Liên hệ admin",
+                    title = "Liên hệ thủ thư",
                     subtitle = "Gửi câu hỏi, yêu cầu hỗ trợ",
-                    icon = Icons.Default.Chat,
+                    icon = Icons.Default.SupportAgent,
                     onClick = onNavigateToContact
                 )
             }
@@ -140,16 +142,17 @@ fun SupportScreen(
 fun SupportTopicCard(
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Card(
         modifier = modifier
-            .height(110.dp)
+            .height(105.dp)
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -161,8 +164,8 @@ fun SupportTopicCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.height(LibrarySpacing.Small))
             Text(
@@ -188,7 +191,7 @@ fun ActionSupportCard(
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -204,22 +207,22 @@ fun ActionSupportCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(44.dp)
                         .clip(MaterialTheme.shapes.small)
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 Column {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
