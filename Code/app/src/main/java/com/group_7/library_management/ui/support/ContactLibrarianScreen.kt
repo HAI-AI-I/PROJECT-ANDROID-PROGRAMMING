@@ -2,10 +2,16 @@ package com.group_7.library_management.ui.support
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -17,15 +23,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactLibrarianScreen(
+    viewModel: SupportViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onNavigateToCreateRequest: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -55,58 +64,40 @@ fun ContactLibrarianScreen(
                 )
             }
 
-            // 1. Chat trực tuyến
-            item {
+            items(uiState.contactMethods) { method ->
+                val icon = when (method.type) {
+                    "chat" -> Icons.Default.Chat
+                    "request" -> Icons.Default.Send
+                    "phone" -> Icons.Default.Phone
+                    else -> Icons.Default.Email
+                }
                 ContactMethodCard(
-                    title = "Chat trực tuyến",
-                    subtitle = "Trả lời nhanh trong giờ làm việc",
-                    icon = Icons.Default.Chat,
+                    title = method.title,
+                    subtitle = method.subtitle,
+                    icon = icon,
                     onClick = {
-                        val zaloUri = Uri.parse("https://zalo.me/0345115421")
-                        val intent = Intent(Intent.ACTION_VIEW, zaloUri)
-                        try {
-                            context.startActivity(intent)
-                        } catch (_: Exception) {}
-                    }
-                )
-            }
-
-            // 2. Gửi yêu cầu
-            item {
-                ContactMethodCard(
-                    title = "Gửi yêu cầu hỗ trợ",
-                    subtitle = "Để lại thông tin, chúng tôi sẽ liên hệ lại",
-                    icon = Icons.Default.Send,
-                    onClick = onNavigateToCreateRequest
-                )
-            }
-
-            // 3. Gọi điện
-            item {
-                ContactMethodCard(
-                    title = "Gọi điện: 028 1234 5678",
-                    subtitle = "Giờ làm việc: 7:30 - 17:00",
-                    icon = Icons.Default.Phone,
-                    onClick = {
-                        val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:02812345678"))
-                        try {
-                            context.startActivity(dialIntent)
-                        } catch (_: Exception) {}
-                    }
-                )
-            }
-
-            // 4. Email
-            item {
-                ContactMethodCard(
-                    title = "Email: thuvien@school.edu.vn",
-                    subtitle = "Phản hồi trong vòng 24h",
-                    icon = Icons.Default.Email,
-                    onClick = {
-                        val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:thuvien@school.edu.vn"))
-                        try {
-                            context.startActivity(emailIntent)
-                        } catch (_: Exception) {}
+                        when (method.type) {
+                            "chat" -> {
+                                val zaloUri = Uri.parse("https://zalo.me/0345115421")
+                                val intent = Intent(Intent.ACTION_VIEW, zaloUri)
+                                try {
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {}
+                            }
+                            "request" -> onNavigateToCreateRequest()
+                            "phone" -> {
+                                val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:0352444349"))
+                                try {
+                                    context.startActivity(dialIntent)
+                                } catch (_: Exception) {}
+                            }
+                            "email" -> {
+                                val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:thuvien@school.edu.vn"))
+                                try {
+                                    context.startActivity(emailIntent)
+                                } catch (_: Exception) {}
+                            }
+                        }
                     }
                 )
             }
@@ -121,14 +112,8 @@ fun ContactLibrarianScreen(
                 )
             }
 
-            item {
-                FAQSmallCard(title = "Thời gian làm việc của thư viện?")
-            }
-            item {
-                FAQSmallCard(title = "Địa chỉ thư viện ở đâu?")
-            }
-            item {
-                FAQSmallCard(title = "Chính sách bảo mật thông tin?")
+            items(uiState.otherFaqs) { faq ->
+                FAQSmallCard(title = faq.question, answer = faq.answer)
             }
         }
     }
@@ -200,32 +185,56 @@ fun ContactMethodCard(
 }
 
 @Composable
-fun FAQSmallCard(title: String) {
+fun FAQSmallCard(title: String, answer: String) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(LibrarySpacing.Medium),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(LibrarySpacing.Medium)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(LibrarySpacing.Small))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(LibrarySpacing.Small))
+                    Text(
+                        text = answer,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

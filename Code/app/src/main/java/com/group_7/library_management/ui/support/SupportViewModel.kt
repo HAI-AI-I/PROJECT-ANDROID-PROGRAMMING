@@ -1,11 +1,14 @@
 package com.group_7.library_management.ui.support
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.repository.SupportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class BorrowedBookItem(
@@ -30,6 +33,17 @@ data class SupportRequestItem(
     val description: String,
     val date: String,
     val status: String // "Đang xử lý" or "Đã giải quyết"
+)
+
+data class ContactMethodItem(
+    val title: String,
+    val subtitle: String,
+    val type: String // "chat", "request", "phone", "email"
+)
+
+data class OtherFaqItem(
+    val question: String,
+    val answer: String
 )
 
 data class SupportUiState(
@@ -64,12 +78,26 @@ data class SupportUiState(
             FaqItem("q3", "Sách bị rách, hỏng trang thì xử lý ra sao?", "Thủ thư sẽ kiểm tra mức độ hư hỏng để quyết định mức phạt đền bù phục chế hoặc đền sách mới.", "Quá hạn / Mất / Hỏng", "Quy định xử lý hư hỏng")
         )
     ),
-    val supportRequests: List<SupportRequestItem> = listOf(
-        SupportRequestItem("1", "Clean Architecture", "Sách bị hỏng / lỗi", "Sách bị rách bìa, khó đọc.", "16/08/2026", "Đang xử lý"),
-        SupportRequestItem("2", "Design Patterns", "Không thể gia hạn sách", "Hệ thống báo lỗi khi bấm gia hạn lần 2.", "15/08/2026", "Đã giải quyết"),
-        SupportRequestItem("3", "Mạng máy tính căn bản", "Đã trả nhưng chưa cập nhật", "Đã trả sách tại quầy nhưng app vẫn hiện đang mượn.", "04/08/2026", "Đã giải quyết"),
-        SupportRequestItem("4", "Code Dạo Ký Sự", "Khác", "Yêu cầu đổi thời gian nhận sách.", "23/08/2026", "Đã giải quyết")
+    val supportTopics: List<String> = listOf("Mượn sách", "Trả sách", "Gia hạn sách", "Quá hạn / Mất / Hỏng"),
+    val supportProblems: List<String> = listOf(
+        "Không thể gia hạn sách",
+        "Đã trả nhưng chưa cập nhật trạng thái",
+        "Sách bị hỏng / lỗi",
+        "Sách bị mất",
+        "Khác"
     ),
+    val contactMethods: List<ContactMethodItem> = listOf(
+        ContactMethodItem("Chat trực tuyến", "Trả lời nhanh trong giờ làm việc", "chat"),
+        ContactMethodItem("Gửi yêu cầu hỗ trợ", "Để lại thông tin, chúng tôi sẽ liên hệ lại", "request"),
+        ContactMethodItem("Gọi điện: 028 1234 5678", "Giờ làm việc: 7:30 - 17:00", "phone"),
+        ContactMethodItem("Email: thuvien@school.edu.vn", "Phản hồi trong vòng 24h", "email")
+    ),
+    val otherFaqs: List<OtherFaqItem> = listOf(
+        OtherFaqItem("Thời gian làm việc của thư viện?", "Thư viện mở cửa từ Thứ Hai đến Thứ Sáu (Sáng: 7:30 - 11:30, Chiều: 13:30 - 17:00). Thứ Bảy: 8:00 - 11:30. Chủ nhật và ngày lễ nghỉ."),
+        OtherFaqItem("Địa chỉ thư viện ở đâu?", "Thư viện đặt tại Tầng 2, Tòa nhà Trung tâm Thông tin - Học liệu, Cơ sở chính của trường."),
+        OtherFaqItem("Chính sách bảo mật thông tin?", "Tất cả thông tin tài khoản, lịch sử mượn sách và yêu cầu hỗ trợ của bạn được bảo mật tuyệt đối theo quy định của nhà trường.")
+    ),
+    val supportRequests: List<SupportRequestItem> = emptyList(),
     val selectedBook: BorrowedBookItem? = null,
     val selectedProblem: String = "",
     val description: String = "",
@@ -80,9 +108,19 @@ data class SupportUiState(
 )
 
 @HiltViewModel
-class SupportViewModel @Inject constructor() : ViewModel() {
+class SupportViewModel @Inject constructor(
+    private val supportRepository: SupportRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(SupportUiState())
     val uiState: StateFlow<SupportUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            supportRepository.getAllRequests().collect { requests ->
+                _uiState.update { it.copy(supportRequests = requests) }
+            }
+        }
+    }
 
     fun updateSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
@@ -119,26 +157,29 @@ class SupportViewModel @Inject constructor() : ViewModel() {
             return
         }
 
-        val newReq = SupportRequestItem(
-            id = (current.supportRequests.size + 1).toString(),
-            bookTitle = current.selectedBook?.title ?: "Sách chung",
-            problemType = current.selectedProblem,
-            description = current.description.ifBlank { "Không có mô tả chi tiết" },
-            date = "Hôm nay",
-            status = "Đang xử lý"
-        )
-
-        _uiState.update {
-            it.copy(
-                supportRequests = listOf(newReq) + it.supportRequests,
-                error = null,
-                successMessage = "Gửi yêu cầu thành công!",
-                selectedProblem = "",
-                description = "",
-                selectedBook = null
+        viewModelScope.launch {
+            val newReq = SupportRequestItem(
+                id = System.currentTimeMillis().toString(),
+                bookTitle = current.selectedBook?.title ?: "Sách chung",
+                problemType = current.selectedProblem,
+                description = current.description.ifBlank { "Không có mô tả chi tiết" },
+                date = "Hôm nay",
+                status = "Đang xử lý"
             )
+
+            supportRepository.createRequest(newReq, isOnline = true)
+
+            _uiState.update {
+                it.copy(
+                    error = null,
+                    successMessage = "Gửi yêu cầu thành công!",
+                    selectedProblem = "",
+                    description = "",
+                    selectedBook = null
+                )
+            }
+            onSuccess()
         }
-        onSuccess()
     }
 
     val selectedCategoryFaqs: List<FaqItem>

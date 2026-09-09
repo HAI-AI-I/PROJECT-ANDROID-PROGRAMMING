@@ -7,8 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
 import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
+import com.group_7.library_management.data.local.dao.SupportRequestDao
 import com.group_7.library_management.data.local.entity.BookEntity
 import com.group_7.library_management.data.local.entity.NotificationEntity
+import com.group_7.library_management.data.local.entity.SupportRequestEntity
 import com.group_7.library_management.navigation.AppNavHost
 import com.group_7.library_management.ui.theme.Library_managementTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +24,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var notificationDao: NotificationDAO
+
+    @Inject
+    lateinit var supportRequestDao: SupportRequestDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +99,14 @@ class MainActivity : ComponentActivity() {
                 )
             )
             //notificationDao.insertNotifications(sampleNotifications)
+
+            val sampleSupportRequests = listOf(
+                SupportRequestEntity("1", "Clean Architecture", "Sách bị hỏng / lỗi", "Sách bị rách bìa, khó đọc.", "16/08/2026", "Đang xử lý"),
+                SupportRequestEntity("2", "Design Patterns", "Không thể gia hạn sách", "Hệ thống báo lỗi khi bấm gia hạn lần 2.", "15/08/2026", "Đã giải quyết"),
+                SupportRequestEntity("3", "Mạng máy tính căn bản", "Đã trả nhưng chưa cập nhật", "Đã trả sách tại quầy nhưng app vẫn hiện đang mượn.", "04/08/2026", "Đã giải quyết"),
+                SupportRequestEntity("4", "Code Dạo Ký Sự", "Khác", "Yêu cầu đổi thời gian nhận sách.", "23/08/2026", "Đã giải quyết")
+            )
+            supportRequestDao.insertRequests(sampleSupportRequests)
         }
 
         enableEdgeToEdge()

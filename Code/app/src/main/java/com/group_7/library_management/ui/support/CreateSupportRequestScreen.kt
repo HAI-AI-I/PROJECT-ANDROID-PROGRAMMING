@@ -104,11 +104,11 @@ fun CreateSupportRequestScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = {
-                                if (isSelected) viewModel.selectBook(null)
-                                else viewModel.selectBook(book)
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = { checked ->
+                                if (checked) viewModel.selectBook(book)
+                                else viewModel.selectBook(null)
                             }
                         )
                     }
@@ -131,26 +131,38 @@ fun CreateSupportRequestScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { viewModel.selectProblem(problem) },
+                        .clickable {
+                            if (isSelected) viewModel.selectProblem("")
+                            else viewModel.selectProblem(problem)
+                        },
                     shape = MaterialTheme.shapes.medium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        else MaterialTheme.colorScheme.surface
+                    ),
+                    border = if (isSelected) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = LibrarySpacing.Medium, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(LibrarySpacing.Medium),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { viewModel.selectProblem(problem) }
-                        )
-                        Spacer(modifier = Modifier.width(LibrarySpacing.Small))
                         Text(
                             text = problem,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = { checked ->
+                                if (checked) viewModel.selectProblem(problem)
+                                else viewModel.selectProblem("")
+                            }
                         )
                     }
                 }

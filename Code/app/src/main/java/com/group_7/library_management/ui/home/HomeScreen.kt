@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.UserBorrowSummary
@@ -79,7 +81,6 @@ fun HomeScreen(
     onNavigateToFavorite: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
 
     if(uiState.isLoadingBooks){
         Box(
@@ -99,55 +100,85 @@ fun HomeScreen(
 
             item {
                 SearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
+                    query = uiState.searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChange,
                     placeholder = "Tìm kiếm sách, tác giả,...",
                     onFilterClick = null,
                     showMic = true
                 )
             }
 
-            item {
-                BookListSection(
-                    title = "Sách phổ biến",
-                    actionText = "Xem tất cả",
-                    books = uiState.popularBooks ,
-                    onBookClick = onBookClick,
-                    onActionClick = { onViewAllClick("popular") }
-                )
-            }
-            item {
-                BookListSection(
-                    title = "Sách mới",
-                    actionText = "Xem tất cả",
-                    books = uiState.newBooks,
-                    onBookClick = onBookClick,
-                    onActionClick = { onViewAllClick("new")}
-                )
-            }
-            item {
-                BookListSection(
-                    title = "Sách dành cho bạn",
-                    actionText = "",
-                    books = uiState.recommendedBooks,
-                    onBookClick = onBookClick,
-                    onActionClick = {}
-                )
-            }
-            item {
-                BorrowStatusSection(
-                    summary = uiState.borrowSummary,
-                    isLoading = uiState.isLoadingSummary,
-                    onStatusClick = { tabKey ->
-                        if (tabKey == "favorite") {
-                            onNavigateToFavorite()
-                        } else {
-                            onNavigateToBorrowTab(tabKey)
+            if (uiState.searchQuery.isNotBlank()) {
+                val allBooks = (uiState.popularBooks + uiState.newBooks + uiState.recommendedBooks).distinctBy { it.id }
+                val searchResults = allBooks.filter {
+                    it.title.contains(uiState.searchQuery, ignoreCase = true) ||
+                    it.author.contains(uiState.searchQuery, ignoreCase = true)
+                }
+
+                if (searchResults.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Không tìm thấy sách phù hợp",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
-                )
+                } else {
+                    items(searchResults, key = { it.id }) { book ->
+                        BookListItemCard(book = book, onClick = { onBookClick(book) })
+                    }
+                }
+            } else {
+                item {
+                    BookListSection(
+                        title = "Sách phổ biến",
+                        actionText = "Xem tất cả",
+                        books = uiState.popularBooks ,
+                        onBookClick = onBookClick,
+                        onActionClick = { onViewAllClick("popular") }
+                    )
+                }
+                item {
+                    BookListSection(
+                        title = "Sách mới",
+                        actionText = "Xem tất cả",
+                        books = uiState.newBooks,
+                        onBookClick = onBookClick,
+                        onActionClick = { onViewAllClick("new")}
+                    )
+                }
+                item {
+                    BookListSection(
+                        title = "Sách dành cho bạn",
+                        actionText = "",
+                        books = uiState.recommendedBooks,
+                        onBookClick = onBookClick,
+                        onActionClick = {}
+                    )
+                }
+                item {
+                    BorrowStatusSection(
+                        summary = uiState.borrowSummary,
+                        isLoading = uiState.isLoadingSummary,
+                        onStatusClick = { tabKey ->
+                            if (tabKey == "favorite") {
+                                onNavigateToFavorite()
+                            } else {
+                                onNavigateToBorrowTab(tabKey)
+                            }
+                        }
+                    )
+                }
+                item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
             }
-            item { QRCheckInCard(onOpenQRClick = onOpenQRClick) }
+
             item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
         }
     }
@@ -353,60 +384,56 @@ fun StatusRowItem(
 }
 
 @Composable
-fun QRCheckInCard(
-    onOpenQRClick: () -> Unit = {}
-) {
+fun QRCheckInCard(onOpenQRClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onOpenQRClick() },
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(LibrarySpacing.Large),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(LibrarySpacing.Large),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(LibrarySpacing.Large)
         ) {
-            Text(
-                text = "QR Check-in",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = "Xuất trình mã QR của bạn tại quầy thủ thư hoặc cổng tự động để vào thư viện hoặc mượn sách.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
-            Button(
-                onClick =onOpenQRClick,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
-                Spacer(modifier = Modifier.width(LibrarySpacing.Small))
-                Text("Mở QR", color = MaterialTheme.colorScheme.onSecondary, style = MaterialTheme.typography.labelLarge)
-            }
-            Spacer(modifier = Modifier.height(LibrarySpacing.Large))
-
             Box(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(RoundedCornerShape(topStart = LibrarySpacing.Medium, topEnd = LibrarySpacing.Medium))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(LibrarySpacing.Small),
-                contentAlignment = Alignment.TopCenter
+                    .size(48.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.QrCode2,
+                    imageVector = Icons.Default.QrCodeScanner,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Quét mã QR tại thư viện",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Check-in nhanh hoặc mượn/trả sách tự động",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.QrCode2,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }

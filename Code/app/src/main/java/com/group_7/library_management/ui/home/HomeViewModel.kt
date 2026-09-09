@@ -20,6 +20,7 @@ data class HomeUiState(
     val popularBooks: List<Book> = emptyList(),
     val newBooks: List<Book> = emptyList(),
     val recommendedBooks: List<Book> = emptyList(),
+    val searchQuery: String = "",
     val isLoadingBooks: Boolean = true,
     val borrowSummary: UserBorrowSummary= UserBorrowSummary(),
     val isLoadingSummary:Boolean=true
@@ -39,14 +40,18 @@ class HomeViewModel @Inject constructor(
         loadBorrowSummary()
     }
 
+    fun onSearchQueryChange(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
     private fun loadBooksData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingBooks = true) }
 
             combine(
-                bookRepository.getPopularBooks(limit = 5),
-                bookRepository.getNewestBooks(limit = 5),
-                bookRepository.getRecommendedBooks(limit = 5)
+                bookRepository.getPopularBooks(limit = 50),
+                bookRepository.getNewestBooks(limit = 50),
+                bookRepository.getRecommendedBooks(limit = 50)
             ) { popular, newest ,recommended->
                 Triple(popular, newest,recommended)
             }.collect { (popular, newest,recommended) ->

@@ -6,9 +6,11 @@ import com.group_7.library_management.data.local.AppDatabase
 import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.dao.UserDAO
+import com.group_7.library_management.data.local.dao.SupportRequestDao
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.NotificationRepository
 import com.group_7.library_management.data.repository.UserRepository
+import com.group_7.library_management.data.repository.SupportRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -64,5 +66,16 @@ object DatabaseModule {
     @Singleton
     fun provideUserRepository(userDao: UserDAO): UserRepository {
         return UserRepository(userDao)
+    }
+
+    @Provides
+    fun provideSupportRequestDao(database: AppDatabase): SupportRequestDao {
+        return database.getSupportRequestDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupportRepository(supportRequestDao: SupportRequestDao): SupportRepository {
+        return SupportRepository(supportRequestDao)
     }
 }
