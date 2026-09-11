@@ -174,7 +174,7 @@ fun BorrowRecordListContent(
 @Composable
 private fun StatusBadge(status: BorrowStatus) {
     val (label, color) = when (status) {
-        BorrowStatus.PENDING -> "Chờ lấy" to MaterialTheme.colorScheme.outline
+        BorrowStatus.PENDING -> "Hàng chờ" to MaterialTheme.colorScheme.outline
         BorrowStatus.BORROWING -> "Đang mượn" to MaterialTheme.colorScheme.onSurfaceVariant
         BorrowStatus.RETURNED -> "Đã trả" to Success
         BorrowStatus.OVERDUE -> "Quá hạn" to MaterialTheme.colorScheme.error

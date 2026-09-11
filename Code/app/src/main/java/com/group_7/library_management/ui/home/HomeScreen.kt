@@ -307,7 +307,7 @@ fun BorrowStatusSection(
         )
         StatusRowItem(
             icon = Icons.Default.AddCircle,
-            title = "Chờ lấy",
+            title = "Hàng chờ",
             count = summary.pendingPickupCount.toString(),
             iconTint = WarningColor,
             onClick = { onStatusClick("pending") }
@@ -416,7 +416,7 @@ fun QRCheckInCard(onOpenQRClick: () -> Unit = {}) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Quét mã QR tại thư viện",
+                    text = "Quét mã QR tại đây",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
