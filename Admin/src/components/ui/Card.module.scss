@@ -1,0 +1,42 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.body {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 14px 16px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .body {
+    padding: 12px;
+  }
+}

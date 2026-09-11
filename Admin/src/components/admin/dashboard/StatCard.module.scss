@@ -1,0 +1,84 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.iconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.primary .iconWrap {
+  background: rgba(124, 137, 254, 0.12);
+  color: var(--primary);
+}
+
+.info .iconWrap {
+  background: var(--info-light);
+  color: var(--info);
+}
+
+.success .iconWrap {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.danger .iconWrap {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.info2 {
+  flex: 1;
+  min-width: 0;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .iconWrap {
+    width: 40px;
+    height: 40px;
+  }
+
+  .value {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 14px;
+  }
+
+  .value {
+    font-size: 22px;
+  }
+}
