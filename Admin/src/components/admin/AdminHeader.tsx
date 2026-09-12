@@ -73,7 +73,7 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
         <Link
           href="/admin/notifications"
           className={styles.iconBtn}
-          aria-label="Thong bao"
+          aria-label="Thông báo"
         >
           <Bell size={18} />
           {hasUnreadNotifications && <span className={styles.badge} />}
