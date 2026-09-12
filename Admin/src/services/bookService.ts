@@ -1,14 +1,5 @@
-import { initialBooks, bookBorrowHistory } from "@/data/books";
+import { apiClient, toApiId } from "@/services/apiClient";
 import type { Book, BookBorrowHistory, BookFormData } from "@/types/Book";
-
-let booksStore: Book[] = [...initialBooks];
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function generateId(): string {
-  const num = booksStore.length + 1;
-  return `B-${String(num).padStart(3, "0")}`;
-}
 
 export interface BookFilters {
   search?: string;
@@ -26,44 +17,16 @@ export interface PaginatedBooks {
   totalPages: number;
 }
 
-function filterBooks(filters: BookFilters): Book[] {
-  let result = [...booksStore];
-
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    result = result.filter(
-      (b) =>
-        b.title.toLowerCase().includes(q) ||
-        b.author.toLowerCase().includes(q) ||
-        b.bookId.toLowerCase().includes(q)
-    );
-  }
-
-  if (filters.category) {
-    result = result.filter((b) => b.category === filters.category);
-  }
-
-  if (filters.status) {
-    result = result.filter((b) => {
-      const status =
-        b.availableQuantity === 0
-          ? "out_of_stock"
-          : b.availableQuantity < b.quantity
-            ? "borrowed"
-            : "available";
-      return status === filters.status;
-    });
-  }
-
-  return result;
-}
-
 export const bookService = {
   async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
-    await delay();
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
-    const filtered = filterBooks(filters);
+    const params = new URLSearchParams();
+    if (filters.search) params.set("search", filters.search);
+    if (filters.category) params.set("category", filters.category);
+    if (filters.status) params.set("status", filters.status);
+    const books = await apiClient.get<ApiBook[]>(`/books?${params.toString()}`);
+    const filtered = books.map(mapBook);
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = (page - 1) * pageSize;
@@ -73,62 +36,65 @@ export const bookService = {
   },
 
   async getBookById(id: string): Promise<Book | null> {
-    await delay();
-    return booksStore.find((b) => b.bookId === id) ?? null;
+    try {
+      return mapBook(await apiClient.get<ApiBook>(`/books/${toApiId(id)}`));
+    } catch {
+      return null;
+    }
   },
 
   async getBookHistory(id: string): Promise<BookBorrowHistory[]> {
-    await delay();
-    return bookBorrowHistory[id] ?? [];
+    return [];
   },
 
   async createBook(data: BookFormData): Promise<Book> {
-    await delay();
-    const quantity = parseInt(data.quantity, 10);
-    const book: Book = {
-      bookId: generateId(),
-      title: data.title.trim(),
-      author: data.author.trim(),
-      category: data.category,
-      publisher: data.publisher.trim(),
-      publishYear: parseInt(data.publishYear, 10),
-      quantity,
-      availableQuantity: quantity,
-      cover: data.cover,
-    };
-    booksStore = [book, ...booksStore];
-    return book;
+    const book = await apiClient.post<ApiBook>("/books", toApiBook(data));
+    return mapBook(book);
   },
 
   async updateBook(id: string, data: BookFormData): Promise<Book | null> {
-    await delay();
-    const index = booksStore.findIndex((b) => b.bookId === id);
-    if (index === -1) return null;
-
-    const old = booksStore[index];
-    const quantity = parseInt(data.quantity, 10);
-    const borrowed = old.quantity - old.availableQuantity;
-    const availableQuantity = Math.max(0, quantity - borrowed);
-
-    const updated: Book = {
-      ...old,
-      title: data.title.trim(),
-      author: data.author.trim(),
-      category: data.category,
-      publisher: data.publisher.trim(),
-      publishYear: parseInt(data.publishYear, 10),
-      quantity,
-      availableQuantity,
-      cover: data.cover ?? old.cover,
-    };
-    booksStore[index] = updated;
-    return updated;
+    try {
+      const book = await apiClient.patch<ApiBook>(`/books/${toApiId(id)}`, toApiBook(data));
+      return mapBook(book);
+    } catch {
+      return null;
+    }
   },
 
   async deleteBook(id: string): Promise<boolean> {
-    await delay();
-    const len = booksStore.length;
-    booksStore = booksStore.filter((b) => b.bookId !== id);
-    return booksStore.length < len;
+    try {
+      await apiClient.delete(`/books/${toApiId(id)}`);
+      return true;
+    } catch {
+      return false;
+    }
   },
 };
+
+interface ApiBook {
+  id: number;
+  title: string;
+  author: string;
+  category: string;
+  publisher: string;
+  publishYear: number;
+  quantity: number;
+  availableQuantity: number;
+  cover?: string;
+}
+
+function mapBook(book: ApiBook): Book {
+  return { ...book, bookId: `B-${String(book.id).padStart(3, "0")}` };
+}
+
+function toApiBook(data: BookFormData) {
+  return {
+    title: data.title.trim(),
+    author: data.author.trim(),
+    category: data.category,
+    publisher: data.publisher.trim(),
+    publishYear: Number(data.publishYear),
+    quantity: Number(data.quantity),
+    cover: data.cover,
+  };
+}

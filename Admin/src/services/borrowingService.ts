@@ -5,6 +5,7 @@ import {
   overdueBooks,
   recentBorrowings,
 } from "@/data/borrowings";
+import { apiClient, toApiId } from "@/services/apiClient";
 import type {
   Borrowing,
   BorrowRequest,
@@ -51,23 +52,23 @@ function filterBorrowings(filters: BorrowingFilters): Borrowing[] {
 
 export const borrowingService = {
   async getDashboardStats(): Promise<DashboardStats> {
-    await delay();
-    return dashboardStats;
+    const summary = await apiClient.get<{ totalBooks: number; borrowingBooks: number; totalReaders: number; overdueBooks: number }>("/dashboard");
+    return { totalBooks: summary.totalBooks, currentlyBorrowed: summary.borrowingBooks, totalReaders: summary.totalReaders, overdueCount: summary.overdueBooks };
   },
 
   async getBorrowingChartData(): Promise<BorrowingChartData[]> {
-    await delay();
-    return borrowingChartData;
+    const trend = await apiClient.get<{ month: string; count: number }[]>("/statistics/borrowing-trend");
+    return trend.map((item) => ({ day: item.month, count: item.count }));
   },
 
   async getRecentBorrowings(): Promise<Borrowing[]> {
-    await delay();
-    return borrowingsStore.slice(0, 5);
+    const items = await apiClient.get<ApiRecentBorrowing[]>("/dashboard/recent-borrowings");
+    return items.map((item) => ({ id: `BR-${String(item.id).padStart(3, "0")}`, readerId: "", readerName: item.readerName, bookId: "", bookTitle: item.bookTitle, borrowDate: item.borrowDate, dueDate: item.dueDate, status: item.status.toLowerCase() as Borrowing["status"] }));
   },
 
   async getOverdueBooks(): Promise<OverdueBook[]> {
-    await delay();
-    return overdueBooks;
+    const items = await apiClient.get<ApiOverdueBook[]>("/dashboard/overdue-books");
+    return items.map((item) => ({ id: `O-${item.id}`, readerName: item.readerName, bookTitle: item.bookTitle, dueDate: "", overdueDays: item.overdueDays }));
   },
 
   async getBorrowings(filters: BorrowingFilters = {}): Promise<PaginatedResult<Borrowing>> {
@@ -145,3 +146,6 @@ export const borrowingService = {
     return requestsStore[idx];
   },
 };
+
+interface ApiRecentBorrowing { id: number; readerName: string; bookTitle: string; borrowDate: string; dueDate: string; status: string; }
+interface ApiOverdueBook { id: number; readerName: string; bookTitle: string; overdueDays: number; }

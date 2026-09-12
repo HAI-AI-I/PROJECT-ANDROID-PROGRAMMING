@@ -1,8 +1,6 @@
-import { initialReaders } from "@/data/readers";
+import { apiClient, toApiId } from "@/services/apiClient";
 import type { Reader, ReaderFormData } from "@/types/Reader";
 
-let store: Reader[] = [...initialReaders];
-const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 
 export interface PaginatedResult<T> {
   items: T[];
@@ -19,28 +17,14 @@ export interface ReaderFilters {
   pageSize?: number;
 }
 
-function filter(filters: ReaderFilters): Reader[] {
-  let result = [...store];
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    result = result.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.email.toLowerCase().includes(q) ||
-        r.readerId.toLowerCase().includes(q) ||
-        r.phone.includes(q)
-    );
-  }
-  if (filters.status) result = result.filter((r) => r.status === filters.status);
-  return result;
-}
-
 export const readerService = {
   async getReaders(filters: ReaderFilters = {}): Promise<PaginatedResult<Reader>> {
-    await delay();
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 8;
-    const filtered = filter(filters);
+    const params = new URLSearchParams();
+    if (filters.search) params.set("search", filters.search);
+    const readers = await apiClient.get<ApiReader[]>(`/readers?${params.toString()}`);
+    const filtered = readers.map(mapReader).filter((reader) => !filters.status || reader.status === filters.status);
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = (page - 1) * pageSize;
@@ -48,37 +32,21 @@ export const readerService = {
   },
 
   async getReaderById(id: string): Promise<Reader | null> {
-    await delay();
-    return store.find((r) => r.readerId === id) ?? null;
+    try { return mapReader(await apiClient.get<ApiReader>(`/readers/${toApiId(id)}`)); } catch { return null; }
   },
 
   async createReader(data: ReaderFormData): Promise<Reader> {
-    await delay();
-    const reader: Reader = {
-      readerId: `R-${String(store.length + 1).padStart(3, "0")}`,
-      name: data.name.trim(),
-      email: data.email.trim(),
-      phone: data.phone.trim(),
-      booksBorrowing: 0,
-      status: data.status,
-      registeredDate: new Date().toLocaleDateString("vi-VN"),
-    };
-    store = [reader, ...store];
-    return reader;
+    return mapReader(await apiClient.post<ApiReader>("/readers", { userId: 1, fullName: data.name.trim(), email: data.email.trim(), phone: data.phone.trim(), status: data.status }));
   },
 
   async updateReader(id: string, data: ReaderFormData): Promise<Reader | null> {
-    await delay();
-    const idx = store.findIndex((r) => r.readerId === id);
-    if (idx === -1) return null;
-    store[idx] = { ...store[idx], ...data, name: data.name.trim(), email: data.email.trim(), phone: data.phone.trim() };
-    return store[idx];
+    try { return mapReader(await apiClient.patch<ApiReader>(`/readers/${toApiId(id)}`, { fullName: data.name.trim(), email: data.email.trim(), phone: data.phone.trim(), status: data.status })); } catch { return null; }
   },
 
   async deleteReader(id: string): Promise<boolean> {
-    await delay();
-    const len = store.length;
-    store = store.filter((r) => r.readerId !== id);
-    return store.length < len;
+    try { await apiClient.delete(`/readers/${toApiId(id)}`); return true; } catch { return false; }
   },
 };
+
+interface ApiReader { id: number; fullName: string; email: string; phone: string; avatar?: string; totalBorrowing: number; status: string; createdAt: string; }
+function mapReader(reader: ApiReader): Reader { return { readerId: `R-${String(reader.id).padStart(3, "0")}`, name: reader.fullName, email: reader.email, phone: reader.phone, avatar: reader.avatar, booksBorrowing: reader.totalBorrowing, status: (reader.status === "blocked" ? "suspended" : reader.status) as Reader["status"], registeredDate: new Date(reader.createdAt).toLocaleDateString("vi-VN") }; }

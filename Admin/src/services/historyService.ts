@@ -1,8 +1,5 @@
-import { initialHistory } from "@/data/history";
+import { apiClient } from "@/services/apiClient";
 import type { HistoryRecord } from "@/types/History";
-
-const store: HistoryRecord[] = [...initialHistory];
-const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 
 export interface HistoryFilters {
   search?: string;
@@ -13,8 +10,8 @@ export interface HistoryFilters {
 
 export const historyService = {
   async getHistory(filters: HistoryFilters = {}): Promise<HistoryRecord[]> {
-    await delay();
-    let result = [...store];
+    const items = await apiClient.get<ApiHistory[]>("/history");
+    let result = items.map((item) => ({ id: String(item.id), action: item.type.toLowerCase() as HistoryRecord["action"], userName: `User #${item.userId}`, bookTitle: "", description: item.description, date: new Date(item.createdAt).toLocaleDateString("vi-VN") }));
     if (filters.search) {
       const q = filters.search.toLowerCase();
       result = result.filter(
@@ -27,3 +24,5 @@ export const historyService = {
     return result;
   },
 };
+
+interface ApiHistory { id: number; userId: number; type: string; description: string; createdAt: string; }

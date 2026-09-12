@@ -26,7 +26,17 @@
   grid-column: 1 / -1;
 }
 
+.coverUploadLabel {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.coverUploadLabel input {
+  display: none;
+}
+
 .coverPreview {
+  position: relative;
   width: 120px;
   height: 160px;
   border: 1px dashed var(--border);
@@ -38,12 +48,45 @@
   color: var(--text-tertiary);
   font-size: 13px;
   overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.coverUploadLabel:hover .coverPreview {
+  border-color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .coverPreview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.coverOverlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 4px;
+}
+
+.coverRemoveRow {
+  margin-top: 10px;
+}
+
+.removeCoverButton {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
 }
 
 .actions {

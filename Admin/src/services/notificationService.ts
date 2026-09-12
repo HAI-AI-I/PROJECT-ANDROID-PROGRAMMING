@@ -1,8 +1,6 @@
-import { initialNotifications } from "@/data/notifications";
+import { apiClient, toApiId } from "@/services/apiClient";
 import type { Notification, NotificationFormData } from "@/types/Notification";
 
-let store: Notification[] = [...initialNotifications];
-const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 const notifyChanged = () => {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("notifications:changed"));
@@ -11,42 +9,46 @@ const notifyChanged = () => {
 
 export const notificationService = {
   async getNotifications(): Promise<Notification[]> {
-    await delay();
-    return [...store];
+    const items = await apiClient.get<ApiNotification[]>("/notifications");
+    return items.map(mapNotification);
   },
 
   async markAsRead(id: string): Promise<void> {
-    await delay();
-    store = store.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+    await apiClient.patch(`/notifications/${toApiId(id)}/read`);
     notifyChanged();
   },
 
   async markAllAsRead(): Promise<void> {
-    await delay();
-    store = store.map((n) => ({ ...n, isRead: true }));
+    await apiClient.patch("/notifications/read-all");
     notifyChanged();
   },
 
   async deleteNotification(id: string): Promise<boolean> {
-    await delay();
-    const len = store.length;
-    store = store.filter((n) => n.id !== id);
+    await apiClient.delete(`/notifications/${toApiId(id)}`);
     notifyChanged();
-    return store.length < len;
+    return true;
   },
 
   async createNotification(data: NotificationFormData): Promise<Notification> {
-    await delay();
-    const notification: Notification = {
-      id: `N-${String(store.length + 1).padStart(3, "0")}`,
+    const notification = await apiClient.post<ApiNotification>("/notifications", {
+      userId: 1,
       title: data.title.trim(),
       message: data.message.trim(),
-      type: data.type,
-      isRead: false,
-      createdDate: new Date().toLocaleDateString("vi-VN"),
-    };
-    store = [notification, ...store];
+      type: data.type === "overdue" ? "OVERDUE" : data.type === "borrow_request" ? "BORROW" : "SYSTEM",
+    });
     notifyChanged();
-    return notification;
+    return mapNotification(notification);
   },
 };
+
+interface ApiNotification { id: number; title: string; message: string; type: string; isRead: boolean; createdAt: string; }
+function mapNotification(item: ApiNotification): Notification {
+  return {
+    id: `N-${String(item.id).padStart(3, "0")}`,
+    title: item.title,
+    message: item.message,
+    type: item.type === "OVERDUE" ? "overdue" : item.type === "BORROW" ? "borrow_request" : "system",
+    isRead: item.isRead,
+    createdDate: new Date(item.createdAt).toLocaleDateString("vi-VN"),
+  };
+}

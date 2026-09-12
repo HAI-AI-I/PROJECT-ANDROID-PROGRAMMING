@@ -1,8 +1,6 @@
-import { initialUsers } from "@/data/users";
+import { apiClient } from "@/services/apiClient";
 import type { User } from "@/types/User";
 
-let store: User[] = [...initialUsers];
-const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 
 export interface UserFilters {
   search?: string;
@@ -20,31 +18,21 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-function filter(filters: UserFilters): User[] {
-  let result = [...store];
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    result = result.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.userId.toLowerCase().includes(q)
-    );
-  }
-  if (filters.role) result = result.filter((u) => u.role === filters.role);
-  if (filters.status) result = result.filter((u) => u.status === filters.status);
-  return result;
-}
-
 export const userService = {
   async getUsers(filters: UserFilters = {}): Promise<PaginatedResult<User>> {
-    await delay();
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 8;
-    const filtered = filter(filters);
+    const params = new URLSearchParams();
+    if (filters.search) params.set("search", filters.search);
+    if (filters.role) params.set("role", filters.role.toUpperCase());
+    if (filters.status) params.set("status", filters.status.toUpperCase());
+    const users = await apiClient.get<ApiUser[]>(`/users?${params.toString()}`);
+    const filtered = users.map((user) => ({ userId: `U-${String(user.id).padStart(3, "0")}`, name: user.fullName, email: user.email, role: user.role.toLowerCase() as User["role"], status: (user.status.toLowerCase() === "blocked" ? "inactive" : user.status.toLowerCase()) as User["status"], avatar: user.avatar, createdDate: new Date(user.createdAt).toLocaleDateString("vi-VN") }));
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = (page - 1) * pageSize;
     return { items: filtered.slice(start, start + pageSize), total, page, pageSize, totalPages };
   },
 };
+
+interface ApiUser { id: number; fullName: string; email: string; role: string; status: string; avatar?: string; createdAt: string; }

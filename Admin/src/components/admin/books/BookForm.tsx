@@ -11,6 +11,14 @@ import { bookService } from "@/services/bookService";
 import type { Book, BookFormData } from "@/types/Book";
 import styles from "./BookForm.module.scss";
 
+const readFileAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error("Không đọc được file ảnh"));
+    reader.readAsDataURL(file);
+  });
+
 interface BookFormProps {
   initialData?: Book;
   mode: "create" | "edit";
@@ -66,6 +74,20 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  const handleCoverChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await readFileAsDataUrl(file);
+      update("cover", url);
+    } catch {
+      showToast("Không thể đọc ảnh đã chọn", "error");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validate(form);
@@ -102,13 +124,26 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
             <p className={styles.sectionTitle} style={{ fontSize: 14, marginBottom: 8 }}>
               Ảnh bìa
             </p>
-            <div className={styles.coverPreview}>
-              {form.cover ? (
-                <img src={form.cover} alt="Bìa sách" />
-              ) : (
-                "Chưa có ảnh"
-              )}
-            </div>
+
+            <label className={styles.coverUploadLabel}>
+              <div className={styles.coverPreview}>
+                {form.cover ? (
+                  <img src={form.cover} alt="Bìa sách" />
+                ) : (
+                  <span>Chưa có ảnh</span>
+                )}
+                <span className={styles.coverOverlay}>{form.cover ? "Thay ảnh" : "Chọn ảnh"}</span>
+              </div>
+              <input type="file" accept="image/*" onChange={handleCoverChange} />
+            </label>
+
+            {form.cover && (
+              <div className={styles.coverRemoveRow}>
+                <button type="button" className={styles.removeCoverButton} onClick={() => update("cover", "")}>
+                  Xóa ảnh
+                </button>
+              </div>
+            )}
           </div>
 
           <div className={styles.full}>
@@ -118,6 +153,15 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
               onChange={(e) => update("title", e.target.value)}
               error={errors.title}
               placeholder="Nhập tên sách"
+            />
+          </div>
+
+          <div className={styles.full}>
+            <Input
+              label="URL ảnh bìa"
+              value={form.cover ?? ""}
+              onChange={(e) => update("cover", e.target.value)}
+              placeholder="https://example.com/cover.jpg"
             />
           </div>
 
