@@ -7,6 +7,7 @@ import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.dao.SupportRequestDao
+import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.NotificationRepository
 import com.group_7.library_management.data.repository.UserRepository
@@ -20,7 +21,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+object  DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -64,8 +65,8 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(userDao: UserDAO): UserRepository {
-        return UserRepository(userDao)
+    fun provideUserRepository(userDao: UserDAO, authApi: AuthApi): UserRepository {
+        return UserRepository(userDao, authApi)
     }
 
     @Provides

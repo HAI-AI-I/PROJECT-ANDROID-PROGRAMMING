@@ -1,10 +1,14 @@
 package com.group_7.library_management.ui.profile
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group_7.library_management.utils.ValidationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import com.group_7.library_management.data.local.preferences.CheckLogin
+import com.group_7.library_management.data.repository.UserRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +25,11 @@ data class ProfileUiState(
 )
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    @ApplicationContext context: Context
+) : ViewModel() {
+    private val checkLogin = CheckLogin(context)
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
@@ -33,16 +41,32 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val profile = UserProfile(
-                    id = "0345115421",
-                    name = "Le",
-                    email = "nguyenvanhai@example.com",
-                    phone = "0123456789",
-                    joinDate = "15/08/2024",
-                    borrowedBooksCount = 3,
-                    totalBooksRead = 12
-                )
-                _uiState.update { it.copy(isLoading = false, userProfile = profile) }
+                val savedUserId = checkLogin.getSavedUserId()?.toLongOrNull()
+                val userEntity = if (savedUserId != null) {
+                    userRepository.getUserById(savedUserId) ?: userRepository.getLatestUser()
+                } else {
+                    userRepository.getLatestUser()
+                }
+
+                if (userEntity != null) {
+                    val profile = UserProfile(
+                        id = userEntity.id.toString(),
+                        name = userEntity.name,
+                        email = userEntity.email,
+                        phone = userEntity.phone,
+                        joinDate = userEntity.joinDate,
+                        borrowedBooksCount = 0,
+                        totalBooksRead = 0
+                    )
+                    _uiState.update { it.copy(isLoading = false, userProfile = profile) }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Không tìm thấy thông tin người dùng."
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }

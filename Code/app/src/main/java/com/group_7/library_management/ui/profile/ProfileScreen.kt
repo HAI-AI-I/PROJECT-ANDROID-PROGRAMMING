@@ -101,7 +101,7 @@ fun ProfileContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ProfileAvatar(
-                        initial = userProfile.name.first(),
+                        initial = userProfile.name.firstOrNull() ?: 'U',
                         modifier = Modifier.size(80.dp)
                     )
 

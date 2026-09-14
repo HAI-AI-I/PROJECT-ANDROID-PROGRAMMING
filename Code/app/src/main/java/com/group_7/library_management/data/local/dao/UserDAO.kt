@@ -22,4 +22,7 @@ interface UserDAO {
 
     @Query("SELECT * FROM users WHERE id = :id AND isDeleted = 0 LIMIT 1")
     suspend fun getUserById(id: Long): UserEntity?
+
+    @Query("SELECT * FROM users WHERE isDeleted = 0 ORDER BY id DESC LIMIT 1")
+    suspend fun getLatestUser(): UserEntity?
 }

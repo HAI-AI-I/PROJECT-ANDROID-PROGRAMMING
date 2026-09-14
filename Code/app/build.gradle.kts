@@ -33,6 +33,11 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    defaultConfig {
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8386/\"")
     }
 }
 
@@ -77,10 +82,16 @@ dependencies {
 
     implementation("com.google.zxing:core:3.5.4")
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
-
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+
+    implementation("androidx.biometric:biometric:1.1.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 }

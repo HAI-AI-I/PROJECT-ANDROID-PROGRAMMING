@@ -81,6 +81,10 @@ fun UserScreen(
             AppNavigationDrawer(
                 user = userState.currentUser,
                 unreadNotificationCount = userState.unreadNotificationCount,
+                isBiometricEnabled = userState.isBiometricEnabled,
+                onToggleBiometric = { enabled ->
+                    userViewModel.toggleBiometricSetting(enabled)
+                },
                 currentRoute = currentRoute,
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }

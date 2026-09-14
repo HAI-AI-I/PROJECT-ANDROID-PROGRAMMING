@@ -3,6 +3,7 @@ package com.group_7.library_management.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group_7.library_management.data.repository.UserRepository
+import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,18 +31,60 @@ class AuthViewModel @Inject constructor(
         email: String,
         phone: String,
         password: String,
-        onSuccess: () -> Unit
+        method: RegistrationVerificationMethod,
+        onSuccess: (String) -> Unit
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val result = userRepository.registerUser(name, email, phone, password)
-            result.onSuccess {
+            val result = userRepository.sendRegistrationCode(
+                name, email, phone, password, method
+            )
+            result.onSuccess { response ->
                 _uiState.value = _uiState.value.copy(isLoading = false, isRegisterSuccess = true)
-                onSuccess()
+                onSuccess(response.registrationId)
             }.onFailure { exception ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     errorMessage = exception.message ?: "Đăng ký thất bại"
+                )
+            }
+        }
+    }
+
+    fun verifyRegistrationCode(
+        registrationId: String,
+        code: String,
+        method: RegistrationVerificationMethod,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val result = userRepository.verifyRegistrationCode(registrationId, code, method)
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                onSuccess()
+            }.onFailure { exception ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = exception.message ?: "Xác nhận mã thất bại"
+                )
+            }
+        }
+    }
+
+    fun resendRegistrationCode(
+        registrationId: String,
+        method: RegistrationVerificationMethod
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val result = userRepository.resendRegistrationCode(registrationId, method)
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(isLoading = false)
+            }.onFailure { exception ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = exception.message ?: "Không thể gửi lại mã xác nhận"
                 )
             }
         }
@@ -62,6 +105,31 @@ class AuthViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     errorMessage = exception.message ?: "Đăng nhập thất bại"
+                )
+            }
+        }
+    }
+
+    fun loginWithBiometrics(
+        savedUserId: String? = null,
+        onSuccess: (Long) -> Unit
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val userIdLong = savedUserId?.toLongOrNull()
+            val user = if (userIdLong != null) {
+                userRepository.getUserById(userIdLong) ?: userRepository.getLatestUser()
+            } else {
+                userRepository.getLatestUser()
+            }
+
+            if (user != null) {
+                _uiState.value = _uiState.value.copy(isLoading = false, loggedInUserId = user.id)
+                onSuccess(user.id)
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Chưa có tài khoản nào được lưu. Vui lòng đăng ký/đăng nhập trước."
                 )
             }
         }

@@ -15,11 +15,13 @@ import com.group_7.library_management.components.PasswordTextField
 import com.group_7.library_management.components.auth.AuthButton
 import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
+import com.group_7.library_management.components.dialogs.VerificationMethodDialog
+import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit,
+    onRegisterClick: (String, RegistrationVerificationMethod) -> Unit,
     onNavigateToLogin: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -35,6 +37,7 @@ fun RegisterScreen(
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     var errorMessage by remember { mutableStateOf("") }
+    var showVerificationMethodDialog by remember { mutableStateOf(false) }
 
     val displayError = errorMessage.ifEmpty { uiState.errorMessage ?: "" }
 
@@ -197,13 +200,7 @@ fun RegisterScreen(
 
                         else -> {
                             errorMessage = ""
-                            authViewModel.register(
-                                name = fullName,
-                                email = email,
-                                phone = sdt,
-                                password = password,
-                                onSuccess = onRegisterClick
-                            )
+                            showVerificationMethodDialog = true
                         }
                     }
                 }
@@ -220,5 +217,29 @@ fun RegisterScreen(
             )
 
         }
+    }
+
+    if (showVerificationMethodDialog) {
+        VerificationMethodDialog(
+            onDismiss = { showVerificationMethodDialog = false },
+            onConfirm = { selectedMethod ->
+                val method = if (selectedMethod == "Sdt") {
+                    RegistrationVerificationMethod.SMS
+                } else {
+                    RegistrationVerificationMethod.EMAIL
+                }
+                showVerificationMethodDialog = false
+                authViewModel.register(
+                    name = fullName,
+                    email = email,
+                    phone = sdt,
+                    password = password,
+                    method = method,
+                    onSuccess = { registrationId ->
+                        onRegisterClick(registrationId, method)
+                    }
+                )
+            }
+        )
     }
 }
