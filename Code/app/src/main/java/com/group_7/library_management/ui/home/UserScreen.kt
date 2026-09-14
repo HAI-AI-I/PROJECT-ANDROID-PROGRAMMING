@@ -30,6 +30,7 @@ import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
+import com.group_7.library_management.ui.support.addSupportNavGraph
 import com.group_7.library_management.ui.profile.ProfileViewModel
 import kotlinx.coroutines.launch
 
@@ -61,7 +62,9 @@ fun UserScreen(
         Routes.BOOKS,
         Routes.BORROW,
         Routes.PROFILE,
-        Routes.NOTIFICATIONS
+        Routes.NOTIFICATIONS,
+        Routes.FAVORITE,
+        Routes.SCAN_QR
     )
     val shouldShowBar=currentRoute in mainTabs
 
@@ -120,7 +123,14 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
-                        onBookClick = {book -> userNavController.navigate(Routes.BOOK_DETAIL)}
+                        onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onOpenQRClick = { userNavController.navigate(Routes.SCAN_QR) },
+                        onNavigateToBorrowTab = { tabKey ->
+                            userNavController.navigate(Routes.BORROW)
+                        },
+                        onNavigateToFavorite = {
+                            userNavController.navigate(Routes.FAVORITE)
+                        }
                     )
                 }
                 composable(Routes.BOOK_DETAIL) {
@@ -167,6 +177,7 @@ fun UserScreen(
                         onBack = { userNavController.popBackStack() }
                     )
                 }
+                addSupportNavGraph(userNavController)
             }
         }
     }

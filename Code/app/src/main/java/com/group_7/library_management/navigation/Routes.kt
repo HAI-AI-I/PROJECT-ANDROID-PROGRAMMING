@@ -23,6 +23,10 @@ object Routes {
     const val FAVORITE = "favorite"
     const val SETTINGS = "settings"
     const val HELP = "help"
+    const val FAQ = "faq/{topic}"
+    const val CREATE_SUPPORT_REQUEST = "create_support_request"
+    const val MY_SUPPORT_REQUESTS = "my_support_requests"
+    const val CONTACT_LIBRARIAN = "contact_librarian"
 
     // Book Flow
     const val BOOK_DETAIL = "book_detail"
