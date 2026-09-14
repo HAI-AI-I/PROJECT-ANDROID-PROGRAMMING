@@ -27,11 +27,8 @@ import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
-import android.net.Uri
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.group_7.library_management.ui.profile.ProfileScreen
-import com.group_7.library_management.ui.support.*
+import com.group_7.library_management.ui.support.addSupportNavGraph
 import kotlinx.coroutines.launch
 
 @Composable
@@ -158,52 +155,7 @@ fun UserScreen(
                         onBack = { userNavController.popBackStack() }
                     )
                 }
-                composable(Routes.HELP) {
-                    SupportScreen(
-                        onBack = { userNavController.popBackStack() },
-                        onNavigateToTopic = { topic ->
-                            userNavController.navigate("faq/${Uri.encode(topic)}")
-                        },
-                        onNavigateToContact = { userNavController.navigate(Routes.CONTACT_LIBRARIAN) },
-                        onNavigateToMyRequests = { userNavController.navigate(Routes.MY_SUPPORT_REQUESTS) }
-                    )
-                }
-                composable(
-                    route = "faq/{topic}?selectedId={selectedId}",
-                    arguments = listOf(
-                        navArgument("topic") { type = NavType.StringType },
-                        navArgument("selectedId") { type = NavType.StringType; nullable = true; defaultValue = null }
-                    )
-                ) { backStackEntry ->
-                    val topic = backStackEntry.arguments?.getString("topic") ?: "Mượn sách"
-                    val selectedId = backStackEntry.arguments?.getString("selectedId")
-                    FAQScreen(
-                        topic = topic,
-                        initialSelectedId = selectedId,
-                        onBack = { userNavController.popBackStack() }
-                    )
-                }
-                composable(Routes.CREATE_SUPPORT_REQUEST) {
-                    val supportViewModel: SupportViewModel = hiltViewModel()
-                    CreateSupportRequestScreen(
-                        viewModel = supportViewModel,
-                        onBack = { userNavController.popBackStack() },
-                        onSubmitSuccess = { userNavController.navigate(Routes.MY_SUPPORT_REQUESTS) }
-                    )
-                }
-                composable(Routes.MY_SUPPORT_REQUESTS) {
-                    val supportViewModel: SupportViewModel = hiltViewModel()
-                    MySupportRequestsScreen(
-                        viewModel = supportViewModel,
-                        onBack = { userNavController.popBackStack() }
-                    )
-                }
-                composable(Routes.CONTACT_LIBRARIAN) {
-                    ContactLibrarianScreen(
-                        onBack = { userNavController.popBackStack() },
-                        onNavigateToCreateRequest = { userNavController.navigate(Routes.CREATE_SUPPORT_REQUEST) }
-                    )
-                }
+                addSupportNavGraph(userNavController)
             }
         }
     }
