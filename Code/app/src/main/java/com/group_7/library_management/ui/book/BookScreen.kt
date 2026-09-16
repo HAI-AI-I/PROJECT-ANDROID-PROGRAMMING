@@ -74,7 +74,7 @@ fun BookScreen(
                             popUpTo(BookRoute.Detail.route) { inclusive = false }
                         }
                     },
-                    onFailure = {
+                    onFailure = { _ ->
                         navController.navigate(BookRoute.Failure.route)
                     },
                     onBack = { navController.popBackStack() }

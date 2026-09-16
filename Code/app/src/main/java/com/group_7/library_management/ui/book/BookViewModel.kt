@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group_7.library_management.data.repository.BookRepository
+import com.group_7.library_management.data.repository.BorrowRepository
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.models.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +36,8 @@ sealed interface BorrowUiState {
 @HiltViewModel
 class BookViewModel @Inject constructor(
     private val bookRepository: BookRepository,
+    private val borrowRepository: BorrowRepository,
+    private val checkLogin: CheckLogin,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val restoredFilter = BookFilterState(
@@ -187,12 +191,23 @@ class BookViewModel @Inject constructor(
     fun confirmBorrowBook(bookId: String) {
         viewModelScope.launch {
             _borrowState.value = BorrowUiState.Loading
-            val isSuccess = true
-            if (isSuccess) {
-                _borrowState.value = BorrowUiState.Success(transactionId = "TX-998823")
-            } else {
-                _borrowState.value = BorrowUiState.Error("Không thể kết nối máy chủ")
+            val userId = checkLogin.getUserId()?.toLongOrNull()
+            if (userId == null) {
+                _borrowState.value = BorrowUiState.Error("Bạn cần đăng nhập trước khi mượn sách")
+                return@launch
             }
+
+            borrowRepository.borrowBook(userId = userId, bookId = bookId)
+                .onSuccess { receipt ->
+                    _borrowState.value = BorrowUiState.Success(
+                        transactionId = "BR-${receipt.receiptId.toString().padStart(6, '0')}"
+                    )
+                }
+                .onFailure { error ->
+                    _borrowState.value = BorrowUiState.Error(
+                        error.message ?: "Không thể mượn sách"
+                    )
+                }
         }
     }
 

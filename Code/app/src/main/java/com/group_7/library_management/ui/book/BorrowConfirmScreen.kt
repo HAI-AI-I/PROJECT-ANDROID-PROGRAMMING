@@ -17,10 +17,11 @@ fun BorrowConfirmScreen(
     bookId: String,
     viewModel: BookViewModel,
     onSuccess: (String) -> Unit,
-    onFailure: () -> Unit,
+    onFailure: (String) -> Unit = {},
     onBack: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val borrowState by viewModel.borrowState.collectAsState()
 
     LaunchedEffect(borrowState) {
@@ -30,8 +31,9 @@ fun BorrowConfirmScreen(
                 onSuccess(state.transactionId)
             }
             is BorrowUiState.Error -> {
+                errorMessage = state.message
                 viewModel.resetBorrowState()
-                onFailure()
+                onFailure(state.message)
             }
             else -> {}
         }
@@ -57,6 +59,13 @@ fun BorrowConfirmScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 OutlinedTextField(
                     value = "Nguyễn Văn Nam",
                     onValueChange = {},
@@ -83,9 +92,13 @@ fun BorrowConfirmScreen(
             Button(
                 onClick = { showDialog = true },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = borrowState !is BorrowUiState.Loading,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A))
             ) {
-                Text("Xác Nhận Mượn", fontSize = 16.sp)
+                Text(
+                    if (borrowState is BorrowUiState.Loading) "Đang xử lý..." else "Xác Nhận Mượn",
+                    fontSize = 16.sp
+                )
             }
         }
     }

@@ -34,6 +34,10 @@ object Routes {
 
     // Book Flow
     const val BOOK_DETAIL = "book_detail"
+    const val CONFIRM_BORROW = "confirm_borrow/{bookId}"
+    const val BORROW_SUCCESS = "borrow_success/{transactionId}"
+    fun confirmBorrow(bookId: String) = "confirm_borrow/$bookId"
+    fun borrowSuccess(transactionId: String) = "borrow_success/$transactionId"
 
     const val DASHBOARD="dashboard"
 }

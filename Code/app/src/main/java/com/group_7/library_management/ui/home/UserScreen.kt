@@ -18,15 +18,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.book.BookDetailScreen
+import com.group_7.library_management.ui.book.BookViewModel
+import com.group_7.library_management.ui.book.BorrowConfirmScreen
+import com.group_7.library_management.ui.book.BorrowSuccessScreen
 import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
@@ -156,7 +161,46 @@ fun UserScreen(
                 composable(Routes.BOOK_DETAIL) {
                     BookDetailScreen (
                         book = selectedBook,
-                        onBack={userNavController.popBackStack()}
+                        onBack={userNavController.popBackStack()},
+                        onNavigateToBorrow = {
+                            selectedBook?.let { book ->
+                                userNavController.navigate(Routes.confirmBorrow(book.id))
+                            }
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.CONFIRM_BORROW,
+                    arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val bookId = requireNotNull(backStackEntry.arguments?.getString("bookId"))
+                    val bookViewModel: BookViewModel = hiltViewModel()
+                    BorrowConfirmScreen(
+                        bookId = bookId,
+                        viewModel = bookViewModel,
+                        onSuccess = { transactionId ->
+                            userNavController.navigate(Routes.borrowSuccess(transactionId)) {
+                                popUpTo(Routes.CONFIRM_BORROW) { inclusive = true }
+                            }
+                        },
+                        onBack = { userNavController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = Routes.BORROW_SUCCESS,
+                    arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    BorrowSuccessScreen(
+                        transactionId = requireNotNull(
+                            backStackEntry.arguments?.getString("transactionId")
+                        ),
+                        onBackToHome = {
+                            selectedBook = null
+                            userNavController.navigate(Routes.HOME) {
+                                popUpTo(userNavController.graph.findStartDestination().id)
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
                 composable(Routes.NOTIFICATIONS) {

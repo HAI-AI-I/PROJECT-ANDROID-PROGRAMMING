@@ -149,10 +149,11 @@ fun BookDetailScreen(
                             .weight(1f)
                             .height(48.dp),
                         shape = MaterialTheme.shapes.large,
+                        enabled = availableCopies > 0,
                         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                     ) {
                         Text(
-                            text = "Mượn sách",
+                            text = if (availableCopies > 0) "Mượn sách" else "Sách đã hết",
                             style= MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onPrimary
                         )

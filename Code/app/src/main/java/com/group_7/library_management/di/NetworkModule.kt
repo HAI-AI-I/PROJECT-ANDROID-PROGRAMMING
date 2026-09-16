@@ -3,6 +3,7 @@ package com.group_7.library_management.di
 import com.group_7.library_management.BuildConfig
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
+import com.group_7.library_management.data.remote.api.BorrowingApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,4 +41,9 @@ object  NetworkModule {
     @Provides
     @Singleton
     fun provideBookApi(retrofit: Retrofit): BookApi = retrofit.create(BookApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideBorrowingApi(retrofit: Retrofit): BorrowingApi =
+        retrofit.create(BorrowingApi::class.java)
 }

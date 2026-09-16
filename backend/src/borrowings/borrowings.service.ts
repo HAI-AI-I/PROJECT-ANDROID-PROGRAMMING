@@ -2,9 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBorrowingDto } from './dto/create-borrowing.dto.js';
 import { UpdateBorrowingDto } from './dto/update-borrowing.dto.js';
 import { Borrowing } from './entities/borrowing.entity.js';
+import { BooksService } from '../books/books.service.js';
 
 @Injectable()
 export class BorrowingsService {
+  constructor(private readonly booksService: BooksService) {}
+
   private readonly borrowings: Borrowing[] = [
     { id: 1, readerId: 1, bookId: 1, borrowDate: '2026-09-10', dueDate: '2026-09-17', status: 'BORROWING', note: 'Đọc trong 7 ngày' },
     { id: 2, readerId: 2, bookId: 2, borrowDate: '2026-09-01', dueDate: '2026-09-08', status: 'OVERDUE', note: 'Quá hạn 2 ngày' },
@@ -25,13 +28,14 @@ export class BorrowingsService {
   }
 
   create(dto: CreateBorrowingDto) {
+    this.booksService.borrowCopy(dto.bookId);
     const borrowing: Borrowing = {
       id: this.nextId++,
       readerId: dto.readerId,
       bookId: dto.bookId,
       borrowDate: dto.borrowDate,
       dueDate: dto.dueDate,
-      status: 'PENDING',
+      status: 'BORROWING',
       note: dto.note,
     };
     this.borrowings.unshift(borrowing);

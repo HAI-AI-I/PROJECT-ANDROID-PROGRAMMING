@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto.js';
 import { UpdateBookDto } from './dto/update-book.dto.js';
 import { Book } from './entities/book.entity.js';
@@ -243,6 +243,17 @@ export class BooksService {
   returnCopy(id: number) {
     const book = this.findOne(id);
     book.availableQuantity = Math.min(book.quantity, book.availableQuantity + 1);
+    book.status = this.getStatus(book.quantity, book.availableQuantity);
+    book.updatedAt = new Date().toISOString();
+    return book;
+  }
+
+  borrowCopy(id: number) {
+    const book = this.findOne(id);
+    if (book.availableQuantity <= 0) {
+      throw new BadRequestException('Book is unavailable');
+    }
+    book.availableQuantity -= 1;
     book.status = this.getStatus(book.quantity, book.availableQuantity);
     book.updatedAt = new Date().toISOString();
     return book;
