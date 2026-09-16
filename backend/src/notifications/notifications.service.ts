@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto.js';
 import { UpdateNotificationDto } from './dto/update-notification.dto.js';
 import { Notification } from './entities/notification.entity.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
 export class NotificationsService {
@@ -12,6 +13,16 @@ export class NotificationsService {
   ];
 
   private nextId = this.notifications.length + 1;
+
+  constructor(private readonly store: PersistentStoreService) {
+    const persisted = this.store.getCollection<Notification>('notifications', this.notifications);
+    this.notifications.splice(0, this.notifications.length, ...persisted);
+    this.nextId = Math.max(0, ...this.notifications.map((item) => item.id)) + 1;
+  }
+
+  private persist() {
+    this.store.saveCollection('notifications', this.notifications);
+  }
 
   findAll() {
     return [...this.notifications];
@@ -34,6 +45,7 @@ export class NotificationsService {
       createdAt: new Date().toISOString(),
     };
     this.notifications.unshift(item);
+    this.persist();
     return item;
   }
 
@@ -42,6 +54,7 @@ export class NotificationsService {
     if (index === -1) throw new NotFoundException('Notification not found');
     const updated = { ...this.notifications[index], ...dto };
     this.notifications[index] = updated;
+    this.persist();
     return updated;
   }
 
@@ -49,12 +62,14 @@ export class NotificationsService {
     const index = this.notifications.findIndex((item) => item.id === id);
     if (index === -1) throw new NotFoundException('Notification not found');
     const [deleted] = this.notifications.splice(index, 1);
+    this.persist();
     return deleted;
   }
 
   markRead(id: number) {
     const item = this.findOne(id);
     item.isRead = true;
+    this.persist();
     return item;
   }
 
@@ -62,6 +77,7 @@ export class NotificationsService {
     this.notifications.forEach((item) => {
       item.isRead = true;
     });
+    this.persist();
     return this.notifications;
   }
 }

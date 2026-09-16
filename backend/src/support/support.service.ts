@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSupportDto } from './dto/create-support.dto.js';
 import { UpdateSupportDto } from './dto/update-support.dto.js';
 import { SupportRequest } from './entities/support-request.entity.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
 export class SupportService {
@@ -29,6 +30,16 @@ export class SupportService {
 
   private nextId = this.supportRequests.length + 1;
 
+  constructor(private readonly store: PersistentStoreService) {
+    const persisted = this.store.getCollection<SupportRequest>('supportRequests', this.supportRequests);
+    this.supportRequests.splice(0, this.supportRequests.length, ...persisted);
+    this.nextId = Math.max(0, ...this.supportRequests.map((item) => item.id)) + 1;
+  }
+
+  private persist() {
+    this.store.saveCollection('supportRequests', this.supportRequests);
+  }
+
   findAll() {
     return [...this.supportRequests];
   }
@@ -50,6 +61,7 @@ export class SupportService {
       updatedAt: new Date().toISOString(),
     };
     this.supportRequests.unshift(item);
+    this.persist();
     return item;
   }
 
@@ -58,6 +70,7 @@ export class SupportService {
     if (index === -1) throw new NotFoundException('Support request not found');
     const updated = { ...this.supportRequests[index], ...dto, updatedAt: new Date().toISOString() };
     this.supportRequests[index] = updated;
+    this.persist();
     return updated;
   }
 
@@ -65,6 +78,7 @@ export class SupportService {
     const index = this.supportRequests.findIndex((item) => item.id === id);
     if (index === -1) throw new NotFoundException('Support request not found');
     const [deleted] = this.supportRequests.splice(index, 1);
+    this.persist();
     return deleted;
   }
 
@@ -73,6 +87,7 @@ export class SupportService {
     item.adminReply = adminReply;
     item.status = 'IN_PROGRESS';
     item.updatedAt = new Date().toISOString();
+    this.persist();
     return item;
   }
 
@@ -80,6 +95,7 @@ export class SupportService {
     const item = this.findOne(id);
     item.status = 'RESOLVED';
     item.updatedAt = new Date().toISOString();
+    this.persist();
     return item;
   }
 
@@ -87,6 +103,7 @@ export class SupportService {
     const item = this.findOne(id);
     item.status = 'CLOSED';
     item.updatedAt = new Date().toISOString();
+    this.persist();
     return item;
   }
 }

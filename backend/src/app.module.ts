@@ -13,11 +13,13 @@ import { SupportModule } from './support/support.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { StatisticsModule } from './statistics/statistics.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { PersistenceModule } from './persistence/persistence.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
+    PersistenceModule,
     ObserveModule.forRoot({
       appKey: 'YOUR_APP_KEY',
       appSecret: 'YOUR_APP_SECRET',

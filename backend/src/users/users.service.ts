@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { User } from './entities/user.entity.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +16,16 @@ export class UsersService {
   ];
 
   private nextId = this.users.length + 1;
+
+  constructor(private readonly store: PersistentStoreService) {
+    const persisted = this.store.getCollection<User>('users', this.users);
+    this.users.splice(0, this.users.length, ...persisted);
+    this.nextId = Math.max(0, ...this.users.map((item) => item.id)) + 1;
+  }
+
+  private persist() {
+    this.store.saveCollection('users', this.users);
+  }
 
   findAll(search?: string, role?: string, status?: string) {
     let items = [...this.users];
@@ -53,6 +64,7 @@ export class UsersService {
       createdAt: new Date().toISOString(),
     };
     this.users.unshift(user);
+    this.persist();
     return user;
   }
 
@@ -61,6 +73,7 @@ export class UsersService {
     if (index === -1) throw new NotFoundException('User not found');
     const updated = { ...this.users[index], ...dto };
     this.users[index] = updated;
+    this.persist();
     return updated;
   }
 
@@ -68,6 +81,7 @@ export class UsersService {
     const index = this.users.findIndex((item) => item.id === id);
     if (index === -1) throw new NotFoundException('User not found');
     const [deleted] = this.users.splice(index, 1);
+    this.persist();
     return deleted;
   }
 }

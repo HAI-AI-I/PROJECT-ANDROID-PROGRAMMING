@@ -1,11 +1,23 @@
 import { BadRequestException } from '@nestjs/common';
 import { BooksService } from '../books/books.service.js';
 import { BorrowingsService } from './borrowings.service.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 describe('BorrowingsService', () => {
   it('decrements availability and rejects a borrow when no copy remains', () => {
-    const booksService = new BooksService();
-    const service = new BorrowingsService(booksService);
+    const collections = new Map<string, unknown[]>();
+    const store = {
+      getCollection: <T>(name: string, seed: T[]) => {
+        const items = (collections.get(name) ?? structuredClone(seed)) as T[];
+        collections.set(name, items);
+        return items;
+      },
+      saveCollection: <T>(name: string, items: T[]) => {
+        collections.set(name, structuredClone(items) as unknown[]);
+      },
+    } as PersistentStoreService;
+    const booksService = new BooksService(store);
+    const service = new BorrowingsService(booksService, store);
     const book = booksService.findOne(1);
     const initialAvailability = book.availableQuantity;
 

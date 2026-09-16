@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateBookDto } from './dto/create-book.dto.js';
 import { UpdateBookDto } from './dto/update-book.dto.js';
 import { Book } from './entities/book.entity.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
 export class BooksService {
@@ -150,6 +151,16 @@ export class BooksService {
 
   private nextId = this.books.length + 1;
 
+  constructor(private readonly store: PersistentStoreService) {
+    const persisted = this.store.getCollection<Book>('books', this.books);
+    this.books.splice(0, this.books.length, ...persisted);
+    this.nextId = Math.max(0, ...this.books.map((book) => book.id)) + 1;
+  }
+
+  private persist() {
+    this.store.saveCollection('books', this.books);
+  }
+
   getStatus(quantity: number, availableQuantity: number): Book['status'] {
     if (availableQuantity <= 0) return 'out_of_stock';
     if (availableQuantity < quantity) return 'borrowed';
@@ -207,6 +218,7 @@ export class BooksService {
     };
 
     this.books.unshift(book);
+    this.persist();
     return book;
   }
 
@@ -230,6 +242,7 @@ export class BooksService {
     };
 
     this.books[index] = updated;
+    this.persist();
     return updated;
   }
 
@@ -237,6 +250,7 @@ export class BooksService {
     const index = this.books.findIndex((item) => item.id === id);
     if (index === -1) throw new NotFoundException('Book not found');
     const [deleted] = this.books.splice(index, 1);
+    this.persist();
     return deleted;
   }
 
@@ -245,6 +259,7 @@ export class BooksService {
     book.availableQuantity = Math.min(book.quantity, book.availableQuantity + 1);
     book.status = this.getStatus(book.quantity, book.availableQuantity);
     book.updatedAt = new Date().toISOString();
+    this.persist();
     return book;
   }
 
@@ -256,6 +271,7 @@ export class BooksService {
     book.availableQuantity -= 1;
     book.status = this.getStatus(book.quantity, book.availableQuantity);
     book.updatedAt = new Date().toISOString();
+    this.persist();
     return book;
   }
 }

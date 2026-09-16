@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReaderDto } from './dto/create-reader.dto.js';
 import { UpdateReaderDto } from './dto/update-reader.dto.js';
 import { Reader } from './entities/reader.entity.js';
+import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
 export class ReadersService {
@@ -16,6 +17,16 @@ export class ReadersService {
     { id: 8, userId: 8, fullName: 'Mai Thu Thảo', email: 'thao@gmail.com', phone: '0908888888', avatar: 'https://i.pravatar.cc/150?img=27', status: 'active', totalBorrowing: 7, createdAt: new Date().toISOString() },
   ];
   private nextId = this.readers.length + 1;
+
+  constructor(private readonly store: PersistentStoreService) {
+    const persisted = this.store.getCollection<Reader>('readers', this.readers);
+    this.readers.splice(0, this.readers.length, ...persisted);
+    this.nextId = Math.max(0, ...this.readers.map((item) => item.id)) + 1;
+  }
+
+  private persist() {
+    this.store.saveCollection('readers', this.readers);
+  }
 
   findAll(search?: string) {
     let items = [...this.readers];
@@ -45,6 +56,7 @@ export class ReadersService {
       createdAt: new Date().toISOString(),
     };
     this.readers.unshift(reader);
+    this.persist();
     return reader;
   }
 
@@ -53,6 +65,7 @@ export class ReadersService {
     if (index === -1) throw new NotFoundException('Reader not found');
     const updated = { ...this.readers[index], ...dto };
     this.readers[index] = updated;
+    this.persist();
     return updated;
   }
 
@@ -60,6 +73,7 @@ export class ReadersService {
     const index = this.readers.findIndex((item) => item.id === id);
     if (index === -1) throw new NotFoundException('Reader not found');
     const [deleted] = this.readers.splice(index, 1);
+    this.persist();
     return deleted;
   }
 }
