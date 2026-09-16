@@ -14,5 +14,6 @@ data class UserEntity (
     val joinDate: String,
     val isActive:Boolean=true,
     val isDeleted:Boolean=false,
+    val avatarUri: String? = null,
     val updateAt:String,
 )

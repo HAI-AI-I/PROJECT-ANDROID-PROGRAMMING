@@ -70,4 +70,61 @@ class UserRepository @Inject constructor(
     suspend fun getUserById(id: Long): UserEntity? {
         return userDao.getUserById(id)
     }
+
+    suspend fun updateUserProfile(
+        userId: Long,
+        name: String,
+        email: String,
+        phone: String,
+        avatarUri: String? = null
+    ): Result<Unit> {
+        return try {
+            val user = userDao.getUserById(userId) ?: return Result.failure(Exception("Người dùng không tồn tại"))
+
+            // Kiểm tra email/phone mới nếu có thay đổi
+            if (user.email != email) {
+                if (userDao.getUserByEmail(email) != null) return Result.failure(Exception("Email đã được sử dụng"))
+            }
+            if (user.phone != phone) {
+                if (userDao.getUserByPhone(phone) != null) return Result.failure(Exception("Số điện thoại đã được sử dụng"))
+            }
+
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val updatedUser = user.copy(
+                name = name,
+                email = email,
+                phone = phone,
+                avatarUri = avatarUri,
+                updateAt = dateFormat.format(Date())
+            )
+            userDao.updateUser(updatedUser)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun changePassword(
+        userId: Long,
+        oldPass: String,
+        newPass: String
+    ): Result<Unit> {
+        return try {
+            val user = userDao.getUserById(userId) ?: return Result.failure(Exception("Người dùng không tồn tại"))
+
+            if (user.password != oldPass) {
+                return Result.failure(Exception("Mật khẩu cũ không chính xác"))
+            }
+
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val updatedUser = user.copy(
+                password = newPass,
+                updateAt = dateFormat.format(Date())
+            )
+            userDao.updateUser(updatedUser)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

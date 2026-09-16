@@ -23,4 +23,10 @@ interface BookDAO {
 
     @Query("SELECT * FROM books ORDER BY rating DESC LIMIT :limit")
     fun getRecommendedBooks(limit: Int): Flow<List<BookEntity>>
+
+    @Query("UPDATE books SET availableCopies = availableCopies - 1 WHERE id = :bookId AND availableCopies > 0")
+    suspend fun decreaseAvailableCopies(bookId: String): Int
+
+    @Query("UPDATE books SET availableCopies = availableCopies + 1 WHERE id = :bookId")
+    suspend fun increaseAvailableCopies(bookId: String)
 }

@@ -12,14 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 data class UserProfile(
@@ -59,7 +60,16 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            if (uiState.isLoading) {
+                CircularProgressIndicator()
+            } else if (uiState.errorMessage != null) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
+                    Button(onClick = onLogoutClick) {
+                        Text("Đăng xuất")
+                    }
+                }
+            }
         }
     }
 }
@@ -101,7 +111,8 @@ fun ProfileContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ProfileAvatar(
-                        initial = userProfile.name.first(),
+                        initial = userProfile.name.firstOrNull() ?: '?',
+                        avatarUrl = userProfile.avatarUrl,
                         modifier = Modifier.size(80.dp)
                     )
 
@@ -197,6 +208,7 @@ fun ProfileContent(
 @Composable
 private fun ProfileAvatar(
     initial: Char,
+    avatarUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -205,12 +217,21 @@ private fun ProfileAvatar(
             .background(MaterialTheme.colorScheme.secondary),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = initial.toString().uppercase(),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
+        if (!avatarUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = "Avatar",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = initial.toString().uppercase(),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 

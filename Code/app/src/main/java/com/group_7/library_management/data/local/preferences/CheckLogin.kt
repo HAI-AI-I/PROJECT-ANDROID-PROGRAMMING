@@ -26,4 +26,8 @@ class CheckLogin(context: Context) {
     fun isLogin(): Boolean{
         return pref.getBoolean(key_is_logged,false)
     }
+
+    fun getUserId(): String? {
+        return pref.getString(key_is_user_id, null)
+    }
 }

@@ -28,6 +28,7 @@ import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.favorite.FavoriteScreen
+import com.group_7.library_management.ui.profile.ChangePasswordScreen
 import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.profile.ProfileViewModel
@@ -140,23 +141,23 @@ fun UserScreen(
                 composable(Routes.HISTORY) {
                     BorrowRecordListContent()
                 }
-                composable(Routes.PROFILE) { backStackEntry ->
-                    val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
+                composable(Routes.PROFILE) {
                     ProfileScreen(
-                        viewModel = profileViewModel,
                         onEditProfileClick = { userNavController.navigate(Routes.EDIT_PROFILE) },
+                        onChangePasswordClick = { userNavController.navigate(Routes.CHANGE_PASSWORD) },
                         onLogoutClick = onLogout
                     )
                 }
                 composable(Routes.EDIT_PROFILE) {
-                    val profileBackStackEntry = remember(userNavController) {
-                        userNavController.getBackStackEntry(Routes.PROFILE)
-                    }
-                    val profileViewModel: ProfileViewModel = hiltViewModel(profileBackStackEntry)
                     EditProfileScreen(
-                        viewModel = profileViewModel,
                         onNavigateBack = { userNavController.popBackStack() },
                         onSaved = { userNavController.popBackStack() }
+                    )
+                }
+                composable(Routes.CHANGE_PASSWORD) {
+                    ChangePasswordScreen(
+                        onNavigateBack = { userNavController.popBackStack() },
+                        onSaveSuccess = { userNavController.popBackStack() }
                     )
                 }
                 composable(Routes.FAVORITE) {

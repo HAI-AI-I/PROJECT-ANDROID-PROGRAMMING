@@ -5,10 +5,9 @@ import androidx.room.Room
 import com.group_7.library_management.data.local.AppDatabase
 import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
+import com.group_7.library_management.data.local.dao.BorrowReceiptDAO
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.repository.BookRepository
-import com.group_7.library_management.data.repository.NotificationRepository
-import com.group_7.library_management.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +26,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "library_management_db"
+            "library_management_db_v3"
         )
         .fallbackToDestructiveMigration(true)
         .build()
@@ -50,19 +49,12 @@ object DatabaseModule {
     }
 
     @Provides
-    @Singleton
-    fun provideNotificationRepository(notificationDao: NotificationDAO): NotificationRepository {
-        return NotificationRepository(notificationDao)
-    }
-
-    @Provides
     fun provideUserDao(database: AppDatabase): UserDAO {
         return database.getUserDao()
     }
 
     @Provides
-    @Singleton
-    fun provideUserRepository(userDao: UserDAO): UserRepository {
-        return UserRepository(userDao)
+    fun provideBorrowReceiptDao(database: AppDatabase): BorrowReceiptDAO {
+        return database.getBorrowReceiptDao()
     }
 }
