@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -46,11 +47,12 @@ fun UserScreen(
 
     val navBackStackEntry by userNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
+    val pendingBookFilter = remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
 
     val navigateTab: (String) -> Unit = { route ->
         userNavController.navigate(route) {
-            popUpTo(route) {
-                inclusive = true
+            popUpTo(userNavController.graph.findStartDestination().id) {
+                saveState = true
             }
             launchSingleTop = true
             restoreState = true
@@ -128,6 +130,10 @@ fun UserScreen(
                 composable(Routes.HOME) {
                     HomeScreen(
                         onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onViewAllClick = { filter ->
+                            pendingBookFilter.value = filter
+                            navigateTab(Routes.BOOKS)
+                        },
                         onOpenQRClick = { userNavController.navigate(Routes.SCAN_QR) },
                         onNavigateToBorrowTab = { tabKey ->
                             userNavController.navigate(Routes.BORROW)
@@ -146,7 +152,10 @@ fun UserScreen(
                     NotificationsContent()
                 }
                 composable(Routes.BOOKS) {
-                    BookListScreen()
+                    BookListScreen(
+                        initialFilter = pendingBookFilter.value,
+                        onInitialFilterApplied = { pendingBookFilter.value = null }
+                    )
                 }
                 composable(Routes.BORROW) {
                     BorrowRecordListContent()
