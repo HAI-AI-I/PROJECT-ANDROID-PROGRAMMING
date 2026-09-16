@@ -3,8 +3,8 @@ package com.group_7.library_management.data.remote.dto
 data class CreateBorrowingRequestDto(
     val readerId: Long,
     val bookId: Long,
-    val borrowDate: String,
-    val dueDate: String,
+    val borrowDate: String? = null,
+    val loanDays: Int = 14,
     val note: String? = null
 )
 

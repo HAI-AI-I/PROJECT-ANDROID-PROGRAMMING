@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.Calendar
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
@@ -31,14 +31,11 @@ class BorrowRepository @Inject constructor(
         return try {
             val numericBookId = bookId.toLongOrNull()
                 ?: return Result.failure(IllegalArgumentException("Mã sách không hợp lệ"))
-            val serverBorrowDate = LocalDate.now()
-            val serverDueDate = serverBorrowDate.plusDays(durationDays.toLong())
             val remoteBorrowing = borrowingApi.borrow(
                 CreateBorrowingRequestDto(
                     readerId = userId,
                     bookId = numericBookId,
-                    borrowDate = serverBorrowDate.toString(),
-                    dueDate = serverDueDate.toString(),
+                    loanDays = durationDays,
                     note = "Borrowed from Android app"
                 )
             )
@@ -48,11 +45,11 @@ class BorrowRepository @Inject constructor(
                 // Keep the Room cache in sync when the book is present locally.
                 bookDao.decreaseAvailableCopies(bookId)
 
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val calendar = Calendar.getInstance()
-                val borrowDate = dateFormat.format(calendar.time)
-                calendar.add(Calendar.DAY_OF_YEAR, durationDays)
-                val dueDate = dateFormat.format(calendar.time)
+                val displayDateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                val borrowDate = LocalDate.parse(remoteBorrowing.borrowDate)
+                    .format(displayDateFormat)
+                val dueDate = LocalDate.parse(remoteBorrowing.dueDate)
+                    .format(displayDateFormat)
 
                 val newReceipt = BorrowReceiptEntity(
                     userId = userId,

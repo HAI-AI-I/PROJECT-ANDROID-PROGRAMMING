@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { CreateBorrowingDto } from './dto/create-borrowing.dto.js';
 import { UpdateBorrowingDto } from './dto/update-borrowing.dto.js';
 import { Borrowing } from './entities/borrowing.entity.js';
@@ -6,7 +6,7 @@ import { BooksService } from '../books/books.service.js';
 import { PersistentStoreService } from '../persistence/persistent-store.service.js';
 
 @Injectable()
-export class BorrowingsService {
+export class BorrowingsService implements OnModuleInit, OnModuleDestroy {
   private readonly borrowings: Borrowing[] = [
     { id: 1, readerId: 1, bookId: 1, borrowDate: '2026-09-10', dueDate: '2026-09-17', status: 'BORROWING', note: 'Đọc trong 7 ngày' },
     { id: 2, readerId: 2, bookId: 2, borrowDate: '2026-09-01', dueDate: '2026-09-08', status: 'OVERDUE', note: 'Quá hạn 2 ngày' },
@@ -15,6 +15,7 @@ export class BorrowingsService {
   ];
 
   private nextId = this.borrowings.length + 1;
+  private overdueTimer?: NodeJS.Timeout;
 
   constructor(
     private readonly booksService: BooksService,
@@ -23,6 +24,19 @@ export class BorrowingsService {
     const persisted = this.store.getCollection<Borrowing>('borrowings', this.borrowings);
     this.borrowings.splice(0, this.borrowings.length, ...persisted);
     this.nextId = Math.max(0, ...this.borrowings.map((item) => item.id)) + 1;
+    this.refreshOverdueStatuses();
+  }
+
+  onModuleInit() {
+    this.overdueTimer = setInterval(
+      () => this.refreshOverdueStatuses(),
+      60_000,
+    );
+    this.overdueTimer.unref();
+  }
+
+  onModuleDestroy() {
+    if (this.overdueTimer) clearInterval(this.overdueTimer);
   }
 
   private persist() {
@@ -30,10 +44,12 @@ export class BorrowingsService {
   }
 
   findAll() {
+    this.refreshOverdueStatuses();
     return [...this.borrowings];
   }
 
   findOne(id: number) {
+    this.refreshOverdueStatuses();
     const borrowing = this.borrowings.find((item) => item.id === id);
     if (!borrowing) throw new NotFoundException('Borrowing not found');
     return borrowing;
@@ -41,13 +57,15 @@ export class BorrowingsService {
 
   create(dto: CreateBorrowingDto) {
     this.booksService.borrowCopy(dto.bookId);
+    const borrowDate = dto.borrowDate?.slice(0, 10) ?? this.today();
+    const dueDate = this.addDays(borrowDate, dto.loanDays ?? 14);
     const borrowing: Borrowing = {
       id: this.nextId++,
       readerId: dto.readerId,
       bookId: dto.bookId,
-      borrowDate: dto.borrowDate,
-      dueDate: dto.dueDate,
-      status: 'BORROWING',
+      borrowDate,
+      dueDate,
+      status: dueDate < this.today() ? 'OVERDUE' : 'BORROWING',
       note: dto.note,
     };
     this.borrowings.unshift(borrowing);
@@ -75,6 +93,7 @@ export class BorrowingsService {
   approve(id: number) {
     const item = this.findOne(id);
     item.status = 'BORROWING';
+    if (item.dueDate < this.today()) item.status = 'OVERDUE';
     this.persist();
     return item;
   }
@@ -92,5 +111,27 @@ export class BorrowingsService {
     item.returnDate = returnDate;
     this.persist();
     return item;
+  }
+
+  private refreshOverdueStatuses() {
+    const today = this.today();
+    let changed = false;
+    this.borrowings.forEach((item) => {
+      if (item.status === 'BORROWING' && item.dueDate < today) {
+        item.status = 'OVERDUE';
+        changed = true;
+      }
+    });
+    if (changed) this.persist();
+  }
+
+  private today() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private addDays(date: string, days: number) {
+    const value = new Date(`${date}T00:00:00.000Z`);
+    value.setUTCDate(value.getUTCDate() + days);
+    return value.toISOString().slice(0, 10);
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class CreateBorrowingDto {
   @IsNotEmpty()
@@ -7,13 +7,15 @@ export class CreateBorrowingDto {
   @IsNotEmpty()
   bookId: number;
 
-  @IsString()
-  @IsNotEmpty()
-  borrowDate: string;
+  @IsOptional()
+  @IsDateString()
+  borrowDate?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  dueDate: string;
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(90)
+  loanDays?: number;
 
   @IsOptional()
   @IsString()
