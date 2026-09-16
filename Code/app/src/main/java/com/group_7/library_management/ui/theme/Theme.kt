@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 private val LibraryColorScheme = lightColorScheme(
 
     primary = PrimaryBlue,
+    primaryContainer = Color(0xFFDCE7FF),
+    onPrimaryContainer = Color(0xFF102A56),
 
     secondary = SecondaryBlue,
 

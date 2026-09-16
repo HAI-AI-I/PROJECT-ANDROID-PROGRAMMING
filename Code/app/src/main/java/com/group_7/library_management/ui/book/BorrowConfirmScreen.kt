@@ -1,15 +1,22 @@
 package com.group_7.library_management.ui.book
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,71 +48,120 @@ fun BorrowConfirmScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Xác Nhận Mượn Sách", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Xác nhận mượn sách",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
+        },
+        bottomBar = {
+            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 10.dp) {
+                Button(
+                    onClick = { showDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                        .height(54.dp),
+                    enabled = borrowState !is BorrowUiState.Loading,
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    if (borrowState is BorrowUiState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(Modifier.width(10.dp))
+                    }
+                    Text(
+                        if (borrowState is BorrowUiState.Loading) "Đang xử lý" else "Xác nhận mượn",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                errorMessage?.let { message ->
-                    Text(
-                        text = message,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+            Text(
+                text = "Kiểm tra thông tin",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Vui lòng kiểm tra thông tin trước khi xác nhận. Hạn trả được hệ thống tự động tính.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            errorMessage?.let { message ->
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Outlined.Info, contentDescription = null)
+                        Spacer(Modifier.width(10.dp))
+                        Text(message, style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
-                OutlinedTextField(
-                    value = formState.borrowerName,
-                    onValueChange = {},
-                    label = { Text("NGƯỜI MƯỢN") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false
-                )
-                OutlinedTextField(
-                    value = formState.borrowDate,
-                    onValueChange = {},
-                    label = { Text("NGÀY MƯỢN") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false
-                )
-                OutlinedTextField(
-                    value = formState.dueDate,
-                    onValueChange = {},
-                    label = { Text("HẠN TRẢ (${formState.loanDays} NGÀY)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false
-                )
-                OutlinedTextField(
-                    value = "Thư viện UTH - Cơ sở 1",
-                    onValueChange = {},
-                    label = { Text("ĐỊA ĐIỂM NHẬN SÁCH") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false
-                )
             }
 
-            Button(
-                onClick = { showDialog = true },
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = borrowState !is BorrowUiState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A))
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)) {
+                    BorrowInfoRow(Icons.Default.Person, "Người mượn", formState.borrowerName)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    BorrowInfoRow(Icons.Default.CalendarMonth, "Ngày mượn", formState.borrowDate)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    BorrowInfoRow(
+                        Icons.Default.EventAvailable,
+                        "Hạn trả (${formState.loanDays} ngày)",
+                        formState.dueDate,
+                        emphasize = true
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    BorrowInfoRow(Icons.Default.LocationOn, "Nơi nhận sách", "Thư viện UTH - Cơ sở 1")
+                }
+            }
+
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
-                    if (borrowState is BorrowUiState.Loading) "Đang xử lý..." else "Xác Nhận Mượn",
-                    fontSize = 16.sp
+                    text = "Bạn có thể trả sách trước hạn tại quầy thư viện.",
+                    modifier = Modifier.padding(14.dp),
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -132,5 +188,50 @@ fun BorrowConfirmScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun BorrowInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    emphasize: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(42.dp),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (emphasize) FontWeight.Bold else FontWeight.Medium,
+                color = if (emphasize) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }

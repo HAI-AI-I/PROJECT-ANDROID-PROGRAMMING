@@ -4,12 +4,12 @@ import androidx.compose.ui.graphics.Color
 
 
 val MidnightNavy = Color(0xFF172554)
-val PrimaryBlue = Color(0xFF1A237E)
-val SecondaryBlue = Color(0xFF3B82F6)
+val PrimaryBlue = Color(0xFF173B73)
+val SecondaryBlue = Color(0xFF2F6FED)
 
 val SecondaryContainerBlue=Color(0xFF8596FF)
 val OnSecondaryContainerBlue= Color(0xFF11278E)
-val Background = Color(0xFFF5F5F5)
+val Background = Color(0xFFF6F8FC)
 val Surface = Color(0xFFFFFFFF)
 val SurfaceVariant = Color(0xFFF1F5F9)
 val TextPrimary = Color(0xFF1B1C1C)
