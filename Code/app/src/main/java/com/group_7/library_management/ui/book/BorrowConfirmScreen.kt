@@ -23,6 +23,7 @@ fun BorrowConfirmScreen(
     var showDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val borrowState by viewModel.borrowState.collectAsState()
+    val formState by viewModel.borrowFormState.collectAsState()
 
     LaunchedEffect(borrowState) {
         when (val state = borrowState) {
@@ -67,16 +68,23 @@ fun BorrowConfirmScreen(
                     )
                 }
                 OutlinedTextField(
-                    value = "Nguyễn Văn Nam",
+                    value = formState.borrowerName,
                     onValueChange = {},
                     label = { Text("NGƯỜI MƯỢN") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = false
                 )
                 OutlinedTextField(
-                    value = "24/05/2024",
+                    value = formState.borrowDate,
                     onValueChange = {},
                     label = { Text("NGÀY MƯỢN") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = false
+                )
+                OutlinedTextField(
+                    value = formState.dueDate,
+                    onValueChange = {},
+                    label = { Text("HẠN TRẢ (${formState.loanDays} NGÀY)") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = false
                 )

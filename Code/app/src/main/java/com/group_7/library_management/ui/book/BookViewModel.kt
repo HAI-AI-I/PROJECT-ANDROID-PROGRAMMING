@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.BorrowRepository
+import com.group_7.library_management.data.repository.UserRepository
 import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.models.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class BookListUiState(
@@ -33,10 +36,22 @@ sealed interface BorrowUiState {
     data class Error(val message: String) : BorrowUiState
 }
 
+data class BorrowFormUiState(
+    val borrowerName: String = "Đang tải...",
+    val borrowDate: String = LocalDate.now().format(DISPLAY_DATE_FORMAT),
+    val dueDate: String = LocalDate.now().plusDays(DEFAULT_LOAN_DAYS.toLong())
+        .format(DISPLAY_DATE_FORMAT),
+    val loanDays: Int = DEFAULT_LOAN_DAYS
+)
+
+private const val DEFAULT_LOAN_DAYS = 14
+private val DISPLAY_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 @HiltViewModel
 class BookViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val borrowRepository: BorrowRepository,
+    private val userRepository: UserRepository,
     private val checkLogin: CheckLogin,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -59,9 +74,23 @@ class BookViewModel @Inject constructor(
     val uiState:StateFlow<BookListUiState> = _uiState.asStateFlow()
     private val _borrowState = MutableStateFlow<BorrowUiState>(BorrowUiState.Idle)
     val borrowState: StateFlow<BorrowUiState> = _borrowState
+    private val _borrowFormState = MutableStateFlow(BorrowFormUiState())
+    val borrowFormState: StateFlow<BorrowFormUiState> = _borrowFormState.asStateFlow()
 
     init{
         loadBooks()
+        loadBorrower()
+    }
+
+    private fun loadBorrower() {
+        viewModelScope.launch {
+            val userId = checkLogin.getUserId()?.toLongOrNull()
+            val user = userId?.let { userRepository.getUserById(it) }
+                ?: userRepository.getLatestUser()
+            _borrowFormState.update {
+                it.copy(borrowerName = user?.name ?: "Chưa xác định người mượn")
+            }
+        }
     }
 
     private fun loadBooks() {
@@ -197,7 +226,11 @@ class BookViewModel @Inject constructor(
                 return@launch
             }
 
-            borrowRepository.borrowBook(userId = userId, bookId = bookId)
+            borrowRepository.borrowBook(
+                userId = userId,
+                bookId = bookId,
+                durationDays = _borrowFormState.value.loanDays
+            )
                 .onSuccess { receipt ->
                     _borrowState.value = BorrowUiState.Success(
                         transactionId = "BR-${receipt.receiptId.toString().padStart(6, '0')}"
