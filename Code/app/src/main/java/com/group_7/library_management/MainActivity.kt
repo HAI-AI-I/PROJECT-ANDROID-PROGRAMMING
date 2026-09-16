@@ -37,12 +37,12 @@ class MainActivity : FragmentActivity() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val sampleBooks = listOf(
-                    BookEntity("1", "Clean Architecture", "Robert C. Martin", "Lập trình", 180000, 2, 4.8, System.currentTimeMillis(), 100),
-                    BookEntity("2", "Design Patterns", "Gang of Four", "Lập trình", 150000, 5, 4.7, System.currentTimeMillis() - 86400000, 80),
-                    BookEntity("3", "Kotlin in Action", "Dmitry Jemerov", "Lập trình", 120000, 1, 4.9, System.currentTimeMillis() - 172800000, 120),
-                    BookEntity("4", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", 150000, 3, 4.6, System.currentTimeMillis(), 50),
-                    BookEntity("5", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", 120000, 0, 4.3, System.currentTimeMillis(), 30),
-                    BookEntity("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", 100000, 5, 4.5, System.currentTimeMillis(), 40)
+                    BookEntity("1", "Clean Architecture", "Robert C. Martin", "Lập trình", null, 180000, 2, 4.8, System.currentTimeMillis(), 100, 100),
+                    BookEntity("2", "Design Patterns", "Gang of Four", "Lập trình", null, 150000, 5, 4.7, System.currentTimeMillis() - 86400000, 80, 80),
+                    BookEntity("3", "Kotlin in Action", "Dmitry Jemerov", "Lập trình", null, 120000, 1, 4.9, System.currentTimeMillis() - 172800000, 120, 120),
+                    BookEntity("4", "Cấu trúc dữ liệu và giải thuật nâng cao", "Nguyễn Văn A", "Lập trình", null, 150000, 3, 4.6, System.currentTimeMillis(), 50, 50),
+                    BookEntity("5", "Hệ quản trị cơ sở dữ liệu quan hệ", "Trần Thị B", "Cơ sở dữ liệu", null, 120000, 0, 4.3, System.currentTimeMillis(), 30, 30),
+                    BookEntity("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", null, 100000, 5, 4.5, System.currentTimeMillis(), 40, 40)
                 )
                 bookDao.insertBooks(sampleBooks)
 

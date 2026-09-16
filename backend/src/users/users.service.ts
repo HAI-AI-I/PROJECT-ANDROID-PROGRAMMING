@@ -33,6 +33,14 @@ export class UsersService {
     return user;
   }
 
+  findByIdentifier(identifier: string) {
+    const normalized = identifier.trim().toLowerCase();
+    return this.users.find(
+      (user) =>
+        user.email.toLowerCase() === normalized || user.phone === normalized,
+    );
+  }
+
   create(dto: CreateUserDto) {
     const user: User = {
       id: this.nextId++,

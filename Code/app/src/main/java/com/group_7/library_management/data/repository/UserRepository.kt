@@ -14,8 +14,11 @@ import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
@@ -136,7 +139,7 @@ class UserRepository @Inject constructor(
 
         if (exception is IOException) {
             return Exception(
-                "Không thể kết nối tới máy chủ. Hãy kiểm tra Spring Boot đang chạy ở cổng 8386."
+                "Không thể kết nối tới máy chủ NestJS. Hãy kiểm tra backend đang chạy ở cổng 3001 và thiết bị cùng mạng với máy tính."
             )
         }
 

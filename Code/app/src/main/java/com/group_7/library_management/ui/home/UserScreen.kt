@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +36,7 @@ import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.support.addSupportNavGraph
 import com.group_7.library_management.ui.profile.ProfileViewModel
+import com.group_7.library_management.models.Book
 import kotlinx.coroutines.launch
 
 @Composable
@@ -49,6 +52,12 @@ fun UserScreen(
     val navBackStackEntry by userNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
     val pendingBookFilter = remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var selectedBook by remember { mutableStateOf<Book?>(null) }
+
+    val openBookDetail: (Book) -> Unit = { book ->
+        selectedBook = book
+        userNavController.navigate(Routes.BOOK_DETAIL)
+    }
 
     val navigateTab: (String) -> Unit = { route ->
         userNavController.navigate(route) {
@@ -130,7 +139,7 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
-                        onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onBookClick = openBookDetail,
                         onViewAllClick = { filter ->
                             pendingBookFilter.value = filter
                             navigateTab(Routes.BOOKS)
@@ -146,6 +155,7 @@ fun UserScreen(
                 }
                 composable(Routes.BOOK_DETAIL) {
                     BookDetailScreen (
+                        book = selectedBook,
                         onBack={userNavController.popBackStack()}
                     )
                 }
@@ -155,7 +165,8 @@ fun UserScreen(
                 composable(Routes.BOOKS) {
                     BookListScreen(
                         initialFilter = pendingBookFilter.value,
-                        onInitialFilterApplied = { pendingBookFilter.value = null }
+                        onInitialFilterApplied = { pendingBookFilter.value = null },
+                        onBookClick = openBookDetail
                     )
                 }
                 composable(Routes.BORROW) {

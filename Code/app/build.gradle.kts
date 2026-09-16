@@ -37,8 +37,8 @@ android {
     }
 
     defaultConfig {
-//        buildConfigField("String", "API_BASE_URL", "\"http://192.168.80.24:8386/\"")
-       buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8386/\"")
+       // Cùng một APK dùng được trên máy ảo và điện thoại thật trong cùng mạng LAN.
+       buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.34:3001/\"")
     }
 }
 

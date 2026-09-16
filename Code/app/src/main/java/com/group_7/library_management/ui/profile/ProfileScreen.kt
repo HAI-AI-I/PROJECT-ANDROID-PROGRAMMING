@@ -45,31 +45,73 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-    ) { paddingValues ->
-        uiState.userProfile?.let { profile ->
-            ProfileContent(
+    Scaffold { paddingValues ->
+        when {
+            uiState.isLoading -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            uiState.userProfile != null -> ProfileContent(
                 modifier = Modifier.padding(paddingValues),
-                userProfile = profile,
+                userProfile = requireNotNull(uiState.userProfile),
                 onEditProfileClick = onEditProfileClick,
                 onChangePasswordClick = onChangePasswordClick,
                 onSettingsClick = onSettingsClick,
                 onLogoutClick = onLogoutClick
             )
-        } ?: Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else if (uiState.errorMessage != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
-                    Button(onClick = onLogoutClick) {
-                        Text("Đăng xuất")
-                    }
-                }
-            }
+            else -> ProfileLoadError(
+                message = uiState.errorMessage ?: "Không thể tải hồ sơ cá nhân.",
+                onRetry = viewModel::loadUserProfile,
+                onLogout = onLogoutClick,
+                modifier = Modifier.padding(paddingValues)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileLoadError(
+    message: String,
+    onRetry: () -> Unit,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(LibrarySpacing.Large),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.PersonOff,
+            contentDescription = null,
+            modifier = Modifier.size(56.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+        Text(
+            text = "Không tải được hồ sơ",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(LibrarySpacing.Small))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(LibrarySpacing.Large))
+        Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+            Text("Thử lại")
+        }
+        TextButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
+            Text("Đăng xuất và đăng nhập lại")
         }
     }
 }
