@@ -1,5 +1,10 @@
 package com.group_7.library_management.ui.book
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,12 +41,17 @@ import coil.compose.AsyncImage
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.group_7.library_management.R
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.StarColor
 import com.group_7.library_management.ui.theme.WarningColor
+import com.group_7.library_management.notifications.BookAvailabilityNotifier
+import com.group_7.library_management.notifications.LibraryNotificationManager
+import android.widget.Toast
 
 @Composable
 fun BookDetailScreen(
@@ -62,6 +72,34 @@ fun BookDetailScreen(
     val borrowFee = book?.borrowFee ?: 150000
 
     var isFav by remember(isFavorite) { mutableStateOf(isFavorite) }
+    val context = LocalContext.current
+    val bookId = book?.id ?: "1"
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            BookAvailabilityNotifier.subscribe(context, bookId, title)
+            LibraryNotificationManager.showTrackingEnabled(context, bookId, title)
+            Toast.makeText(context, "Đã bật thông báo cho sách này", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Cần cho phép thông báo trong Cài đặt", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    val subscribeForAvailability = {
+        if (availableCopies > 0) {
+            Toast.makeText(context, "Sách đang có sẵn, bạn có thể mượn ngay", Toast.LENGTH_SHORT).show()
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            BookAvailabilityNotifier.subscribe(context, bookId, title)
+            LibraryNotificationManager.showTrackingEnabled(context, bookId, title)
+            Toast.makeText(context, "Đã bật thông báo cho sách này", Toast.LENGTH_SHORT).show()
+        } else {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -92,14 +130,14 @@ fun BookDetailScreen(
                 ) {
                     // Nút Chuông góc trái
                     OutlinedIconButton(
-                        onClick = { },
+                        onClick = subscribeForAvailability,
                         modifier = Modifier.size(48.dp),
                         shape = CircleShape,
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Notifications,
-                            contentDescription = "Notification",
+                            contentDescription = "Báo khi sách có sẵn",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -161,12 +199,12 @@ fun BookDetailScreen(
                         .padding(LibrarySpacing.Large)
                 ) {
                     Text(
-                        text = "Clean Code",
+                        text = title,
                         style= MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "Robert C. Martin",
+                        text = author,
                         style= MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.secondaryContainer
                     )
@@ -238,7 +276,11 @@ fun BookDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Sẵn có (3 / 10 bản)",
+                                    text = if (availableCopies > 0) {
+                                        "Sẵn có ($availableCopies / $totalCopies bản)"
+                                    } else {
+                                        "Đang hết sách - nhấn chuông để được báo"
+                                    },
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0A1268)

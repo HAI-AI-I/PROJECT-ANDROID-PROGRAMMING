@@ -36,7 +36,9 @@ fun ConfirmCodeScreen(
     onNavigateBack: () -> Unit = {},
     onSubmit: (String) -> Unit = {},
     onResendCode: () -> Unit = {},
-    isEmail: Boolean=true
+    isEmail: Boolean = true,
+    isLoading: Boolean = false,
+    errorMessage: String? = null
 ) {
     val focusRequesters = remember { List(6) { FocusRequester() } }
     var otpCode by remember { mutableStateOf(List(6) { "" }) }
@@ -109,14 +111,25 @@ fun ConfirmCodeScreen(
 
             Spacer(modifier = Modifier.height(LibrarySpacing.ExtraLarge))
 
+            if (!errorMessage.isNullOrBlank()) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = LibrarySpacing.Medium)
+                )
+            }
+
             AuthButton(
-                text ="XÁC NHẬN",
+                text = if (isLoading) "ĐANG XỬ LÝ..." else "XÁC NHẬN",
                 onClick = {
                     if (isComplete) {
                         onSubmit(otpCode.joinToString(""))
                     }
                 },
-                enabled = isComplete
+                enabled = isComplete && !isLoading
             )
 
             Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
@@ -125,7 +138,9 @@ fun ConfirmCodeScreen(
             AuthFooter(
                 descriptionText = "",
                 actionText = "Gửi lại mã",
-                onActionClick = onResendCode
+                onActionClick = {
+                    if (!isLoading) onResendCode()
+                }
             )
         }
     }

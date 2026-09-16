@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.group_7.library_management.data.local.preferences.CheckLogin
+import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import com.group_7.library_management.ui.auth.ConfirmCodeRegisAuthScreen
 import com.group_7.library_management.ui.auth.ConfirmCodeResetAuthScreen
 import com.group_7.library_management.ui.auth.ForgotPasswordScreen
@@ -33,12 +34,11 @@ fun AppNavHost(
         composable(route = Routes.SPLASH) {
             SplashScreen(
                 onNext = {
-                    if(checkLogin.isLogin()){
-                        navController.navigate(Routes.HOME){
-                            popUpTo (Routes.SPLASH){inclusive=true}
+                    if (checkLogin.isLogin()) {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
                         }
-                    }
-                    else{
+                    } else {
                         navController.navigate(Routes.LOGIN) {
                             popUpTo(Routes.SPLASH) { inclusive = true }
                         }
@@ -65,8 +65,10 @@ fun AppNavHost(
         }
         composable(route = Routes.REGISTER) {
             RegisterScreen(
-                onRegisterClick = {
-                    navController.navigate(Routes.CONFIRM_CODE_REGIS_AUTH)
+                onRegisterClick = { registrationId, method ->
+                    navController.navigate(
+                        Routes.confirmRegistration(registrationId, method.name)
+                    )
                 },
                 onNavigateToLogin = {
                     navController.popBackStack()
@@ -95,12 +97,25 @@ fun AppNavHost(
                 }
             )
         }
-        composable(route= Routes.CONFIRM_CODE_REGIS_AUTH){
+        composable(route = Routes.CONFIRM_CODE_REGIS_AUTH) { backStackEntry ->
+            val registrationId = backStackEntry.arguments
+                ?.getString("registrationId")
+                .orEmpty()
+            val verificationMethod = runCatching {
+                RegistrationVerificationMethod.valueOf(
+                    backStackEntry.arguments
+                        ?.getString("verificationMethod")
+                        .orEmpty()
+                )
+            }.getOrDefault(RegistrationVerificationMethod.EMAIL)
             ConfirmCodeRegisAuthScreen(
+                registrationId = registrationId,
+                method = verificationMethod,
                 onNavigateBack = {navController.popBackStack()},
-                onSubmit = {
+                onSuccess = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) { inclusive = true }
+                        popUpTo(Routes.LOGIN) { inclusive = false }
+                        launchSingleTop = true
                     }
                 }
             )

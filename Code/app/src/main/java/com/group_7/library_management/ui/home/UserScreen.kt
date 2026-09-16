@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,6 +32,7 @@ import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.ChangePasswordScreen
 import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
+import com.group_7.library_management.ui.support.addSupportNavGraph
 import com.group_7.library_management.ui.profile.ProfileViewModel
 import kotlinx.coroutines.launch
 
@@ -46,11 +48,12 @@ fun UserScreen(
 
     val navBackStackEntry by userNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
+    val pendingBookFilter = remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
 
     val navigateTab: (String) -> Unit = { route ->
         userNavController.navigate(route) {
-            popUpTo(route) {
-                inclusive = true
+            popUpTo(userNavController.graph.findStartDestination().id) {
+                saveState = true
             }
             launchSingleTop = true
             restoreState = true
@@ -62,7 +65,9 @@ fun UserScreen(
         Routes.BOOKS,
         Routes.BORROW,
         Routes.PROFILE,
-        Routes.NOTIFICATIONS
+        Routes.NOTIFICATIONS,
+        Routes.FAVORITE,
+        Routes.SCAN_QR
     )
     val shouldShowBar=currentRoute in mainTabs
 
@@ -79,6 +84,10 @@ fun UserScreen(
             AppNavigationDrawer(
                 user = userState.currentUser,
                 unreadNotificationCount = userState.unreadNotificationCount,
+                isBiometricEnabled = userState.isBiometricEnabled,
+                onToggleBiometric = { enabled ->
+                    userViewModel.toggleBiometricSetting(enabled)
+                },
                 currentRoute = currentRoute,
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
@@ -121,7 +130,18 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
-                        onBookClick = {book -> userNavController.navigate(Routes.BOOK_DETAIL)}
+                        onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onViewAllClick = { filter ->
+                            pendingBookFilter.value = filter
+                            navigateTab(Routes.BOOKS)
+                        },
+                        onOpenQRClick = { userNavController.navigate(Routes.SCAN_QR) },
+                        onNavigateToBorrowTab = { tabKey ->
+                            userNavController.navigate(Routes.BORROW)
+                        },
+                        onNavigateToFavorite = {
+                            userNavController.navigate(Routes.FAVORITE)
+                        }
                     )
                 }
                 composable(Routes.BOOK_DETAIL) {
@@ -133,7 +153,10 @@ fun UserScreen(
                     NotificationsContent()
                 }
                 composable(Routes.BOOKS) {
-                    BookListScreen()
+                    BookListScreen(
+                        initialFilter = pendingBookFilter.value,
+                        onInitialFilterApplied = { pendingBookFilter.value = null }
+                    )
                 }
                 composable(Routes.BORROW) {
                     BorrowRecordListContent()
@@ -168,6 +191,7 @@ fun UserScreen(
                         onBack = { userNavController.popBackStack() }
                     )
                 }
+                addSupportNavGraph(userNavController)
             }
         }
     }

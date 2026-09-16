@@ -11,5 +11,6 @@ data class Book(
     val availableCopies: Int = 0,  // 0 = đang hết, "Sẵn có (N bản)" khi > 0
     val rating: Double = 0.0,
     val createdAt:Long=0,
-    val viewCount:Int=0,
+    val ratingCount:Int=0,
+    val popularityScore:Long=0,
 )

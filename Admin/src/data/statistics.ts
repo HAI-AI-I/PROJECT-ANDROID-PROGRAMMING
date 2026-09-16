@@ -1,0 +1,42 @@
+export const statisticsData = {
+  totalBorrows: 3842,
+  totalReturns: 3516,
+  overdueBooks: 18,
+  popularBooks: [
+    { title: "Clean Code", count: 156 },
+    { title: "Design Patterns", count: 142 },
+    { title: "Clean Architecture", count: 128 },
+    { title: "Kotlin in Action", count: 98 },
+    { title: "Mạng máy tính căn bản", count: 87 },
+  ],
+  activeReaders: [
+    { name: "Nguyễn Văn A", count: 24 },
+    { name: "Trần Thị B", count: 19 },
+    { name: "Lê Văn C", count: 16 },
+    { name: "Phạm Thị D", count: 14 },
+    { name: "Hoàng Văn E", count: 12 },
+  ],
+  booksByCategory: [
+    { category: "Lập trình", count: 520 },
+    { category: "Cơ sở dữ liệu", count: 180 },
+    { category: "Mạng máy tính", count: 150 },
+    { category: "Khoa học", count: 220 },
+    { category: "Văn học", count: 180 },
+  ],
+  returnTrend: [
+    { month: "T4", count: 280 },
+    { month: "T5", count: 310 },
+    { month: "T6", count: 295 },
+    { month: "T7", count: 340 },
+    { month: "T8", count: 360 },
+    { month: "T9", count: 320 },
+  ],
+  borrowTrend: [
+    { month: "T4", count: 300 },
+    { month: "T5", count: 330 },
+    { month: "T6", count: 310 },
+    { month: "T7", count: 370 },
+    { month: "T8", count: 390 },
+    { month: "T9", count: 350 },
+  ],
+};

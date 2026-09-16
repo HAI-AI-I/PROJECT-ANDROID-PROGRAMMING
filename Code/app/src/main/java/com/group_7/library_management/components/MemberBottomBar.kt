@@ -30,8 +30,9 @@ fun MemberBottomBar(
             BottomNavItem(Routes.PROFILE, Icons.Default.Person, "Hồ Sơ")
         )
         items.forEach { item ->
+            val isSelected = currentRoute.split("?").firstOrNull() == item.route
             NavigationBarItem(
-                selected = currentRoute == item.route,
+                selected = isSelected,
                 onClick = { onNavigate(item.route) },
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(text=item.label, style = MaterialTheme.typography.labelLarge) },

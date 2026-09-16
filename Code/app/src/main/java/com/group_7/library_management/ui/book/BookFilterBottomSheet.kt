@@ -3,6 +3,8 @@ package com.group_7.library_management.ui.book
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
@@ -73,7 +75,7 @@ fun BookFilterBottomSheet(
     initialFilter: BookFilterState,
     onDismiss: () -> Unit,
     onApply: (BookFilterState) -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(),
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     var sort by remember { mutableStateOf(initialFilter.sort) }
     var genres by remember { mutableStateOf(initialFilter.selectedGenres) }
@@ -87,7 +89,8 @@ fun BookFilterBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = LibrarySpacing.Medium)
-                .padding(bottom = LibrarySpacing.Large),
+                .padding(bottom = LibrarySpacing.Large)
+                .verticalScroll(rememberScrollState()),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

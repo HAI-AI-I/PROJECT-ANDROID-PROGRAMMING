@@ -6,14 +6,16 @@ import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.dao.BorrowReceiptDAO
 import com.group_7.library_management.data.local.dao.UserDAO
+import com.group_7.library_management.data.local.dao.SupportRequestDao
 import com.group_7.library_management.data.local.entity.BookEntity
 import com.group_7.library_management.data.local.entity.NotificationEntity
 import com.group_7.library_management.data.local.entity.BorrowReceiptEntity
 import com.group_7.library_management.data.local.entity.UserEntity
+import com.group_7.library_management.data.local.entity.SupportRequestEntity
 
 @Database(
-    entities = [BookEntity::class, NotificationEntity::class, UserEntity::class, BorrowReceiptEntity::class],
-    version = 8,
+    entities = [BookEntity::class, NotificationEntity::class, UserEntity::class, BorrowReceiptEntity::class, SupportRequestEntity::class],
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -21,4 +23,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getNotificationDao(): NotificationDAO
     abstract fun getUserDao(): UserDAO
     abstract fun getBorrowReceiptDao(): BorrowReceiptDAO
+    abstract fun getSupportRequestDao(): SupportRequestDao
 }

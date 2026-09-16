@@ -2,13 +2,17 @@ package com.group_7.library_management.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.CreateLogoIcon
 import com.group_7.library_management.components.CreateLogoTitle
@@ -17,7 +21,9 @@ import com.group_7.library_management.components.PasswordTextField
 import com.group_7.library_management.components.auth.AuthButton
 import com.group_7.library_management.components.auth.AuthFooter
 import com.group_7.library_management.components.auth.AuthHeader
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import com.group_7.library_management.utils.BiometricAuthManager
 
 @Composable
 fun LoginScreen(
@@ -26,6 +32,16 @@ fun LoginScreen(
     onLoginSuccess: (Long) -> Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val checkLogin = remember(context) { CheckLogin(context) }
+    // Tạm tắt đăng nhập sinh trắc học cho đến khi hoàn thành luồng API cơ bản.
+    val isBiometricEnabled = false
+
+    val activity = context as? FragmentActivity
+    val biometricAuthManager = remember(activity) {
+        activity?.let { BiometricAuthManager(it) }
+    }
+
     val uiState by authViewModel.uiState.collectAsState()
 
     var textEmailorPassword by remember { mutableStateOf("") }
@@ -135,6 +151,39 @@ fun LoginScreen(
                     }
                 }
             )
+
+            if (isBiometricEnabled && biometricAuthManager?.isBiometricAvailable() == true) {
+                Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+
+                OutlinedButton(
+                    onClick = {
+                        biometricAuthManager.showBiometricPrompt(
+                            onSuccess = {
+                                authViewModel.loginWithBiometrics(
+                                    savedUserId = checkLogin.getSavedUserId(),
+                                    onSuccess = { userId ->
+                                        onLoginSuccess(userId)
+                                    }
+                                )
+                            },
+                            onError = { error ->
+                                localError = error
+                            }
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(LibrarySpacing.Huge),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(
+                        text = "ĐĂNG NHẬP BẰNG VÂN TAY / KHUÔN MẶT",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 

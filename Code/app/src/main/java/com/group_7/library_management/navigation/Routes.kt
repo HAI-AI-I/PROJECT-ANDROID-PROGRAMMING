@@ -8,7 +8,10 @@ object Routes {
     const val REGISTER = "register"
     const val FORGOT_PASSWORD = "forgot_password"
     const val CONFIRM_CODE_RESET_AUTH = "confirm_code_reset_auth"
-    const val CONFIRM_CODE_REGIS_AUTH = "confirm_code_regis_auth"
+    const val CONFIRM_CODE_REGIS_AUTH =
+        "confirm_code_regis_auth/{registrationId}/{verificationMethod}"
+    fun confirmRegistration(registrationId: String, verificationMethod: String) =
+        "confirm_code_regis_auth/$registrationId/$verificationMethod"
     const val RESET_PASSWORD_AUTH = "reset_password_auth"
 
     // Main group
@@ -24,6 +27,10 @@ object Routes {
     const val FAVORITE = "favorite"
     const val SETTINGS = "settings"
     const val HELP = "help"
+    const val FAQ = "faq/{topic}"
+    const val CREATE_SUPPORT_REQUEST = "create_support_request"
+    const val MY_SUPPORT_REQUESTS = "my_support_requests"
+    const val CONTACT_LIBRARIAN = "contact_librarian"
 
     // Book Flow
     const val BOOK_DETAIL = "book_detail"
