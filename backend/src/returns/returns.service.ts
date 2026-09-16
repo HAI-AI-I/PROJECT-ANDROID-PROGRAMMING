@@ -2,9 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReturnDto } from './dto/create-return.dto.js';
 import { UpdateReturnDto } from './dto/update-return.dto.js';
 import { ReturnRecord } from './entities/return.entity.js';
+import { BorrowingsService } from '../borrowings/borrowings.service.js';
+import { BooksService } from '../books/books.service.js';
 
 @Injectable()
 export class ReturnsService {
+  constructor(
+    private readonly borrowingsService: BorrowingsService,
+    private readonly booksService: BooksService,
+  ) {}
+
   private readonly returns: ReturnRecord[] = [
     { id: 1, borrowingId: 4, returnDate: '2026-09-12', condition: 'GOOD', fine: 0, note: 'Tốt', status: 'CONFIRMED' },
   ];
@@ -52,7 +59,14 @@ export class ReturnsService {
 
   confirm(id: number) {
     const record = this.findOne(id);
+    if (record.status === 'CONFIRMED') return record;
+    const borrowing = this.borrowingsService.findOne(record.borrowingId);
     record.status = 'CONFIRMED';
+    borrowing.status = 'RETURNED';
+    borrowing.returnDate = record.returnDate;
+    if (record.condition !== 'LOST') {
+      this.booksService.returnCopy(borrowing.bookId);
+    }
     return record;
   }
 }

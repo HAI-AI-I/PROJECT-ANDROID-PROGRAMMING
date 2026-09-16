@@ -239,4 +239,12 @@ export class BooksService {
     const [deleted] = this.books.splice(index, 1);
     return deleted;
   }
+
+  returnCopy(id: number) {
+    const book = this.findOne(id);
+    book.availableQuantity = Math.min(book.quantity, book.availableQuantity + 1);
+    book.status = this.getStatus(book.quantity, book.availableQuantity);
+    book.updatedAt = new Date().toISOString();
+    return book;
+  }
 }
