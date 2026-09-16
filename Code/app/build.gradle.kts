@@ -37,7 +37,8 @@ android {
     }
 
     defaultConfig {
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8386/\"")
+//        buildConfigField("String", "API_BASE_URL", "\"http://192.168.80.24:8386/\"")
+       buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8386/\"")
     }
 }
 

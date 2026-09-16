@@ -109,6 +109,16 @@ fun HomeScreen(
                 )
             }
 
+            uiState.bookLoadError?.let { message ->
+                item {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
             if (uiState.searchQuery.isNotBlank()) {
                 val allBooks = (uiState.popularBooks + uiState.newBooks + uiState.recommendedBooks).distinctBy { it.id }
                 val searchResults = allBooks.filter {

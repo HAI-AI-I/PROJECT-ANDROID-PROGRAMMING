@@ -22,6 +22,7 @@ data class HomeUiState(
     val recommendedBooks: List<Book> = emptyList(),
     val searchQuery: String = "",
     val isLoadingBooks: Boolean = true,
+    val bookLoadError: String? = null,
     val borrowSummary: UserBorrowSummary= UserBorrowSummary(),
     val isLoadingSummary:Boolean=true
 )
@@ -46,11 +47,25 @@ class HomeViewModel @Inject constructor(
 
     private fun loadBooksData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingBooks = true) }
+            _uiState.update { it.copy(isLoadingBooks = true, bookLoadError = null) }
+
+            runCatching {
+                bookRepository.refreshHomeBooks(
+                    newestLimit = 10,
+                    popularLimit = 10
+                )
+            }.onFailure {
+                _uiState.update { state ->
+                    state.copy(
+                        isLoadingBooks = false,
+                        bookLoadError = "Không thể tải sách mới từ máy chủ"
+                    )
+                }
+            }
 
             combine(
-                bookRepository.getPopularBooks(limit = 50),
-                bookRepository.getNewestBooks(limit = 50),
+                bookRepository.getPopularBooks(limit = 10),
+                bookRepository.getNewestBooks(limit = 10),
                 bookRepository.getRecommendedBooks(limit = 50)
             ) { popular, newest ,recommended->
                 Triple(popular, newest,recommended)
