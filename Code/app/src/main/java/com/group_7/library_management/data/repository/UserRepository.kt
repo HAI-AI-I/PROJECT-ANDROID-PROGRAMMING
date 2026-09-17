@@ -2,6 +2,7 @@ package com.group_7.library_management.data.repository
 
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.entity.UserEntity
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.dto.LoginRequestDto
 import com.group_7.library_management.data.remote.dto.RegisterRequestDto
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val userDao: UserDAO,
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    private val checkLogin: CheckLogin
 ) {
     suspend fun sendRegistrationCode(
         name: String,
@@ -98,6 +100,7 @@ class UserRepository @Inject constructor(
             )
 
             userDao.insertUser(response.user.toUserEntity())
+            checkLogin.saveAccessToken(response.accessToken)
             Result.success(response.user)
         } catch (exception: Exception) {
             Result.failure(toReadableException(exception))
@@ -107,6 +110,20 @@ class UserRepository @Inject constructor(
     suspend fun getUserById(id: Long): UserEntity? = userDao.getUserById(id)
 
     suspend fun getLatestUser(): UserEntity? = userDao.getLatestUser()
+
+    suspend fun logout(): Result<Unit> {
+        return try {
+            val response = authApi.logout()
+            if (!response.isSuccessful && response.code() !in listOf(401, 403)) {
+                throw HttpException(response)
+            }
+
+            checkLogin.clearLogin()
+            Result.success(Unit)
+        } catch (exception: Exception) {
+            Result.failure(toReadableException(exception))
+        }
+    }
 
     private fun UserResponseDto.toUserEntity(): UserEntity {
         val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")

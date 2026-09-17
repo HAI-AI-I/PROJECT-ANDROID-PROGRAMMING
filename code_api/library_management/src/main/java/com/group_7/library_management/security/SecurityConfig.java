@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/v1/publishers",
                                 "/api/v1/publishers/**",
                                 "/api/v1/categories",
-                                "/api/v1/categories/**"
+                                "/api/v1/categories/**",
+                                "/api/v1/notifications"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/books", "/api/v1/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/books/**").hasRole("ADMIN")

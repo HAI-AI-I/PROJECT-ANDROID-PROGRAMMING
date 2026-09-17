@@ -1,11 +1,15 @@
 package com.group_7.library_management.di
 
+import android.content.Context
 import com.group_7.library_management.BuildConfig
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
+import com.group_7.library_management.data.remote.api.NotificationApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -18,7 +22,22 @@ import javax.inject.Singleton
 object  NetworkModule {
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+    fun provideCheckLogin(@ApplicationContext context: Context): CheckLogin = CheckLogin(context)
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(checkLogin: CheckLogin): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val accessToken = checkLogin.getAccessToken()
+            val request = if (accessToken.isNullOrBlank()) {
+                chain.request()
+            } else {
+                chain.request().newBuilder()
+                    .header("Authorization", "Bearer $accessToken")
+                    .build()
+            }
+            chain.proceed(request)
+        }
         .connectTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -40,4 +59,9 @@ object  NetworkModule {
     @Provides
     @Singleton
     fun provideBookApi(retrofit: Retrofit): BookApi = retrofit.create(BookApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi =
+        retrofit.create(NotificationApi::class.java)
 }

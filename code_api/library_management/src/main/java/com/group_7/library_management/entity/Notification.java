@@ -50,6 +50,12 @@ public class Notification {
     @Column(name = "clicked_at")
     private Instant clickedAt;
 
+    @Column(name = "read_at")
+    private Instant readAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -81,5 +87,29 @@ public class Notification {
     public NotificationType getType() { return type; }
     public Instant getClickedAt() { return clickedAt; }
     public void setClickedAt(Instant clickedAt) { this.clickedAt = clickedAt; }
+    public Instant getReadAt() { return readAt; }
+    public Instant getDeletedAt() { return deletedAt; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public boolean isRead() {
+        return readAt != null;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void markAsRead() {
+        if (readAt == null) readAt = Instant.now();
+    }
+
+    public void markAsClicked() {
+        Instant now = Instant.now();
+        if (clickedAt == null) clickedAt = now;
+        if (readAt == null) readAt = now;
+    }
+
+    public void softDelete() {
+        if (deletedAt == null) deletedAt = Instant.now();
+    }
 }

@@ -23,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
+import com.group_7.library_management.components.AppSnackbarHost
 import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.book.BookDetailScreen
 import com.group_7.library_management.ui.qrscan.ScanScreen
@@ -94,12 +95,13 @@ fun UserScreen(
                 },
                 onLogout = {
                     scope.launch { drawerState.close() }
-                    onLogout()
+                    userViewModel.logout(onLogout)
                 }
             )
         }
     ) {
         Scaffold(
+            snackbarHost = { AppSnackbarHost(userViewModel.snackbarController) },
             containerColor = MaterialTheme.colorScheme.background,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
@@ -168,7 +170,7 @@ fun UserScreen(
                     ProfileScreen(
                         viewModel = profileViewModel,
                         onEditProfileClick = { userNavController.navigate(Routes.EDIT_PROFILE) },
-                        onLogoutClick = onLogout
+                        onLogoutClick = { userViewModel.logout(onLogout) }
                     )
                 }
                 composable(Routes.EDIT_PROFILE) {

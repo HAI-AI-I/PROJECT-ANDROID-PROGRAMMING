@@ -134,7 +134,6 @@ fun AppNavHost(
         composable(route= Routes.HOME) {
             UserScreen(
                 onLogout = {
-                    checkLogin.clearLogin()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }

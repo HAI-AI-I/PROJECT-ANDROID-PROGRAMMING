@@ -9,6 +9,7 @@ import com.group_7.library_management.data.remote.dto.UserResponseDto
 import com.group_7.library_management.data.remote.dto.VerifyRegistrationCodeRequestDto
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.Response
 
 interface AuthApi {
     @POST("api/v1/auth/register/email/code")
@@ -43,4 +44,7 @@ interface AuthApi {
 
     @POST("api/v1/auth/login")
     suspend fun login(@Body request: LoginRequestDto): AuthResponseDto
+
+    @POST("api/v1/auth/logout")
+    suspend fun logout(): Response<Unit>
 }

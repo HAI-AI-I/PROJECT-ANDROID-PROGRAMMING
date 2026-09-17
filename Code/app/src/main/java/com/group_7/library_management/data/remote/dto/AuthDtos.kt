@@ -23,6 +23,8 @@ data class UserResponseDto(
 )
 
 data class AuthResponseDto(
+    val accessToken: String,
+    val tokenType: String,
     val user: UserResponseDto
 )
 

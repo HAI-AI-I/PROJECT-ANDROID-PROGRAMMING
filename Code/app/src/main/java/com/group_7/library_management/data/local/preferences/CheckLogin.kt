@@ -10,6 +10,7 @@ class CheckLogin(context: Context) {
         private const val key_is_logged = "is_login"
         private const val key_is_user_id = "user_id"
         private const val key_biometric_enabled = "biometric_enabled"
+        private const val key_access_token = "access_token"
     }
 
     fun saveLogin(userId: String) {
@@ -24,6 +25,7 @@ class CheckLogin(context: Context) {
         pref.edit().apply {
             remove(key_is_logged)
             remove(key_is_user_id)
+            remove(key_access_token)
             apply()
         }
     }
@@ -34,6 +36,14 @@ class CheckLogin(context: Context) {
 
     fun getSavedUserId(): String? {
         return pref.getString(key_is_user_id, null)
+    }
+
+    fun saveAccessToken(accessToken: String) {
+        pref.edit().putString(key_access_token, accessToken).apply()
+    }
+
+    fun getAccessToken(): String? {
+        return pref.getString(key_access_token, null)
     }
 
     fun setBiometricEnabled(enabled: Boolean) {

@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.components.NotificationCard
 import com.group_7.library_management.ui.theme.*
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class NotificationType {
     WARNING, SUCCESS, ERROR, INFO,BOOK
@@ -38,6 +40,22 @@ fun NotificationsContent(
     viewModel: NotificationViewModel = hiltViewModel()
 ) {
     val notifications by viewModel.notificationsFlow.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            lastVisibleIndex to layoutInfo.totalItemsCount
+        }
+            .distinctUntilChanged()
+            .collect { (lastVisibleIndex, totalItemsCount) ->
+                if (totalItemsCount > 0 && lastVisibleIndex >= totalItemsCount - 3) {
+                    viewModel.loadNextPage()
+                }
+            }
+    }
 
     val groupedNotifications = remember(notifications) {
         notifications.groupBy { it.date }
@@ -48,6 +66,7 @@ fun NotificationsContent(
     }
 
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = LibrarySpacing.Large),
@@ -112,7 +131,44 @@ fun NotificationsContent(
 
         item { Spacer(modifier = Modifier.height(4.dp)) }
 
-        if (notifications.isEmpty()) {
+        uiState.errorMessage?.let { errorMessage ->
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = viewModel::refreshNotifications) {
+                            Text("Thử lại")
+                        }
+                    }
+                }
+            }
+        }
+
+        if (uiState.isRefreshing && notifications.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        } else if (notifications.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
@@ -162,12 +218,25 @@ fun NotificationsContent(
                     NotificationCard(
                         item = notification,
                         onClick = {
-                            viewModel.markAsRead(notification.id)
+                            viewModel.markAsClicked(notification.id)
                         },
                         onDelete = {
                             viewModel.deleteNotification(notification.id)
                         }
                     )
+                }
+            }
+        }
+
+        if (uiState.isLoadingMore) {
+            item(key = "notification_loading_more") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(28.dp))
                 }
             }
         }

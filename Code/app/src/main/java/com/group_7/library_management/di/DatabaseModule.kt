@@ -9,8 +9,10 @@ import com.group_7.library_management.data.local.dao.BookDAO
 import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.dao.SupportRequestDao
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
+import com.group_7.library_management.data.remote.api.NotificationApi
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.NotificationRepository
 import com.group_7.library_management.data.repository.UserRepository
@@ -38,6 +40,13 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE notifications ADD COLUMN userId INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE notifications ADD COLUMN bookId INTEGER")
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -48,7 +57,7 @@ object  DatabaseModule {
             AppDatabase::class.java,
             "library_management_db"
         )
-        .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
+        .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
         .fallbackToDestructiveMigration(true)
         .build()
     }
@@ -71,8 +80,12 @@ object  DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideNotificationRepository(notificationDao: NotificationDAO): NotificationRepository {
-        return NotificationRepository(notificationDao)
+    fun provideNotificationRepository(
+        notificationDao: NotificationDAO,
+        notificationApi: NotificationApi,
+        checkLogin: CheckLogin
+    ): NotificationRepository {
+        return NotificationRepository(notificationDao, notificationApi, checkLogin)
     }
 
     @Provides
@@ -82,8 +95,12 @@ object  DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(userDao: UserDAO, authApi: AuthApi): UserRepository {
-        return UserRepository(userDao, authApi)
+    fun provideUserRepository(
+        userDao: UserDAO,
+        authApi: AuthApi,
+        checkLogin: CheckLogin
+    ): UserRepository {
+        return UserRepository(userDao, authApi, checkLogin)
     }
 
     @Provides
