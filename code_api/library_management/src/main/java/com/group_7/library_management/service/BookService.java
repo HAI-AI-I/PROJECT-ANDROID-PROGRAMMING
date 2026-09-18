@@ -51,19 +51,22 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
     private final PublisherRepository publisherRepository;
+    private final BookAvailabilitySubscriptionService availabilitySubscriptionService;
 
     public BookService(
         BookRepository bookRepository,
             BookCopyRepository bookCopyRepository,
             AuthorRepository authorRepository,
             CategoryRepository categoryRepository,
-            PublisherRepository publisherRepository
+            PublisherRepository publisherRepository,
+            BookAvailabilitySubscriptionService availabilitySubscriptionService
     ) {
         this.bookRepository = bookRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.authorRepository = authorRepository;
         this.categoryRepository = categoryRepository;
         this.publisherRepository = publisherRepository;
+        this.availabilitySubscriptionService = availabilitySubscriptionService;
     }
 
     @Transactional
@@ -126,6 +129,37 @@ public class BookService {
         Instant thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
         List<BookPopularityStatistics> statistics = bookRepository
                 .findPopularBooksSince(thirtyDaysAgo, PageRequest.of(0, limit));
+
+        Map<Long, Book> booksById = bookRepository
+                .findAllByIdInAndActiveTrue(
+                        statistics.stream().map(BookPopularityStatistics::getBookId).toList()
+                )
+                .stream()
+                .collect(Collectors.toMap(Book::getId, book -> book));
+
+        return statistics.stream()
+                .filter(item -> booksById.containsKey(item.getBookId()))
+                .map(item -> new PopularBookResponse(
+                        toResponse(booksById.get(item.getBookId())),
+                        item.getBorrowCount(),
+                        item.getFavoriteCount(),
+                        item.getNotificationClickCount(),
+                        item.getPopularityScore()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PopularBookResponse> getRelatedBooks(Long bookId, int limit) {
+        Book currentBook = bookRepository.findByIdAndActiveTrue(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách"));
+        Instant thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
+        List<BookPopularityStatistics> statistics = bookRepository.findRelatedPopularBooksSince(
+                currentBook.getCategory().getId(),
+                bookId,
+                thirtyDaysAgo,
+                PageRequest.of(0, limit)
+        );
 
         Map<Long, Book> booksById = bookRepository
                 .findAllByIdInAndActiveTrue(
@@ -236,6 +270,9 @@ public class BookService {
     ) {
         List<BookCopy> existingCopies = bookCopyRepository.findAllByBookIdOrderByIdAsc(book.getId());
         int currentQuantity = existingCopies.size();
+        long previousAvailable = existingCopies.stream()
+                .filter(copy -> copy.getStatus() == BookCopyStatus.AVAILABLE)
+                .count();
         if (updateShelfLocation) {
             existingCopies.forEach(copy -> copy.setShelfLocation(shelfLocation));
         }
@@ -252,6 +289,11 @@ public class BookService {
                     requestedQuantity - currentQuantity,
                     shelfForNewCopies
             );
+            availabilitySubscriptionService.notifyAvailabilityChanged(
+                    book,
+                    previousAvailable,
+                    previousAvailable + requestedQuantity - currentQuantity
+            );
             return;
         }
         if (requestedQuantity < currentQuantity) {
@@ -267,6 +309,11 @@ public class BookService {
                 );
             }
             bookCopyRepository.deleteAll(removableCopies);
+            availabilitySubscriptionService.notifyAvailabilityChanged(
+                    book,
+                    previousAvailable,
+                    previousAvailable - removableCopies.size()
+            );
         }
     }
 

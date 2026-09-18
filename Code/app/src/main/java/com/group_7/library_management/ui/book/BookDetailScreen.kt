@@ -3,7 +3,18 @@ package com.group_7.library_management.ui.book
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -12,13 +23,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,35 +54,28 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import androidx.compose.foundation.Image
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.ui.res.painterResource
 import com.group_7.library_management.R
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.StarColor
-import com.group_7.library_management.ui.theme.WarningColor
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun BookDetailScreen(
-    book: Book?=null,
-    isFavorite:Boolean=false,
-    onBack: () -> Unit ,
-    onToggleFavorite:()->Unit={},
+    onBack: () -> Unit,
+    viewModel: BookDetailViewModel = hiltViewModel(),
+    isFavorite: Boolean = false,
+    onToggleFavorite: () -> Unit = {},
     onNavigateToReviews: () -> Unit = {},
     onNavigateToBorrow: () -> Unit = {},
-    onRelatedBookClick:(String)->Unit={}
+    onRelatedBookClick: (Book) -> Unit = {}
 ) {
-
-    val title = book?.title ?: "Clean Code"
-    val author = book?.author ?: "Robert C. Martin"
-    val rating = book?.rating ?: 4.8
-    val availableCopies = book?.availableCopies ?: 3
-    val totalCopies = 10
-    val borrowFee = book?.borrowFee ?: 150000
-
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isFav by remember(isFavorite) { mutableStateOf(isFavorite) }
 
     Scaffold(
@@ -78,228 +93,285 @@ fun BookDetailScreen(
             )
         },
         bottomBar = {
-            Surface(
-                shadowElevation = 12.dp,
-                color = MaterialTheme.colorScheme.background,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    // Nút Chuông góc trái
-                    OutlinedIconButton(
-                        onClick = { },
-                        modifier = Modifier.size(48.dp),
-                        shape = CircleShape,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Notifications,
-                            contentDescription = "Notification",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    // Nút Mượn sách
-                    Button(
-                        onClick = onNavigateToBorrow,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = MaterialTheme.shapes.large,
-                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(
-                            text = "Mượn sách",
-                            style= MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
+            uiState.book?.let { book ->
+                BookDetailBottomBar(
+                    canBorrow = book.availableCopies > 0,
+                    borrowStatus = uiState.currentBorrowOrder?.status,
+                    isSubscribed = uiState.isAvailabilitySubscribed,
+                    isUpdatingSubscription = uiState.isUpdatingSubscription,
+                    onToggleSubscription = viewModel::toggleAvailabilitySubscription,
+                    onNavigateToBorrow = { viewModel.requestBorrow(onNavigateToBorrow) }
+                )
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Header Bìa Sách
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(310.dp)
-                    .background(MaterialTheme.colorScheme.primary),
+        when {
+            uiState.book != null -> BookDetailContent(
+                book = requireNotNull(uiState.book),
+                relatedBooks = uiState.relatedBooks,
+                isLoadingRelated = uiState.isLoadingRelated,
+                onNavigateToReviews = onNavigateToReviews,
+                onRelatedBookClick = onRelatedBookClick,
+                modifier = Modifier.padding(innerPadding)
+            )
+
+            uiState.isLoading -> Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.cleancode),
-                    contentDescription = "Cover",
-                    modifier = Modifier
-                        .height(240.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Fit
+                CircularProgressIndicator()
+            }
+
+            else -> Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = uiState.errorMessage ?: "Không thể tải chi tiết sách.",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(onClick = viewModel::refreshBook) { Text("Tải lại") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookDetailBottomBar(
+    canBorrow: Boolean,
+    borrowStatus: String?,
+    isSubscribed: Boolean,
+    isUpdatingSubscription: Boolean,
+    onToggleSubscription: () -> Unit,
+    onNavigateToBorrow: () -> Unit
+) {
+    Surface(
+        shadowElevation = 12.dp,
+        color = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedIconButton(
+                onClick = onToggleSubscription,
+                enabled = !isUpdatingSubscription,
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            ) {
+                Icon(
+                    imageVector = if (isSubscribed) {
+                        Icons.Default.NotificationsActive
+                    }else{
+                        Icons.Outlined.Notifications
+                    },
+                    contentDescription = if (isSubscribed) {
+                        "Tắt thông báo sách"
+                    } else {
+                        "Bật thông báo sách"
+                    },
+                    tint =MaterialTheme.colorScheme.primary
                 )
             }
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = (-24).dp),
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = MaterialTheme.colorScheme.background
+            Button(
+                onClick = onNavigateToBorrow,
+                enabled = borrowStatus == null,
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = MaterialTheme.shapes.large
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(LibrarySpacing.Large)
+                Text(
+                    when (borrowStatus) {
+                        "REQUESTED" -> "Chờ lấy sách"
+                        "BORROWED" -> "Đang mượn"
+                        "OVERDUE" -> "Đã quá hạn"
+                        else -> if (canBorrow) "Mượn sách" else "Sách đang hết"
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookDetailContent(
+    book: Book,
+    relatedBooks: List<Book>,
+    isLoadingRelated: Boolean,
+    onNavigateToReviews: () -> Unit,
+    onRelatedBookClick: (Book) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val formattedFee = NumberFormat.getNumberInstance(Locale("vi", "VN")).format(book.borrowFee)
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().height(310.dp).background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = book.coverImageUrl,
+                contentDescription = "Bìa sách ${book.title}",
+                modifier = Modifier.height(240.dp).clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Fit,
+                fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
+                error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+            )
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth().offset(y = (-24).dp),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(LibrarySpacing.Large)) {
+                Text(book.title, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    book.author,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable(onClick = onNavigateToReviews)
                 ) {
+                    repeat(5) {
+                        Icon(Icons.Default.Star, null, tint = StarColor, modifier = Modifier.size(22.dp))
+                    }
+                    Spacer(Modifier.width(6.dp))
+                    Text("${book.rating}/5 (${book.ratingCount} lượt đánh giá)")
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DetailChip("THỂ LOẠI", book.category, Modifier.weight(1f))
+                    DetailChip("NHÀ XUẤT BẢN", book.publisher ?: "Chưa cập nhật", Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DetailChip("NĂM XUẤT BẢN", book.publishYear?.toString() ?: "Chưa cập nhật", Modifier.weight(1f))
+                    DetailChip("ISBN", book.isbn ?: "Chưa cập nhật", Modifier.weight(1f))
+                }
+
+                Spacer(Modifier.height(8.dp))
+                HighlightChip("GIÁ MƯỢN", "$formattedFee đ", Modifier.fillMaxWidth(0.5f))
+
+                Spacer(Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE2E4FA))
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text("TRẠNG THÁI", fontSize = 10.sp, color = Color(0xFF4C55B4), fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            if (book.availableCopies > 0) {
+                                "Sẵn có (${book.availableCopies} / ${book.totalCopies} bản)"
+                            } else {
+                                "Đang hết sách"
+                            },
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0A1268)
+                        )
+                    }
+                }
+
+                if (!book.description.isNullOrBlank()) {
+                    Spacer(Modifier.height(20.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Info, null, tint = Color(0xFF202773), modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Mô tả", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Clean Code",
-                        style= MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text = book.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = "Robert C. Martin",
-                        style= MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.secondaryContainer
+                }
+
+                Spacer(Modifier.height(20.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.MenuBook,
+                        contentDescription = null,
+                        tint = Color(0xFF202773),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Sách liên quan", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(12.dp))
+
+                when {
+                    isLoadingRelated && relatedBooks.isEmpty() -> {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(120.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                        }
+                    }
+
+                    relatedBooks.isEmpty() -> Text(
+                        "Chưa có sách liên quan cùng thể loại.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Đánh giá
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { onNavigateToReviews() }
-                    ) {
-                        repeat(5) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = StarColor,
-                                modifier = Modifier.size(24.dp)
+                    else -> LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(relatedBooks, key = { it.id }) { relatedBook ->
+                            RelatedBookCard(
+                                book = relatedBook,
+                                onClick = { onRelatedBookClick(relatedBook) }
                             )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "4.8/5 ",
-                            style= MaterialTheme.typography.titleSmall)
-                        Text(text = "(128 lượt đánh giá)",
-                            style= MaterialTheme.typography.titleSmall, color = Color.Gray)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Thông tin 2 cột
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DetailChip(title = "THỂ LOẠI", value = "Lập trình", modifier = Modifier.weight(1f))
-                        DetailChip(title = "NHÀ XUẤT BẢN", value = "Prentice Hall", modifier = Modifier.weight(1f))
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DetailChip(title = "NGÀY XUẤT BẢN", value = "01/08/2008", modifier = Modifier.weight(1f))
-                        DetailChip(title = "NGÔN NGỮ", value = "Tiếng Anh", modifier = Modifier.weight(1f))
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DetailChip(title = "ISBN", value = "9780132350884", modifier = Modifier.weight(1f))
-                        DetailChip(title = "SỐ TRANG", value = "464 trang", modifier = Modifier.weight(1f))
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Thẻ Giá tiền cọc (Màu tím nhạt)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HighlightChip(title = "GIÁ TIỀN CỌC", value = "150.000đ", modifier = Modifier.weight(0.48f))
-                        Spacer(modifier = Modifier.weight(0.52f))
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Thẻ Trạng thái Status (Màu tím nhạt)
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE2E4FA))
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(text = "STATUS", fontSize = 10.sp, color = Color(0xFF4C55B4), fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(12.dp)
-                                        .background(Color(0xFF0A1268), CircleShape)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Sẵn có (3 / 10 bản)",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF0A1268)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Description
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Info, contentDescription = null, tint = Color(0xFF202773), modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Description", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Mã sạch là mã có thể đọc được và dễ bảo trì. Cuốn sách này cung cấp các nguyên tắc, mẫu và thực tiễn để viết mã sạch, giúp các nhà phát triển phần mềm nâng cao chất lượng công việc của họ. Nó chia sẻ những hiểu biết sâu sắc về cách định dạng, đặt tên, cấu trúc và kiểm thử mã nguồn một cách hiệu quả trong môi trường làm việc thực tế.",
-                        fontSize = 13.sp,
-                        color = Color.DarkGray,
-                        lineHeight = 19.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Sách liên quan
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.MenuBook, contentDescription = null, tint = Color(0xFF202773), modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Sách liên quan", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    val related = listOf(
-                        Triple("The Pragmatic...", "Andrew Hunt", "https://m.media-amazon.com/images/I/41as+Tjg13L.jpg"),
-                        Triple("Refactoring", "Martin Fowler", "https://m.media-amazon.com/images/I/41AptR55cFL.jpg"),
-                        Triple("Test Driven...", "Kent Beck", "https://m.media-amazon.com/images/I/5113Xm9+KGL.jpg")
-                    )
-
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(related) { item ->
-                            Column(modifier = Modifier.width(110.dp)) {
-                                AsyncImage(
-                                    model = item.third,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .height(135.dp)
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(text = item.first, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                Text(text = item.second, fontSize = 11.sp, color = Color.Gray, maxLines = 1)
-                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RelatedBookCard(book: Book, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.width(120.dp).clickable(onClick = onClick)
+    ) {
+        AsyncImage(
+            model = book.coverImageUrl,
+            contentDescription = "Bìa sách ${book.title}",
+            modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(10.dp)),
+            contentScale = ContentScale.Crop,
+            fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
+            error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = book.title,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 2
+        )
+        Text(
+            text = book.author,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
+        )
     }
 }
 
@@ -310,10 +382,10 @@ fun DetailChip(title: String, value: String, modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F6))
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(text = title, fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = value, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Column(Modifier.padding(12.dp)) {
+            Text(title, fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(2.dp))
+            Text(value, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -325,10 +397,10 @@ fun HighlightChip(title: String, value: String, modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE2E4FA))
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(text = title, fontSize = 9.sp, color = Color(0xFF4C55B4), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0A1268))
+        Column(Modifier.padding(12.dp)) {
+            Text(title, fontSize = 9.sp, color = Color(0xFF4C55B4), fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(2.dp))
+            Text(value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0A1268))
         }
     }
 }

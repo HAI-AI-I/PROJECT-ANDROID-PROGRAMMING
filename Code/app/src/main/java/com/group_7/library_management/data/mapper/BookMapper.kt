@@ -9,10 +9,15 @@ import java.time.Instant
 fun BookEntity.toBookModel(): Book {
     return Book(
         id=id,
+        isbn=isbn,
         title=title,
         author=author,
         category=category,
+        publisher=publisher,
+        publishYear=publishYear,
+        totalCopies=totalCopies,
         coverImageUrl = coverImageUrl,
+        description=description,
         borrowFee=borrowFee,
         availableCopies = availableCopies,
         rating = rating,
@@ -22,32 +27,19 @@ fun BookEntity.toBookModel(): Book {
     )
 }
 
-
-fun Book.toEntity(
-    createdAt: Long = System.currentTimeMillis(),
-): BookEntity {
-    return BookEntity(
-        id=id,
-        title=title,
-        author=author,
-        category=category,
-        coverImageUrl = coverImageUrl,
-        borrowFee=borrowFee,
-        availableCopies = availableCopies,
-        rating = rating,
-        createdAt = createdAt,
-        ratingCount = ratingCount,
-        popularityScore = popularityScore
-    )
-}
 
 fun BookResponseDto.toEntity(popularityScore: Long = 0): BookEntity {
     return BookEntity(
         id = id.toString(),
+        isbn = null,
         title = title,
         author = author,
         category = category,
+        publisher = null,
+        publishYear = null,
+        totalCopies = 0,
         coverImageUrl = cover,
+        description = null,
         borrowFee = borrowFee,
         availableCopies = availableQuantity.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
         rating = rating,
@@ -58,3 +50,26 @@ fun BookResponseDto.toEntity(popularityScore: Long = 0): BookEntity {
 }
 
 fun PopularBookResponseDto.toEntity(): BookEntity = book.toEntity(popularityScore)
+
+fun BookResponseDto.toBookModel(popularityScore: Long = 0): Book {
+    return Book(
+        id = id.toString(),
+        isbn = isbn,
+        title = title,
+        author = author,
+        category = category,
+        publisher = publisher,
+        publishYear = publishYear,
+        totalCopies = quantity.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        coverImageUrl = cover,
+        description = description,
+        borrowFee = borrowFee,
+        availableCopies = availableQuantity.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        rating = rating,
+        createdAt = runCatching { Instant.parse(createdAt).toEpochMilli() }.getOrDefault(0L),
+        ratingCount = ratingCount,
+        popularityScore = popularityScore
+    )
+}
+
+fun PopularBookResponseDto.toBookModel(): Book = book.toBookModel(popularityScore)

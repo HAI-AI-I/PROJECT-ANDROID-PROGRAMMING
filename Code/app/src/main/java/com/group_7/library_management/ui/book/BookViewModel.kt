@@ -24,13 +24,6 @@ data class BookListUiState(
     val isLoading: Boolean = false
 )
 
-sealed interface BorrowUiState {
-    object Idle : BorrowUiState
-    object Loading : BorrowUiState
-    data class Success(val transactionId: String) : BorrowUiState
-    data class Error(val message: String) : BorrowUiState
-}
-
 @HiltViewModel
 class BookViewModel @Inject constructor(
     private val bookRepository: BookRepository,
@@ -53,9 +46,6 @@ class BookViewModel @Inject constructor(
         )
     )
     val uiState:StateFlow<BookListUiState> = _uiState.asStateFlow()
-    private val _borrowState = MutableStateFlow<BorrowUiState>(BorrowUiState.Idle)
-    val borrowState: StateFlow<BorrowUiState> = _borrowState
-
     init{
         loadBooks()
     }
@@ -182,23 +172,6 @@ class BookViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun confirmBorrowBook(bookId: String) {
-        viewModelScope.launch {
-            _borrowState.value = BorrowUiState.Loading
-            val isSuccess = true
-            if (isSuccess) {
-                _borrowState.value = BorrowUiState.Success(transactionId = "TX-998823")
-            } else {
-                _borrowState.value = BorrowUiState.Error("Không thể kết nối máy chủ")
-            }
-        }
-    }
-
-
-    fun resetBorrowState() {
-        _borrowState.value = BorrowUiState.Idle
     }
 
     private fun savePageState() {

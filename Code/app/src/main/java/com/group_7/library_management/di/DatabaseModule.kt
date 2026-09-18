@@ -47,6 +47,29 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE books ADD COLUMN isbn TEXT")
+            db.execSQL("ALTER TABLE books ADD COLUMN publisher TEXT")
+            db.execSQL("ALTER TABLE books ADD COLUMN publishYear INTEGER")
+            db.execSQL("ALTER TABLE books ADD COLUMN totalCopies INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE books ADD COLUMN description TEXT")
+        }
+    }
+
+    private val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                UPDATE books
+                SET isbn = NULL,
+                    publisher = NULL,
+                    publishYear = NULL,
+                    totalCopies = 0,
+                    description = NULL
+            """.trimIndent())
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -57,7 +80,13 @@ object  DatabaseModule {
             AppDatabase::class.java,
             "library_management_db"
         )
-        .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+        .addMigrations(
+            MIGRATION_4_5,
+            MIGRATION_5_6,
+            MIGRATION_6_7,
+            MIGRATION_7_8,
+            MIGRATION_8_9
+        )
         .fallbackToDestructiveMigration(true)
         .build()
     }

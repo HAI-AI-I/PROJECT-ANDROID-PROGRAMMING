@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.Collection;
 import java.util.List;
+import java.time.Instant;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
@@ -90,7 +91,47 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             order by popularityScore desc, b.created_at desc, b.id desc
             """, nativeQuery = true)
     List<BookPopularityStatistics> findPopularBooksSince(
-            @Param("since") java.time.Instant since,
+            @Param("since") Instant since,
+            Pageable pageable
+    );
+
+    @Query(value = """
+            select b.id as bookId,
+                   coalesce(bor.borrow_count, 0) as borrowCount,
+                   coalesce(fav.favorite_count, 0) as favoriteCount,
+                   coalesce(noti.notification_click_count, 0) as notificationClickCount,
+                   coalesce(bor.borrow_count, 0) * 5
+                       + coalesce(fav.favorite_count, 0) * 2
+                       + coalesce(noti.notification_click_count, 0) * 2 as popularityScore
+            from books b
+            left join (
+                select bc.book_id, count(*) as borrow_count
+                from borrow_records br
+                join book_copies bc on bc.id = br.book_copy_id
+                where br.borrowed_at >= :since and br.status <> 'CANCELLED'
+                group by bc.book_id
+            ) bor on bor.book_id = b.id
+            left join (
+                select bf.book_id, count(*) as favorite_count
+                from book_favorites bf
+                where bf.created_at >= :since
+                group by bf.book_id
+            ) fav on fav.book_id = b.id
+            left join (
+                select n.book_id, count(*) as notification_click_count
+                from notifications n
+                where n.clicked_at >= :since and n.book_id is not null
+                group by n.book_id
+            ) noti on noti.book_id = b.id
+            where b.active = b'1'
+              and b.category_id = :categoryId
+              and b.id <> :excludedBookId
+            order by popularityScore desc, b.created_at desc, b.id desc
+            """, nativeQuery = true)
+    List<BookPopularityStatistics> findRelatedPopularBooksSince(
+            @Param("categoryId") Long categoryId,
+            @Param("excludedBookId") Long excludedBookId,
+            @Param("since") Instant since,
             Pageable pageable
     );
 }

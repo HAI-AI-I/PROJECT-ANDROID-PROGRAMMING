@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +44,7 @@ class UserRootViewModel @Inject constructor(
         _uiState.update { it.copy(isBiometricEnabled = checkLogin.isBiometricEnabled()) }
         loadCurrentUserInfo()
         observeUnreadNotifications()
+        pollUnreadNotificationCount()
         observeNetworkConnection()
     }
 
@@ -98,17 +101,32 @@ class UserRootViewModel @Inject constructor(
                     it.copy(unreadNotificationCount = cachedUnreadCount)
                 }
 
-                runCatching {
-                    notificationRepository.getUnreadCount()
-                }.onSuccess { serverUnreadCount ->
-                    _uiState.update {
-                        it.copy(
-                            unreadNotificationCount = serverUnreadCount
-                                .coerceAtMost(Int.MAX_VALUE.toLong())
-                                .toInt()
-                        )
-                    }
+                refreshUnreadNotificationCount()
+            }
+        }
+    }
+
+    private fun pollUnreadNotificationCount() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(UNREAD_POLL_INTERVAL_MS)
+                if (networkMonitor.isConnected.value) {
+                    refreshUnreadNotificationCount()
                 }
+            }
+        }
+    }
+
+    private suspend fun refreshUnreadNotificationCount() {
+        runCatching {
+            notificationRepository.getUnreadCount()
+        }.onSuccess { serverUnreadCount ->
+            _uiState.update {
+                it.copy(
+                    unreadNotificationCount = serverUnreadCount
+                        .coerceAtMost(Int.MAX_VALUE.toLong())
+                        .toInt()
+                )
             }
         }
     }
@@ -119,9 +137,14 @@ class UserRootViewModel @Inject constructor(
             networkMonitor.isConnected.collect { isConnected ->
                     if (isConnected && wasDisconnected) {
                         snackbarController.show("Đã có kết nối mạng trở lại.")
+                        refreshUnreadNotificationCount()
                     }
                     wasDisconnected = !isConnected
                 }
         }
+    }
+
+    companion object {
+        private const val UNREAD_POLL_INTERVAL_MS = 30_000L
     }
 }

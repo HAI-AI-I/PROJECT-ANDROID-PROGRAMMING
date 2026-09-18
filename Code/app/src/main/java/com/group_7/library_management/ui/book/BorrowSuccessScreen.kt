@@ -1,7 +1,7 @@
 package com.group_7.library_management.ui.book
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -9,195 +9,151 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.group_7.library_management.models.BorrowOrder
+import java.text.NumberFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun BorrowSuccessScreen(
-    transactionId: String = "TX-998823",
-    onViewQrCode: (String) -> Unit = {},
-    onBackToHome: () -> Unit = {}
+    onViewQrCode: (Long) -> Unit,
+    onBackToHome: () -> Unit,
+    viewModel: BorrowOrderViewModel = hiltViewModel()
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFF8F9FA)
-    ) {
+    BackHandler(onBack = onBackToHome)
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    when {
+        state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        state.errorMessage != null -> BorrowOrderLoadError(
+            message = requireNotNull(state.errorMessage),
+            onRetry = viewModel::loadOrder,
+            onBackToHome = onBackToHome
+        )
+        state.order != null -> BorrowSuccessContent(
+            order = requireNotNull(state.order),
+            onViewQrCode = onViewQrCode,
+            onBackToHome = onBackToHome
+        )
+    }
+}
+
+@Composable
+private fun BorrowSuccessContent(order: BorrowOrder, onViewQrCode: (Long) -> Unit, onBackToHome: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Icon tích xanh / navy
-            Box(
-                modifier = Modifier
-                    .size(84.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF000865).copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF000865)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Success",
-                        tint = Color.White,
-                        modifier = Modifier.size(38.dp)
-                    )
+            Spacer(Modifier.height(16.dp))
+            Surface(modifier = Modifier.size(76.dp).clip(CircleShape), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)) {
+                Box(contentAlignment = Alignment.Center) {
+                    Surface(modifier = Modifier.size(56.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(34.dp))
+                        }
+                    }
                 }
             }
+            Spacer(Modifier.height(18.dp))
+            Text("Đặt mượn sách thành công!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(6.dp))
+            Text("Mang mã đơn đến thủ thư để nhận sách và thanh toán.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Mượn sách thành công!",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F1F1F)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Giao dịch của bạn đã được ghi nhận vào hệ thống.",
-                fontSize = 13.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Card Chi tiết giao dịch
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F3))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(
-                        text = "Chi tiết giao dịch",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF000865)
-                    )
-
-                    DetailRow(label = "Sách", value = "Clean Code")
-                    DetailRow(label = "Người mượn", value = "Nguyễn Văn Nam")
-                    DetailRow(label = "Chi nhánh", value = "Thư viện UTH - Cơ sở 1")
-                    DetailRow(label = "Hạn trả", value = "24/05/2024")
-                    DetailRow(label = "Tiền cọc", value = "150.000đ")
-                    DetailRow(
-                        label = "Trạng thái",
-                        value = "Thành công",
-                        valueColor = Color(0xFF000865),
-                        isBold = true
-                    )
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Thông tin đơn mượn", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    OrderRow("Mã đơn", order.referenceCode, true)
+                    OrderRow("Sách", order.bookTitle)
+                    if (order.bookAuthor.isNotBlank()) OrderRow("Tác giả", order.bookAuthor)
+                    OrderRow("Mã bản sách", order.copyBarcode)
+                    OrderRow("Người mượn", order.borrowerName)
+                    OrderRow("Nơi nhận", order.pickupLocation)
+                    OrderRow("Ngày tạo", formatInstant(order.requestedAt))
+                    OrderRow("Hạn trả dự kiến", formatInstant(order.dueAt))
+                    OrderRow("Thời hạn", "${order.borrowDays} ngày")
+                    OrderRow("Trạng thái", "Chờ nhận sách", true)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Vui lòng giữ lại biên nhận này để đối soát khi trả sách.",
-                fontSize = 12.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                lineHeight = 16.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Nút Xem mã QR
-            Button(
-                onClick = { onViewQrCode(transactionId) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF000865)),
-                shape = RoundedCornerShape(25.dp)
+            Spacer(Modifier.height(14.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.QrCodeScanner,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Xem mã QR",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Thanh toán tại thủ thư", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    OrderRow("Phí mượn", money(order.borrowFee))
+                    OrderRow("Tiền cọc (được hoàn lại)", money(order.depositAmount))
+                    HorizontalDivider()
+                    OrderRow("Tổng cần trả", money(order.totalAmount), true)
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Nút Quay lại trang chủ
-            OutlinedButton(
-                onClick = onBackToHome,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(25.dp),
-                border = BorderStroke(1.dp, Color.LightGray)
-            ) {
-                Text(
-                    text = "Quay lại trang chủ",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.DarkGray
-                )
+            Spacer(Modifier.height(22.dp))
+            Button(onClick = { onViewQrCode(order.id) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Icon(Icons.Outlined.QrCode2, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Xem mã QR đơn hàng", fontWeight = FontWeight.Bold)
             }
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(onClick = onBackToHome, modifier = Modifier.fillMaxWidth().height(52.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
+                Icon(Icons.Outlined.Home, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Quay lại trang chủ")
+            }
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    value: String,
-    valueColor: Color = Color.Black,
-    isBold: Boolean = false
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+private fun OrderRow(label: String, value: String, emphasized: Boolean = false) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, modifier = Modifier.weight(0.43f), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
-            text = label,
-            fontSize = 13.sp,
-            color = Color.Gray
-        )
-        Text(
-            text = value,
-            fontSize = 13.sp,
-            fontWeight = if (isBold) FontWeight.Bold else FontWeight.Medium,
-            color = valueColor,
-            textAlign = TextAlign.End
+            value,
+            modifier = Modifier.weight(0.57f),
+            textAlign = TextAlign.End,
+            color = if (emphasized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            fontWeight = if (emphasized) FontWeight.Bold else FontWeight.Medium
         )
     }
 }
+
+@Composable
+internal fun BorrowOrderLoadError(message: String, onRetry: () -> Unit, onBackToHome: () -> Unit) {
+    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text(message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) { Text("Thử lại") }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = onBackToHome) { Text("Về trang chủ") }
+    }
+}
+
+internal fun money(amount: Long): String = "${NumberFormat.getNumberInstance(Locale("vi", "VN")).format(amount)} đ"
+
+private fun formatInstant(value: String): String = runCatching {
+    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.systemDefault()).format(Instant.parse(value))
+}.getOrDefault(value)

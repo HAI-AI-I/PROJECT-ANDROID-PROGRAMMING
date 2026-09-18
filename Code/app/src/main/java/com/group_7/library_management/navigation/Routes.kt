@@ -32,7 +32,17 @@ object Routes {
     const val CONTACT_LIBRARIAN = "contact_librarian"
 
     // Book Flow
-    const val BOOK_DETAIL = "book_detail"
+    const val BOOK_DETAIL = "book_detail/{bookId}"
+    fun bookDetail(bookId: String) = "book_detail/$bookId"
+    const val BOOK_REVIEWS = "book_reviews/{bookId}"
+    fun bookReviews(bookId: String) = "book_reviews/$bookId"
+    const val BOOK_BORROW_CONFIRM = "book_borrow_confirm/{bookId}"
+    fun bookBorrowConfirm(bookId: String) = "book_borrow_confirm/$bookId"
+    const val BORROW_SUCCESS = "borrow_success/{orderId}"
+    fun borrowSuccess(orderId: Long) = "borrow_success/$orderId"
+    const val BORROW_QR = "borrow_qr/{orderId}"
+    fun borrowQr(orderId: Long) = "borrow_qr/$orderId"
+    const val BORROW_FAILURE = "borrow_failure"
 
     const val DASHBOARD="dashboard"
 }

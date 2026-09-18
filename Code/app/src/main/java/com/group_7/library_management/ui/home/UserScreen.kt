@@ -16,16 +16,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.group_7.library_management.components.MemberBottomBar
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.components.AppSnackbarHost
 import com.group_7.library_management.navigation.Routes
 import com.group_7.library_management.ui.book.BookDetailScreen
+import com.group_7.library_management.ui.book.BookReviewsScreen
+import com.group_7.library_management.ui.book.BorrowConfirmScreen
+import com.group_7.library_management.ui.book.BorrowFailureScreen
+import com.group_7.library_management.ui.book.BorrowQrScreen
+import com.group_7.library_management.ui.book.BorrowSuccessScreen
 import com.group_7.library_management.ui.qrscan.ScanScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
@@ -67,7 +74,7 @@ fun UserScreen(
         Routes.PROFILE,
         Routes.NOTIFICATIONS,
         Routes.FAVORITE,
-        Routes.SCAN_QR
+        // Routes.SCAN_QR
     )
     val shouldShowBar=currentRoute in mainTabs
 
@@ -131,7 +138,7 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
-                        onBookClick = { book -> userNavController.navigate(Routes.BOOK_DETAIL) },
+                        onBookClick = { book -> userNavController.navigate(Routes.bookDetail(book.id)) },
                         onViewAllClick = { filter ->
                             pendingBookFilter.value = filter
                             navigateTab(Routes.BOOKS)
@@ -145,9 +152,86 @@ fun UserScreen(
                         }
                     )
                 }
-                composable(Routes.BOOK_DETAIL) {
+                composable(
+                    route = Routes.BOOK_DETAIL,
+                    arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
                     BookDetailScreen (
-                        onBack={userNavController.popBackStack()}
+                        onBack={userNavController.popBackStack()},
+                        onNavigateToReviews = {
+                            userNavController.navigate(Routes.bookReviews(bookId))
+                        },
+                        onNavigateToBorrow = {
+                            userNavController.navigate(Routes.bookBorrowConfirm(bookId))
+                        },
+                        onRelatedBookClick = { book ->
+                            userNavController.navigate(Routes.bookDetail(book.id))
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.BOOK_REVIEWS,
+                    arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                ) {
+                    BookReviewsScreen(onBack = { userNavController.popBackStack() })
+                }
+                composable(
+                    route = Routes.BOOK_BORROW_CONFIRM,
+                    arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                ) {
+                    BorrowConfirmScreen(
+                        onSuccess = { orderId ->
+                            userNavController.navigate(Routes.borrowSuccess(orderId)) {
+                                popUpTo(Routes.BOOK_BORROW_CONFIRM) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                        onBookUnavailable = {
+                            userNavController.navigate(Routes.BORROW_FAILURE) {
+                                popUpTo(Routes.BOOK_BORROW_CONFIRM) { inclusive = false }
+                            }
+                        },
+                        onBack = { userNavController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = Routes.BORROW_SUCCESS,
+                    arguments = listOf(navArgument("orderId") { type = NavType.LongType })
+                ) {
+                    BorrowSuccessScreen(
+                        onViewQrCode = { orderId -> userNavController.navigate(Routes.borrowQr(orderId)) },
+                        onBackToHome = {
+                            userNavController.navigate(Routes.HOME) {
+                                popUpTo(Routes.HOME) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.BORROW_QR,
+                    arguments = listOf(navArgument("orderId") { type = NavType.LongType })
+                ) {
+                    BorrowQrScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onBackToHome = {
+                            userNavController.navigate(Routes.HOME) {
+                                popUpTo(Routes.HOME) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+                composable(Routes.BORROW_FAILURE) {
+                    BorrowFailureScreen(
+                        onTryAgain = { userNavController.popBackStack() },
+                        onBackToHome = {
+                            userNavController.navigate(Routes.HOME) {
+                                popUpTo(Routes.HOME) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
                 composable(Routes.NOTIFICATIONS) {
@@ -156,7 +240,8 @@ fun UserScreen(
                 composable(Routes.BOOKS) {
                     BookListScreen(
                         initialFilter = pendingBookFilter.value,
-                        onInitialFilterApplied = { pendingBookFilter.value = null }
+                        onInitialFilterApplied = { pendingBookFilter.value = null },
+                        onBookClick = { book -> userNavController.navigate(Routes.bookDetail(book.id)) }
                     )
                 }
                 composable(Routes.BORROW) {

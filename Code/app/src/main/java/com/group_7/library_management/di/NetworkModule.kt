@@ -5,6 +5,7 @@ import com.group_7.library_management.BuildConfig
 import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
+import com.group_7.library_management.data.remote.api.BorrowApi
 import com.group_7.library_management.data.remote.api.NotificationApi
 import dagger.Module
 import dagger.Provides
@@ -59,6 +60,10 @@ object  NetworkModule {
     @Provides
     @Singleton
     fun provideBookApi(retrofit: Retrofit): BookApi = retrofit.create(BookApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideBorrowApi(retrofit: Retrofit): BorrowApi = retrofit.create(BorrowApi::class.java)
 
     @Provides
     @Singleton

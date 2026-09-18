@@ -32,6 +32,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/biometric/login"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/books/*/reviews/mine").authenticated()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/books",
@@ -44,6 +45,9 @@ public class SecurityConfig {
                                 "/api/v1/categories/**",
                                 "/api/v1/notifications"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/books/*/reviews").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/books/*/reviews/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/books/*/reviews/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/books", "/api/v1/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/books/**").hasRole("ADMIN")

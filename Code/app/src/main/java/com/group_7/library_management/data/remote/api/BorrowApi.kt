@@ -1,0 +1,26 @@
+package com.group_7.library_management.data.remote.api
+
+import com.group_7.library_management.data.remote.dto.BorrowOrderResponseDto
+import com.group_7.library_management.data.remote.dto.CreateBorrowOrderRequestDto
+import com.group_7.library_management.data.remote.dto.CurrentBorrowOrderResponseDto
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+
+interface BorrowApi {
+    @POST("api/v1/borrow-orders")
+    suspend fun createBorrowOrder(
+        @Body request: CreateBorrowOrderRequestDto
+    ): BorrowOrderResponseDto
+
+    @GET("api/v1/borrow-orders/{orderId}")
+    suspend fun getBorrowOrder(
+        @Path("orderId") orderId: Long
+    ): BorrowOrderResponseDto
+
+    @GET("api/v1/borrow-orders/books/{bookId}/current")
+    suspend fun getCurrentBorrowOrder(
+        @Path("bookId") bookId: Long
+    ): CurrentBorrowOrderResponseDto
+}

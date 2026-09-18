@@ -31,9 +31,8 @@ fun NavGraphBuilder.addBookNavGraph(navController: NavController) {
     composable(
         route = BookRoute.Reviews.route,
         arguments = listOf(navArgument("bookId") { type = NavType.StringType })
-    ) { backStackEntry ->
-        val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
-        // TODO: BookReviewsScreen(bookId = bookId, onBack = { navController.popBackStack() })
+    ) {
+        BookReviewsScreen(onBack = { navController.popBackStack() })
     }
 
     // 3. Màn hình Xác nhận mượn sách
@@ -48,19 +47,19 @@ fun NavGraphBuilder.addBookNavGraph(navController: NavController) {
     // 5. Màn hình Mượn thành công
     composable(
         route = BookRoute.Success.route,
-        arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+        arguments = listOf(navArgument("orderId") { type = NavType.LongType })
     ) { backStackEntry ->
-        val transactionId = backStackEntry.arguments?.getString("transactionId") ?: ""
-        // TODO: BorrowSuccessScreen(transactionId = transactionId, ...)
+        val orderId = backStackEntry.arguments?.getLong("orderId") ?: return@composable
+        // The active application graph is declared in UserScreen.
     }
 
     // 6. Màn hình Mã QR giao dịch
     composable(
         route = BookRoute.QRCode.route,
-        arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+        arguments = listOf(navArgument("orderId") { type = NavType.LongType })
     ) { backStackEntry ->
-        val transactionId = backStackEntry.arguments?.getString("transactionId") ?: ""
-        // TODO: QRCodeScreen(transactionId = transactionId, ...)
+        val orderId = backStackEntry.arguments?.getLong("orderId") ?: return@composable
+        // The active application graph is declared in UserScreen.
     }
 
     // 7. Màn hình Mượn thất bại

@@ -70,6 +70,14 @@ public class BookController {
         return bookService.getBook(id);
     }
 
+    @GetMapping("/{id}/related")
+    public List<PopularBookResponse> getRelatedBooks(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return bookService.getRelatedBooks(id, normalizePageSize(limit));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookResponse createBook(@Valid @RequestBody CreateBookRequest request) {

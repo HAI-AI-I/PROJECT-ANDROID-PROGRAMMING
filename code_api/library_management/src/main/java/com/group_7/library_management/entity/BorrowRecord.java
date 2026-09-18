@@ -51,6 +51,21 @@ public class BorrowRecord {
     @Column(name = "returned_at")
     private Instant returnedAt;
 
+    @Column(name = "borrow_days", nullable = false)
+    private int borrowDays;
+
+    @Column(name = "pickup_location", nullable = false, length = 150)
+    private String pickupLocation = "Thư viện UTH";
+
+    @Column(name = "borrow_fee", nullable = false)
+    private long borrowFee;
+
+    @Column(name = "deposit_amount", nullable = false)
+    private long depositAmount;
+
+    @Column(name = "total_amount", nullable = false)
+    private long totalAmount;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -65,6 +80,28 @@ public class BorrowRecord {
         this.bookCopy = bookCopy;
         this.borrowedAt = borrowedAt;
         this.status = BorrowStatus.BORROWED;
+    }
+
+    public BorrowRecord(
+            String referenceCode,
+            User user,
+            BookCopy bookCopy,
+            int borrowDays,
+            Instant dueAt,
+            String pickupLocation,
+            long borrowFee,
+            long depositAmount
+    ) {
+        this.referenceCode = referenceCode;
+        this.user = user;
+        this.bookCopy = bookCopy;
+        this.status = BorrowStatus.REQUESTED;
+        this.borrowDays = borrowDays;
+        this.dueAt = dueAt;
+        this.pickupLocation = pickupLocation;
+        this.borrowFee = borrowFee;
+        this.depositAmount = depositAmount;
+        this.totalAmount = Math.addExact(borrowFee, depositAmount);
     }
 
     @PrePersist
@@ -84,8 +121,16 @@ public class BorrowRecord {
     public BorrowStatus getStatus() { return status; }
     public void setStatus(BorrowStatus status) { this.status = status; }
     public Instant getBorrowedAt() { return borrowedAt; }
+    public void setBorrowedAt(Instant borrowedAt) { this.borrowedAt = borrowedAt; }
     public Instant getDueAt() { return dueAt; }
     public void setDueAt(Instant dueAt) { this.dueAt = dueAt; }
     public Instant getReturnedAt() { return returnedAt; }
     public void setReturnedAt(Instant returnedAt) { this.returnedAt = returnedAt; }
+    public int getBorrowDays() { return borrowDays; }
+    public String getPickupLocation() { return pickupLocation; }
+    public long getBorrowFee() { return borrowFee; }
+    public long getDepositAmount() { return depositAmount; }
+    public long getTotalAmount() { return totalAmount; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 }

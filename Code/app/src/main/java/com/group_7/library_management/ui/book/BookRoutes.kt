@@ -16,13 +16,13 @@ sealed class BookRoute(val route: String) {
     }
 
     // 5. Màn hình Mượn thành công
-    object Success : BookRoute("borrow_success/{transactionId}") {
-        fun createRoute(id: String) = "borrow_success/$id"
+    object Success : BookRoute("borrow_success/{orderId}") {
+        fun createRoute(id: Long) = "borrow_success/$id"
     }
 
     // 6. Màn hình Mã QR giao dịch
-    object QRCode : BookRoute("qr_code/{transactionId}") {
-        fun createRoute(id: String) = "qr_code/$id"
+    object QRCode : BookRoute("qr_code/{orderId}") {
+        fun createRoute(id: Long) = "qr_code/$id"
     }
 
     // 7. Màn hình Mượn thất bại

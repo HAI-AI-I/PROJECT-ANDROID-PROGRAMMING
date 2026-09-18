@@ -1,2 +1,3 @@
 hs_err_pid*.log
 replay_pid*.log
+code_api/library_management/spring-boot.out.log

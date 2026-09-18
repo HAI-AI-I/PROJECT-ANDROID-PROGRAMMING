@@ -1,318 +1,486 @@
 package com.group_7.library_management.ui.book
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.group_7.library_management.R
+import com.group_7.library_management.models.Book
+import com.group_7.library_management.models.BookReview
+import com.group_7.library_management.ui.theme.Border
+import com.group_7.library_management.ui.theme.StarColor
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-data class Review(
-    val id: String,
-    val name: String,
-    val avatarUrl: String,
-    val date: String,
-    val rating: Int,
-    val comment: String,
-    val helpfulCount: Int
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookReviewsScreen(
     onBack: () -> Unit = {},
-    onWriteReview: () -> Unit = {}
+    viewModel: BookReviewsViewModel = hiltViewModel()
 ) {
-    val sampleReviews = listOf(
-        Review(
-            id = "1",
-            name = "Lê Thanh Hải",
-            avatarUrl = "https://i.pravatar.cc/150?img=11",
-            date = "15/10/2023",
-            rating = 5,
-            comment = "Cuốn sách cực kỳ hữu ích cho lập trình viên muốn viết code sạch và dễ bảo trì. Các ví dụ rất thực tế và dễ áp dụng. Rất đáng đọc!",
-            helpfulCount = 24
-        ),
-        Review(
-            id = "2",
-            name = "Nguyễn Minh Anh",
-            avatarUrl = "https://i.pravatar.cc/150?img=5",
-            date = "02/09/2023",
-            rating = 4,
-            comment = "Nội dung cốt lõi rất hay, nhưng một số phần hơi dài dòng. Nhìn chung vẫn là một tài liệu bắt buộc phải đọc cho mọi sinh viên CNTT.",
-            helpfulCount = 8
-        )
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+    var reviewToDelete by remember { mutableStateOf<BookReview?>(null) }
+    val reachedEnd by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = listState.layoutInfo.totalItemsCount
+            totalItems > 0 && lastVisible >= totalItems - 2
+        }
+    }
+
+    LaunchedEffect(reachedEnd) {
+        if (reachedEnd) viewModel.loadNextPage()
+    }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Đánh giá & Bình luận",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF000865)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color(0xFF000865)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFF8F9FA)
-                )
-            )
-        },
+        topBar = { ReviewTopBar(uiState.book, onBack) },
         bottomBar = {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFF8F9FA),
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 8.dp
             ) {
                 Button(
-                    onClick = onWriteReview,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF000865)
-                    ),
-                    shape = RoundedCornerShape(25.dp)
+                    onClick = viewModel::openReviewEditor,
+                    enabled = !uiState.isSubmitting && !uiState.isCheckingMyReview,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    if (uiState.isCheckingMyReview) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                    Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Viết đánh giá",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        if (uiState.isCheckingMyReview) "Đang kiểm tra..." else "Viết đánh giá",
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         },
-        containerColor = Color(0xFFF8F9FA)
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                RatingSummaryCard()
-            }
+        when {
+            uiState.isLoading -> LoadingContent(Modifier.padding(innerPadding))
+            uiState.errorMessage != null -> ErrorContent(
+                message = requireNotNull(uiState.errorMessage),
+                onRetry = viewModel::refresh,
+                modifier = Modifier.padding(innerPadding)
+            )
+            else -> LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 8.dp,
+                    bottom = 20.dp
+                )
+            ) {
+                if (uiState.reviews.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá cuốn sách này.",
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    items(uiState.reviews, key = BookReview::id) { review ->
+                        ReviewItem(
+                            review = review,
+                            isOwner = review.userId == viewModel.currentUserId,
+                            onEdit = { viewModel.editReview(review) },
+                            onDelete = { reviewToDelete = review }
+                        )
+                    }
+                }
 
-            items(sampleReviews) { review ->
-                ReviewItemCard(review = review)
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                if (uiState.isLoadingMore) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                        }
+                    }
+                }
             }
         }
     }
-}
 
-@Composable
-fun RatingSummaryCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "4.8",
-                fontSize = 42.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF000865)
-            )
+    if (uiState.isEditorVisible) {
+        WriteReviewDialog(
+            existingReview = uiState.editingReview,
+            isSubmitting = uiState.isSubmitting,
+            onDismiss = viewModel::dismissEditor,
+            onSubmit = viewModel::submitReview
+        )
+    }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(4) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = Color(0xFF7F90FF),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Outlined.Star,
-                    contentDescription = null,
-                    tint = Color(0xFF7F90FF),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "128 lượt đánh giá",
-                fontSize = 13.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val breakdown = listOf(
-                5 to 0.80f,
-                4 to 0.15f,
-                3 to 0.03f,
-                2 to 0.01f,
-                1 to 0.01f
-            )
-
-            breakdown.forEach { (star, progress) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+    reviewToDelete?.let { review ->
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isDeleting) reviewToDelete = null },
+            title = { Text("Xóa đánh giá?") },
+            text = { Text("Đánh giá của bạn sẽ bị xóa và điểm trung bình của sách được tính lại.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteReview(review.id)
+                        reviewToDelete = null
+                    },
+                    enabled = !uiState.isDeleting
                 ) {
-                    Text(
-                        text = "$star",
-                        fontSize = 13.sp,
-                        color = Color.DarkGray,
-                        modifier = Modifier.width(12.dp)
-                    )
-                    Icon(
-                        imageVector = Icons.Outlined.Star,
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(8.dp)
-                            .clip(CircleShape),
-                        color = Color(0xFF7F90FF),
-                        trackColor = Color(0xFFEFEFEF)
-                    )
+                    Text("Xóa")
                 }
-                Spacer(modifier = Modifier.height(6.dp))
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { reviewToDelete = null },
+                    enabled = !uiState.isDeleting
+                ) { Text("Hủy") }
+            }
+        )
+    }
+}
+
+@Composable
+private fun ReviewTopBar(book: Book?, onBack: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 50.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại")
+            }
+            AsyncImage(
+                model = book?.coverImageUrl,
+                contentDescription = book?.title,
+                modifier = Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop,
+                fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
+                error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = book?.title ?: "Đánh giá sách",
+                        modifier = Modifier.weight(1f, fill = false),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (book != null) {
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = String.format(Locale.US, "%.1f", book.rating),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(Modifier.width(3.dp))
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = null,
+                            tint = StarColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "Xếp hạng và đánh giá${book?.let { " · ${it.ratingCount} lượt" } ?: ""}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
 }
 
 @Composable
-fun ReviewItemCard(review: Review) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+private fun ReviewItem(
+    review: BookReview,
+    isOwner: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var helpfulChoice by rememberSaveable(review.id) { mutableStateOf<Boolean?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(48.dp).clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = review.avatarUrl,
-                    contentDescription = review.name,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
+                Text(
+                    text = review.userName.firstOrNull()?.uppercase() ?: "?",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Medium
                 )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = review.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = Color(0xFF1F1F1F)
-                    )
-                    Text(
-                        text = review.date,
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    for (i in 1..5) {
-                        Icon(
-                            imageVector = if (i <= review.rating) Icons.Default.Star else Icons.Outlined.Star,
-                            contentDescription = null,
-                            tint = Color(0xFF7F90FF),
-                            modifier = Modifier.size(16.dp)
+            }
+            Spacer(Modifier.width(14.dp))
+            Text(
+                text = review.userName,
+                modifier = Modifier.weight(1f),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (isOwner) {
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Tùy chọn đánh giá")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Thay đổi") },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                            onClick = {
+                                showMenu = false
+                                onEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Xóa") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDelete()
+                            }
                         )
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = review.comment,
-                fontSize = 13.sp,
-                color = Color.DarkGray,
-                lineHeight = 18.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = { /* Xử lý khi bấm hữu ích */ },
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
-                modifier = Modifier.height(32.dp)
-            ) {
+        Spacer(Modifier.height(16.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            repeat(5) { index ->
                 Icon(
-                    imageVector = Icons.Outlined.ThumbUp,
+                    imageVector = if (index < review.rating) Icons.Default.Star else Icons.Outlined.Star,
                     contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Hữu ích (${review.helpfulCount})",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    tint = if (index < review.rating) StarColor else Border,
+                    modifier = Modifier.size(20.dp)
                 )
             }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = formatReviewDate(review.createdAt),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+        }
+
+        if (!review.comment.isNullOrBlank()) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = review.comment,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 24.sp
+            )
+        }
+
+        Spacer(Modifier.height(18.dp))
+        HorizontalDivider(modifier = Modifier.width(48.dp), thickness = 1.dp, color = Border)
+        Spacer(Modifier.height(14.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Bài đánh giá này có hữu ích không?",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            HelpfulButton("Có", selected = helpfulChoice == true) { helpfulChoice = true }
+            Spacer(Modifier.width(8.dp))
+            HelpfulButton("Không", selected = helpfulChoice == false) { helpfulChoice = false }
+        }
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider(color = Border)
+    }
+}
+
+@Composable
+private fun HelpfulButton(text: String, selected: Boolean, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.height(36.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        ),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+    ) {
+        Text(text, fontSize = 14.sp)
+    }
+}
+
+@Composable
+private fun LoadingContent(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = onRetry) { Text("Tải lại") }
         }
     }
 }
+
+@Composable
+private fun WriteReviewDialog(
+    existingReview: BookReview?,
+    isSubmitting: Boolean,
+    onDismiss: () -> Unit,
+    onSubmit: (Int, String) -> Unit
+) {
+    var rating by remember(existingReview?.id) {
+        mutableIntStateOf(existingReview?.rating ?: 5)
+    }
+    var comment by remember(existingReview?.id) {
+        mutableStateOf(existingReview?.comment.orEmpty())
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (existingReview == null) "Viết đánh giá" else "Thay đổi đánh giá") },
+        text = {
+            Column {
+                Text("Bạn đánh giá cuốn sách này bao nhiêu sao?")
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    repeat(5) { index ->
+                        val star = index + 1
+                        Icon(
+                            imageVector = if (star <= rating) Icons.Default.Star else Icons.Outlined.Star,
+                            contentDescription = "$star sao",
+                            tint = if (star <= rating) StarColor else Color.Gray,
+                            modifier = Modifier.size(36.dp).clickable { rating = star }
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { if (it.length <= 2000) comment = it },
+                    label = { Text("Bình luận (không bắt buộc)") },
+                    supportingText = { Text("${comment.length}/2000") },
+                    minLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isSubmitting
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSubmit(rating, comment) }, enabled = !isSubmitting) {
+                if (isSubmitting) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Text(if (existingReview == null) "Gửi" else "Lưu")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isSubmitting) { Text("Hủy") }
+        }
+    )
+}
+
+private fun formatReviewDate(value: String): String = runCatching {
+    Instant.parse(value)
+        .atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+}.getOrDefault(value)
