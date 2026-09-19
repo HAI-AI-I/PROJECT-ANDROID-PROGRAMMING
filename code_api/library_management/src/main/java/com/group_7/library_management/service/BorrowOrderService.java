@@ -173,6 +173,18 @@ public class BorrowOrderService {
         return BorrowOrderResponse.from(savedOrder);
     }
 
+    @Transactional
+    public BorrowOrderResponse confirmDepositRefund(String referenceCode) {
+        BorrowRecord order = findOrderForUpdate(referenceCode);
+        if (order.getStatus() != BorrowStatus.RETURNED) {
+            throw new ConflictException("Chỉ có thể hoàn tiền cọc sau khi sách đã được trả");
+        }
+        if (order.getDepositRefundedAt() == null) {
+            order.setDepositRefundedAt(Instant.now());
+        }
+        return BorrowOrderResponse.from(borrowRecordRepository.saveAndFlush(order));
+    }
+
     private BorrowRecord findOrderForUpdate(String referenceCode) {
         return borrowRecordRepository.findByReferenceCode(referenceCode.trim().toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn mượn"));

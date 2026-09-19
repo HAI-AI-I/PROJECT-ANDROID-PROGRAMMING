@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -44,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -61,6 +63,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.components.SearchBar
@@ -82,6 +87,17 @@ fun HomeScreen(
     onNavigateToFavorite: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshBorrowSummary()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     if(uiState.isLoadingBooks){
         Box(
@@ -178,6 +194,7 @@ fun HomeScreen(
                     BorrowStatusSection(
                         summary = uiState.borrowSummary,
                         isLoading = uiState.isLoadingSummary,
+                        errorMessage = uiState.summaryLoadError,
                         onStatusClick = { tabKey ->
                             if (tabKey == "favorite") {
                                 onNavigateToFavorite()
@@ -299,8 +316,29 @@ fun BookItemCard(book: Book,
 fun BorrowStatusSection(
     summary: UserBorrowSummary,
     isLoading: Boolean = false,
+    errorMessage: String? = null,
     onStatusClick: (String) -> Unit = {}
 ) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(vertical = LibrarySpacing.Large),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (errorMessage != null) {
+        Text(
+            text = errorMessage,
+            modifier = Modifier.fillMaxWidth().padding(vertical = LibrarySpacing.Medium),
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+        return
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StatusRowItem(
             icon = Icons.Default.LibraryBooks,
@@ -339,8 +377,15 @@ fun BorrowStatusSection(
         )
         StatusRowItem(
             icon = Icons.Default.Done,
-            title = "Đã mượn",
+            title = "Đã trả",
             count = summary.returnedCount.toString(),
+            iconTint = SuccessColor,
+            onClick = { onStatusClick("returned") }
+        )
+        StatusRowItem(
+            icon = Icons.Default.History,
+            title = "Lịch sử mượn",
+            count = summary.allBorrowCount.toString(),
             iconTint = SuccessColor,
             onClick = { onStatusClick("history") }
         )

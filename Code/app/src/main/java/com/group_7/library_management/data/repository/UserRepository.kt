@@ -24,7 +24,7 @@ class UserRepository @Inject constructor(
     private val authApi: AuthApi,
     private val checkLogin: CheckLogin
 ) {
-    suspend fun sendRegistrationCode(
+    suspend fun sendRegistrationCode    (
         name: String,
         email: String,
         phone: String,

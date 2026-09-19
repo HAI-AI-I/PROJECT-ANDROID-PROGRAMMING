@@ -1,17 +1,24 @@
 package com.group_7.library_management.data.repository
 
+import com.group_7.library_management.data.local.dao.HomeSummaryDao
+import com.group_7.library_management.data.local.entity.HomeSummaryEntity
+import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.BorrowApi
 import com.group_7.library_management.data.remote.dto.BorrowOrderResponseDto
 import com.group_7.library_management.data.remote.dto.CreateBorrowOrderRequestDto
+import com.group_7.library_management.data.remote.dto.HomeSummaryResponseDto
 import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.models.UserBorrowSummary
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class BorrowRepository @Inject constructor(
-    private val borrowApi: BorrowApi
+    private val borrowApi: BorrowApi,
+    private val homeSummaryDao: HomeSummaryDao,
+    private val checkLogin: CheckLogin
 ) {
     suspend fun getBorrowOrders(): List<BorrowOrder> {
         return borrowApi.getBorrowOrders().map { it.toModel() }
@@ -31,19 +38,50 @@ class BorrowRepository @Inject constructor(
         return borrowApi.getCurrentBorrowOrder(bookId).order?.toModel()
     }
 
-    fun getBorrowSummary(userId:String="default_user"): Flow<UserBorrowSummary> = flow {
-        delay(500)
-        emit(
-            UserBorrowSummary(
-                pendingPickupCount = 1,
-                borrowingCount = 3,
-                dueSoonCount = 1,
-                overdueCount = 0,
-                favoriteCount = 5,
-                returnedCount = 10
-            )
-        )
+    fun getBorrowSummary(): Flow<UserBorrowSummary> = flow {
+        val userId = requireNotNull(checkLogin.getSavedUserId()?.toLongOrNull()) {
+            "Không tìm thấy người dùng đang đăng nhập."
+        }
+        val refreshFailure = try {
+            val remoteSummary = borrowApi.getHomeSummary()
+            homeSummaryDao.upsert(remoteSummary.toEntity(userId))
+            null
+        } catch (error: Throwable) {
+            if (!error.canReadFromCache()) throw error
+            error
+        }
+
+        val cachedSummary = homeSummaryDao.findByUserId(userId)
+        when {
+            cachedSummary != null -> emit(cachedSummary.toModel())
+            refreshFailure != null -> throw refreshFailure
+            else -> emit(UserBorrowSummary())
+        }
     }
+
+    private fun HomeSummaryResponseDto.toEntity(userId: Long) = HomeSummaryEntity(
+        userId = userId,
+        pendingPickupCount = pendingPickupCount,
+        borrowingCount = borrowingCount,
+        dueSoonCount = dueSoonCount,
+        overdueCount = overdueCount,
+        favoriteCount = favoriteCount,
+        returnedCount = returnedCount,
+        allBorrowCount = allBorrowCount
+    )
+
+    private fun HomeSummaryEntity.toModel() = UserBorrowSummary(
+        pendingPickupCount = pendingPickupCount,
+        borrowingCount = borrowingCount,
+        dueSoonCount = dueSoonCount,
+        overdueCount = overdueCount,
+        favoriteCount = favoriteCount,
+        returnedCount = returnedCount,
+        allBorrowCount = allBorrowCount
+    )
+
+    private fun Throwable.canReadFromCache(): Boolean =
+        this is IOException || (this is HttpException && code() >= 500)
 
     private fun BorrowOrderResponseDto.toModel() = BorrowOrder(
         id = id,
@@ -64,6 +102,9 @@ class BorrowRepository @Inject constructor(
         returnedAt = returnedAt,
         borrowFee = borrowFee,
         depositAmount = depositAmount,
-        totalAmount = totalAmount
+        totalAmount = totalAmount,
+        paidAmount = paidAmount,
+        depositRefunded = depositRefunded,
+        remainingRefundAmount = remainingRefundAmount
     )
 }

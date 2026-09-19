@@ -126,7 +126,11 @@ fun BookListScreen(
                     verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
                 ) {
                     items(uiState.filteredBooks, key = { it.id }) { book ->
-                        BookListItemCard(book = book, onClick = { onBookClick(book) })
+                        BookListItemCard(
+                            book = book,
+                            onClick = { onBookClick(book) },
+                            onBorrowClick = { onBookClick(book) },
+                        )
                     }
                 }
             }

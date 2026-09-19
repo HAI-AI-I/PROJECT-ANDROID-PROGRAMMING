@@ -43,9 +43,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,26 +66,20 @@ import java.util.Locale
 fun BookDetailScreen(
     onBack: () -> Unit,
     viewModel: BookDetailViewModel = hiltViewModel(),
-    isFavorite: Boolean = false,
-    onToggleFavorite: () -> Unit = {},
     onNavigateToReviews: () -> Unit = {},
     onNavigateToBorrow: () -> Unit = {},
     onRelatedBookClick: (Book) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var isFav by remember(isFavorite) { mutableStateOf(isFavorite) }
 
     Scaffold(
         topBar = {
             MemberTopBar(
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onLeftClick = onBack,
-                rightIcon = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                rightIconTint = if (isFav) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                onRightClick = {
-                    isFav = !isFav
-                    onToggleFavorite()
-                },
+                rightIcon = if (uiState.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                rightIconTint = if (uiState.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                onRightClick = viewModel::toggleFavorite,
                 showNotificationBadge = false
             )
         },

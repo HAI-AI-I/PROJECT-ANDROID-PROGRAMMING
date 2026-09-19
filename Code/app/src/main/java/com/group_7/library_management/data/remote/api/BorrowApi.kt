@@ -3,12 +3,16 @@ package com.group_7.library_management.data.remote.api
 import com.group_7.library_management.data.remote.dto.BorrowOrderResponseDto
 import com.group_7.library_management.data.remote.dto.CreateBorrowOrderRequestDto
 import com.group_7.library_management.data.remote.dto.CurrentBorrowOrderResponseDto
+import com.group_7.library_management.data.remote.dto.HomeSummaryResponseDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface BorrowApi {
+    @GET("api/v1/home/summary")
+    suspend fun getHomeSummary(): HomeSummaryResponseDto
+
     @GET("api/v1/borrow-orders")
     suspend fun getBorrowOrders(): List<BorrowOrderResponseDto>
 

@@ -31,4 +31,9 @@ public class AdminBorrowOrderController {
     public BorrowOrderResponse confirmReturn(@PathVariable String referenceCode) {
         return borrowOrderService.confirmReturn(referenceCode);
     }
+
+    @PostMapping("/{referenceCode}/refund-deposit")
+    public BorrowOrderResponse confirmDepositRefund(@PathVariable String referenceCode) {
+        return borrowOrderService.confirmDepositRefund(referenceCode);
+    }
 }

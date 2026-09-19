@@ -24,7 +24,10 @@ public record BorrowOrderResponse(
         Instant returnedAt,
         long borrowFee,
         long depositAmount,
-        long totalAmount
+        long totalAmount,
+        long paidAmount,
+        boolean depositRefunded,
+        long remainingRefundAmount
 ) {
     public static BorrowOrderResponse from(BorrowRecord order) {
         var book = order.getBookCopy().getBook();
@@ -38,6 +41,14 @@ public record BorrowOrderResponse(
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .reduce((left, right) -> left + ", " + right)
                 .orElse("");
+        long paidAmount = effectiveStatus == BorrowStatus.REQUESTED
+                || effectiveStatus == BorrowStatus.CANCELLED
+                ? 0L
+                : order.getTotalAmount();
+        boolean depositRefunded = order.getDepositRefundedAt() != null;
+        long remainingRefundAmount = effectiveStatus == BorrowStatus.RETURNED && !depositRefunded
+                ? order.getDepositAmount()
+                : 0L;
         return new BorrowOrderResponse(
                 order.getId(),
                 order.getReferenceCode(),
@@ -57,7 +68,10 @@ public record BorrowOrderResponse(
                 order.getReturnedAt(),
                 order.getBorrowFee(),
                 order.getDepositAmount(),
-                order.getTotalAmount()
+                order.getTotalAmount(),
+                paidAmount,
+                depositRefunded,
+                remainingRefundAmount
         );
     }
 }

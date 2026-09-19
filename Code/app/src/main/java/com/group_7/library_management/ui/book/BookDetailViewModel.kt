@@ -7,6 +7,7 @@ import com.group_7.library_management.components.AppSnackbarController
 import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.BorrowRepository
+import com.group_7.library_management.data.repository.FavoriteRepository
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BorrowOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,8 @@ data class BookDetailUiState(
     val book: Book? = null,
     val relatedBooks: List<Book> = emptyList(),
     val currentBorrowOrder: BorrowOrder? = null,
+    val isFavorite: Boolean = false,
+    val isUpdatingFavorite: Boolean = false,
     val isAvailabilitySubscribed: Boolean = false,
     val isUpdatingSubscription: Boolean = false,
     val isLoading: Boolean = true,
@@ -35,6 +38,7 @@ class BookDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val bookRepository: BookRepository,
     private val borrowRepository: BorrowRepository,
+    private val favoriteRepository: FavoriteRepository,
     private val networkMonitor: NetworkMonitor,
     private val snackbarController: AppSnackbarController
 ) : ViewModel() {
@@ -45,6 +49,7 @@ class BookDetailViewModel @Inject constructor(
     init {
         refreshBook()
         loadAvailabilitySubscription()
+        loadFavoriteStatus()
     }
 
     fun refreshBook() {
@@ -141,6 +146,35 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    fun toggleFavorite() {
+        val state = _uiState.value
+        if (state.isUpdatingFavorite) return
+        val book = state.book ?: return
+        if (!networkMonitor.isConnected.value) {
+            snackbarController.show("Không có kết nối mạng. Không thể cập nhật yêu thích.")
+            return
+        }
+
+        val shouldFavorite = !state.isFavorite
+        viewModelScope.launch {
+            _uiState.update { it.copy(isUpdatingFavorite = true) }
+            runCatching { favoriteRepository.setFavorite(book, shouldFavorite) }
+                .onSuccess { favorite ->
+                    _uiState.update {
+                        it.copy(isFavorite = favorite, isUpdatingFavorite = false)
+                    }
+                    snackbarController.show(
+                        if (favorite) "Đã thêm vào sách yêu thích."
+                        else "Đã xóa khỏi sách yêu thích."
+                    )
+                }
+                .onFailure { throwable ->
+                    _uiState.update { it.copy(isUpdatingFavorite = false) }
+                    snackbarController.show(throwable.toMessage())
+                }
+        }
+    }
+
     fun requestBorrow(onAvailable: () -> Unit) {
         if (_uiState.value.currentBorrowOrder != null) return
         val book = _uiState.value.book
@@ -161,6 +195,16 @@ class BookDetailViewModel @Inject constructor(
             runCatching { bookRepository.isAvailabilitySubscribed(bookId) }
                 .onSuccess { subscribed ->
                     _uiState.update { it.copy(isAvailabilitySubscribed = subscribed) }
+                }
+        }
+    }
+
+    private fun loadFavoriteStatus() {
+        if (bookId.isBlank() || !networkMonitor.isConnected.value) return
+        viewModelScope.launch {
+            runCatching { favoriteRepository.isFavorite(bookId) }
+                .onSuccess { favorite ->
+                    _uiState.update { it.copy(isFavorite = favorite) }
                 }
         }
     }

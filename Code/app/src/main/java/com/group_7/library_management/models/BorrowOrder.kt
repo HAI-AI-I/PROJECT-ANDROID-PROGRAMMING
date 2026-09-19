@@ -19,5 +19,8 @@ data class BorrowOrder(
     val returnedAt: String?,
     val borrowFee: Long,
     val depositAmount: Long,
-    val totalAmount: Long
+    val totalAmount: Long,
+    val paidAmount: Long,
+    val depositRefunded: Boolean,
+    val remainingRefundAmount: Long
 )

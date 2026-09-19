@@ -6,7 +6,9 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.group_7.library_management.data.local.AppDatabase
 import com.group_7.library_management.data.local.dao.BookDAO
+import com.group_7.library_management.data.local.dao.FavoriteBookDao
 import com.group_7.library_management.data.local.dao.NotificationDAO
+import com.group_7.library_management.data.local.dao.HomeSummaryDao
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.dao.SupportRequestDao
 import com.group_7.library_management.data.local.preferences.CheckLogin
@@ -14,6 +16,7 @@ import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
 import com.group_7.library_management.data.remote.api.NotificationApi
 import com.group_7.library_management.data.repository.BookRepository
+import com.group_7.library_management.data.repository.FavoriteRepository
 import com.group_7.library_management.data.repository.NotificationRepository
 import com.group_7.library_management.data.repository.UserRepository
 import com.group_7.library_management.data.repository.SupportRepository
@@ -70,6 +73,70 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS favorite_books (
+                    userId TEXT NOT NULL,
+                    bookId TEXT NOT NULL,
+                    isbn TEXT,
+                    title TEXT NOT NULL,
+                    author TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    publisher TEXT,
+                    publishYear INTEGER,
+                    totalCopies INTEGER NOT NULL,
+                    coverImageUrl TEXT,
+                    description TEXT,
+                    borrowFee INTEGER NOT NULL,
+                    availableCopies INTEGER NOT NULL,
+                    rating REAL NOT NULL,
+                    createdAt INTEGER NOT NULL,
+                    ratingCount INTEGER NOT NULL,
+                    popularityScore INTEGER NOT NULL,
+                    favoritedAt INTEGER NOT NULL,
+                    PRIMARY KEY(userId, bookId)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
+    private val MIGRATION_10_11 = object : Migration(10, 11) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS home_summaries (
+                    userId INTEGER NOT NULL,
+                    pendingPickupCount INTEGER NOT NULL,
+                    borrowingCount INTEGER NOT NULL,
+                    dueSoonCount INTEGER NOT NULL,
+                    overdueCount INTEGER NOT NULL,
+                    favoriteCount INTEGER NOT NULL,
+                    returnedCount INTEGER NOT NULL,
+                    updatedAt INTEGER NOT NULL,
+                    PRIMARY KEY(userId)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
+    private val MIGRATION_11_12 = object : Migration(11, 12) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE home_summaries RENAME COLUMN returnedCount TO allBorrowCount")
+        }
+    }
+
+    private val MIGRATION_12_13 = object : Migration(12, 13) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE home_summaries ADD COLUMN returnedCount INTEGER NOT NULL DEFAULT 0"
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -85,7 +152,11 @@ object  DatabaseModule {
             MIGRATION_5_6,
             MIGRATION_6_7,
             MIGRATION_7_8,
-            MIGRATION_8_9
+            MIGRATION_8_9,
+            MIGRATION_9_10,
+            MIGRATION_10_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13
         )
         .fallbackToDestructiveMigration(true)
         .build()
@@ -97,9 +168,29 @@ object  DatabaseModule {
     }
 
     @Provides
+    fun provideFavoriteBookDao(database: AppDatabase): FavoriteBookDao {
+        return database.getFavoriteBookDao()
+    }
+
+    @Provides
+    fun provideHomeSummaryDao(database: AppDatabase): HomeSummaryDao {
+        return database.getHomeSummaryDao()
+    }
+
+    @Provides
     @Singleton
     fun provideBookRepository(bookDao: BookDAO, bookApi: BookApi): BookRepository {
         return BookRepository(bookDao, bookApi)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteRepository(
+        favoriteBookDao: FavoriteBookDao,
+        bookApi: BookApi,
+        checkLogin: CheckLogin
+    ): FavoriteRepository {
+        return FavoriteRepository(favoriteBookDao, bookApi, checkLogin)
     }
 
     @Provides

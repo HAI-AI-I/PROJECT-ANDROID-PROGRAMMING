@@ -3,6 +3,7 @@ package com.group_7.library_management.data.remote.api
 import com.group_7.library_management.data.remote.dto.BookResponseDto
 import com.group_7.library_management.data.remote.dto.PopularBookResponseDto
 import com.group_7.library_management.data.remote.dto.BookAvailabilitySubscriptionResponseDto
+import com.group_7.library_management.data.remote.dto.BookFavoriteStatusResponseDto
 import com.group_7.library_management.data.remote.dto.BookReviewRequestDto
 import com.group_7.library_management.data.remote.dto.BookReviewResponseDto
 import com.group_7.library_management.data.remote.dto.PagedResponseDto
@@ -17,6 +18,24 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface BookApi {
+    @GET("api/v1/favorites")
+    suspend fun getFavoriteBooks(): List<BookResponseDto>
+
+    @GET("api/v1/favorites/books/{id}")
+    suspend fun getFavoriteStatus(
+        @Path("id") id: String
+    ): BookFavoriteStatusResponseDto
+
+    @PUT("api/v1/favorites/books/{id}")
+    suspend fun addFavorite(
+        @Path("id") id: String
+    ): BookFavoriteStatusResponseDto
+
+    @DELETE("api/v1/favorites/books/{id}")
+    suspend fun removeFavorite(
+        @Path("id") id: String
+    ): BookFavoriteStatusResponseDto
+
     @GET("api/v1/books/{id}")
     suspend fun getBook(@Path("id") id: String): BookResponseDto
 

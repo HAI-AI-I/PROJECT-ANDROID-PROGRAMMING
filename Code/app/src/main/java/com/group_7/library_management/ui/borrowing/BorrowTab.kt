@@ -5,5 +5,6 @@ enum class BorrowTab(val title: String) {
     PENDING("Chờ nhận"),
     BORROWING("Đang mượn"),
     DUE_SOON("Sắp đến hạn"),
-    OVERDUE("Quá hạn")
+    OVERDUE("Quá hạn"),
+    RETURNED("Đã trả")
 }

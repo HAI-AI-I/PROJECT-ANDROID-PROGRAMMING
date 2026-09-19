@@ -17,17 +17,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.group_7.library_management.components.BookListItemCard
+import com.group_7.library_management.components.BorrowOrderItemCard
 import com.group_7.library_management.components.BorrowingTopBar
-import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.ui.theme.LibrarySpacing
-import com.group_7.library_management.ui.theme.Success
-import com.group_7.library_management.ui.theme.Warning
 import java.time.Duration
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +47,7 @@ fun BorrowRecordListScreen(title: String, onBack: () -> Unit = {}) {
 fun BorrowRecordListContent(
     modifier: Modifier = Modifier,
     initialTab: BorrowTab = BorrowTab.ALL,
+    onOrderClick: (Long) -> Unit = {},
     viewModel: BorrowRecordListViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,6 +64,7 @@ fun BorrowRecordListContent(
                 BorrowTab.BORROWING -> order.status == "BORROWED" && !order.isDueSoon()
                 BorrowTab.DUE_SOON -> order.status == "BORROWED" && order.isDueSoon()
                 BorrowTab.OVERDUE -> order.status == "OVERDUE"
+                BorrowTab.RETURNED -> order.status == "RETURNED"
             }
         }
     }
@@ -93,17 +90,9 @@ fun BorrowRecordListContent(
             ) {
                 item { Spacer(Modifier.height(LibrarySpacing.Small)) }
                 items(filteredOrders, key = { it.id }) { order ->
-                    BookListItemCard(
-                        book = Book(
-                            id = order.bookId.toString(),
-                            title = order.bookTitle,
-                            author = order.bookAuthor,
-                            category = "",
-                            coverImageUrl = order.coverImageUrl,
-                            borrowFee = order.borrowFee
-                        ),
-                        subtitleOverride = orderSubtitle(order),
-                        trailingContent = { StatusBadge(order) }
+                    BorrowOrderItemCard(
+                        order = order,
+                        onClick = { onOrderClick(order.id) }
                     )
                 }
                 item { Spacer(Modifier.height(LibrarySpacing.Medium)) }
@@ -141,44 +130,10 @@ private fun EmptyBorrowList(tab: BorrowTab) {
     }
 }
 
-@Composable
-private fun StatusBadge(order: BorrowOrder) {
-    val (label, color) = when {
-        order.status == "REQUESTED" -> "Chờ nhận" to MaterialTheme.colorScheme.primary
-        order.status == "BORROWED" && order.isDueSoon() -> "Sắp đến hạn" to Warning
-        order.status == "BORROWED" -> "Đang mượn" to MaterialTheme.colorScheme.primary
-        order.status == "OVERDUE" -> "Quá hạn" to MaterialTheme.colorScheme.error
-        order.status == "RETURNED" -> "Đã trả" to Success
-        else -> "Đã hủy" to MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Surface(color = color.copy(alpha = 0.12f), shape = MaterialTheme.shapes.extraSmall) {
-        Text(
-            label,
-            color = color,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
-        )
-    }
-}
-
 private fun BorrowOrder.isDueSoon(now: Instant = Instant.now()): Boolean {
     if (status != "BORROWED") return false
     val due = runCatching { Instant.parse(dueAt) }.getOrNull() ?: return false
     val remaining = Duration.between(now, due)
     return !remaining.isNegative && remaining <= Duration.ofDays(DUE_SOON_DAYS)
 }
-
-private fun orderSubtitle(order: BorrowOrder): String {
-    val start = order.borrowedAt ?: order.requestedAt
-    val prefix = if (order.status == "REQUESTED") "Đặt" else "Mượn"
-    return "$prefix: ${formatDate(start)} · Hạn trả: ${formatDate(order.dueAt)}"
-}
-
-private fun formatDate(value: String): String = runCatching {
-    DATE_FORMATTER.format(Instant.parse(value))
-}.getOrDefault(value)
-
-private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    .withZone(ZoneId.systemDefault())
 private const val DUE_SOON_DAYS = 1L

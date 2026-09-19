@@ -20,6 +20,8 @@ object Routes {
     const val SCAN_QR="scan_qr"
     const val MEMBER_QR = "member_qr"
     const val BORROW = "borrow"
+    const val BORROW_ORDER_DETAIL = "borrow_order/{orderId}"
+    fun borrowOrderDetail(orderId: Long) = "borrow_order/$orderId"
     const val PROFILE = "profile"
     const val EDIT_PROFILE = "edit_profile"
     const val NOTIFICATIONS = "notifications"

@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,7 +26,8 @@ data class HomeUiState(
     val isLoadingBooks: Boolean = true,
     val bookLoadError: String? = null,
     val borrowSummary: UserBorrowSummary= UserBorrowSummary(),
-    val isLoadingSummary:Boolean=true
+    val isLoadingSummary: Boolean = true,
+    val summaryLoadError: String? = null
 )
 
 
@@ -35,10 +38,11 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private var summaryLoadJob: Job? = null
 
     init {
         loadBooksData()
-        loadBorrowSummary()
+        refreshBorrowSummary()
     }
 
     fun onSearchQueryChange(query: String) {
@@ -81,17 +85,28 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    private fun loadBorrowSummary(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingSummary = true) }
-            borrowRepository.getBorrowSummary().collect { summary ->
-                _uiState.update {
-                    it.copy(
-                        borrowSummary = summary,
-                        isLoadingSummary = false
-                    )
+    fun refreshBorrowSummary() {
+        if (summaryLoadJob?.isActive == true) return
+        summaryLoadJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingSummary = true, summaryLoadError = null) }
+            borrowRepository.getBorrowSummary()
+                .catch {
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoadingSummary = false,
+                            summaryLoadError = "Không thể tải trạng thái mượn sách"
+                        )
+                    }
                 }
-            }
+                .collect { summary ->
+                    _uiState.update {
+                        it.copy(
+                            borrowSummary = summary,
+                            isLoadingSummary = false,
+                            summaryLoadError = null
+                        )
+                    }
+                }
         }
     }
 }

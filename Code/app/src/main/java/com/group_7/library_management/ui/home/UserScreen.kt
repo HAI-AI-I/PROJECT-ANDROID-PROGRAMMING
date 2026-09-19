@@ -40,6 +40,7 @@ import com.group_7.library_management.ui.home.MemberQrScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
 import com.group_7.library_management.ui.borrowing.BorrowTab
+import com.group_7.library_management.ui.borrowing.BorrowOrderDetailScreen
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
@@ -135,7 +136,15 @@ fun UserScreen(
                     MemberBottomBar(
                         currentRoute = currentRoute,
                         onNavigate = { route ->
-                            navigateTab(route)
+                            if (route == Routes.HOME && currentRoute == Routes.FAVORITE) {
+                                val returnedHome = userNavController.popBackStack(
+                                    route = Routes.HOME,
+                                    inclusive = false
+                                )
+                                if (!returnedHome) navigateTab(Routes.HOME)
+                            } else {
+                                navigateTab(route)
+                            }
                         }
                     )
                 }
@@ -160,12 +169,14 @@ fun UserScreen(
                                 "borrowing" -> BorrowTab.BORROWING
                                 "due_soon" -> BorrowTab.DUE_SOON
                                 "overdue" -> BorrowTab.OVERDUE
+                                "returned" -> BorrowTab.RETURNED
+                                "history" -> BorrowTab.ALL
                                 else -> BorrowTab.ALL
                             }
                             navigateTab(Routes.BORROW)
                         },
                         onNavigateToFavorite = {
-                            userNavController.navigate(Routes.FAVORITE)
+                            navigateTab(Routes.FAVORITE)
                         }
                     )
                 }
@@ -263,8 +274,27 @@ fun UserScreen(
                 }
                 composable(Routes.BORROW) {
                     androidx.compose.runtime.key(borrowScreenResetKey.intValue) {
-                        BorrowRecordListContent(initialTab = pendingBorrowTab.value)
+                        BorrowRecordListContent(
+                            initialTab = pendingBorrowTab.value,
+                            onOrderClick = { orderId ->
+                                userNavController.navigate(Routes.borrowOrderDetail(orderId))
+                            }
+                        )
                     }
+                }
+                composable(
+                    route = Routes.BORROW_ORDER_DETAIL,
+                    arguments = listOf(navArgument("orderId") { type = NavType.LongType })
+                ) {
+                    BorrowOrderDetailScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onViewQrCode = { orderId ->
+                            userNavController.navigate(Routes.borrowQr(orderId))
+                        },
+                        onBookClick = { bookId ->
+                            userNavController.navigate(Routes.bookDetail(bookId.toString()))
+                        }
+                    )
                 }
                 composable(Routes.PROFILE) { backStackEntry ->
                     val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
@@ -286,7 +316,11 @@ fun UserScreen(
                     )
                 }
                 composable(Routes.FAVORITE) {
-                    FavoriteScreen()
+                    FavoriteScreen(
+                        onBookClick = { book ->
+                            userNavController.navigate(Routes.bookDetail(book.id))
+                        }
+                    )
                 }
                 composable(Routes.SCAN_QR) {
                     ScanScreen(
