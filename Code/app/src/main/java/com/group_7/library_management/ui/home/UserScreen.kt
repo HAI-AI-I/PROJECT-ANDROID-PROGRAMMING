@@ -324,7 +324,13 @@ fun UserScreen(
                 }
                 composable(Routes.SCAN_QR) {
                     ScanScreen(
-                        onBack = { userNavController.popBackStack() }
+                        onBack = { userNavController.popBackStack() },
+                        onNavigateToBookDetail = { bookId ->
+                            userNavController.navigate(Routes.bookDetail(bookId.toString()))
+                        },
+                        onNavigateToBorrowOrderDetail = { orderId ->
+                            userNavController.navigate(Routes.borrowOrderDetail(orderId))
+                        }
                     )
                 }
                 composable(Routes.MEMBER_QR) {

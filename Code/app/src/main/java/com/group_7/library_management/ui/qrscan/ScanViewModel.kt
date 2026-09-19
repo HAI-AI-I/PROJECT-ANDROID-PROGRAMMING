@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.repository.ScanDestinationType
+import com.group_7.library_management.data.repository.ScanRepository
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,71 +14,115 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 sealed interface ScanResultState {
-    object Idle : ScanResultState
-    object Processing : ScanResultState
-    data class Success(val rawCode: String) : ScanResultState
+    data object Idle : ScanResultState
+    data object Processing : ScanResultState
+    data class Success(
+        val type: ScanDestinationType,
+        val targetId: Long
+    ) : ScanResultState
     data class Error(val message: String) : ScanResultState
 }
 
 data class ScanUiState(
-    val isFlashlightOn:Boolean=false,
-    val isFlashlightAvailable:Boolean=true,
+    val isFlashlightOn: Boolean = false,
+    val isFlashlightAvailable: Boolean = true,
     val scanState: ScanResultState = ScanResultState.Idle
 )
 
 @HiltViewModel
-class ScanViewModel @Inject constructor() : ViewModel() {
-
+class ScanViewModel @Inject constructor(
+    private val scanRepository: ScanRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()
 
-    // 1. Nhận kết quả quét trực tiếp từ Camera (Google Code Scanner)
     fun onLiveCameraScanned(rawCode: String) {
-        processScannedCode(rawCode)
+        if (_uiState.value.scanState !is ScanResultState.Idle) return
+        resolveScannedCode(rawCode)
     }
 
-    // 2. Nhận URI ảnh từ thư viện và giải mã bằng ML Kit
     fun scanFromGalleryUri(context: Context, imageUri: Uri) {
+        if (_uiState.value.scanState !is ScanResultState.Idle) return
         _uiState.update { it.copy(scanState = ScanResultState.Processing) }
 
+        try {
+            val inputImage = InputImage.fromFilePath(context, imageUri)
+            val scanner = BarcodeScanning.getClient()
+            scanner.process(inputImage)
+                .addOnSuccessListener { barcodes ->
+                    val code = barcodes.firstOrNull()?.rawValue
+                    if (code != null) {
+                        resolveScannedCode(code)
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                scanState = ScanResultState.Error(
+                                    "Không tìm thấy mã QR hoặc mã vạch trong ảnh này."
+                                )
+                            )
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    _uiState.update {
+                        it.copy(
+                            scanState = ScanResultState.Error(
+                                "Lỗi quét ảnh: ${exception.localizedMessage}"
+                            )
+                        )
+                    }
+                }
+                .addOnCompleteListener { scanner.close() }
+        } catch (_: Exception) {
+            _uiState.update {
+                it.copy(scanState = ScanResultState.Error("Không thể đọc tệp ảnh."))
+            }
+        }
+    }
+
+    private fun resolveScannedCode(rawCode: String) {
+        val code = rawCode.trim()
+        if (code.isEmpty()) {
+            _uiState.update { it.copy(scanState = ScanResultState.Error("Mã quét không hợp lệ.")) }
+            return
+        }
+
+        _uiState.update { it.copy(scanState = ScanResultState.Processing) }
         viewModelScope.launch {
             try {
-                val inputImage = InputImage.fromFilePath(context, imageUri)
-                val scanner = BarcodeScanning.getClient()
-
-                scanner.process(inputImage)
-                    .addOnSuccessListener { barcodes ->
-                        val code = barcodes.firstOrNull()?.rawValue
-                        if (code != null) {
-                            processScannedCode(code)
-                        } else {
-                            _uiState.update {
-                                it.copy(scanState = ScanResultState.Error("Không tìm thấy mã QR trong ảnh này."))
-                            }
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        _uiState.update {
-                            it.copy(scanState = ScanResultState.Error("Lỗi quét ảnh: ${exception.localizedMessage}"))
-                        }
-                    }
-            } catch (e: Exception) {
+                val destination = scanRepository.resolve(code)
                 _uiState.update {
-                    it.copy(scanState = ScanResultState.Error("Không thể đọc tệp ảnh."))
+                    it.copy(
+                        scanState = ScanResultState.Success(
+                            type = destination.type,
+                            targetId = destination.targetId
+                        )
+                    )
+                }
+            } catch (error: HttpException) {
+                val message = when (error.code()) {
+                    404 -> "Không tìm thấy sách hoặc đơn mượn phù hợp với mã đã quét."
+                    401 -> "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại."
+                    else -> "Không thể kiểm tra mã với máy chủ."
+                }
+                _uiState.update { it.copy(scanState = ScanResultState.Error(message)) }
+            } catch (_: IOException) {
+                _uiState.update {
+                    it.copy(scanState = ScanResultState.Error("Không có kết nối tới máy chủ."))
+                }
+            } catch (_: Exception) {
+                _uiState.update {
+                    it.copy(scanState = ScanResultState.Error("Mã quét không được hệ thống hỗ trợ."))
                 }
             }
         }
     }
 
-    // Hàm dùng chung để kiểm tra và xử lý mã sau khi đọc được
-    private fun processScannedCode(code: String) {
-        _uiState.update { it.copy(scanState = ScanResultState.Success(code)) }
-    }
-
-    // Reset lại trạng thái để người dùng quét lại nếu muốn
     fun resetScanState() {
         _uiState.update { it.copy(scanState = ScanResultState.Idle) }
     }

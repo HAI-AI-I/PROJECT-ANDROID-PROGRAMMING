@@ -4,6 +4,7 @@ import com.group_7.library_management.entity.BookCopy;
 import com.group_7.library_management.entity.BookCopyStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
@@ -14,6 +15,9 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, Long> {
     boolean existsByBarcode(String barcode);
 
     Optional<BookCopy> findByBarcode(String barcode);
+
+    @EntityGraph(attributePaths = "book")
+    Optional<BookCopy> findByBarcodeAndBookActiveTrue(String barcode);
 
     List<BookCopy> findAllByBookIdOrderByIdAsc(Long bookId);
 

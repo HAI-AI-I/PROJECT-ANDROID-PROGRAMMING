@@ -34,13 +34,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import com.group_7.library_management.data.repository.ScanDestinationType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
     viewModel: ScanViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onNavigateToBookDetail: (String) -> Unit = {}
+    onNavigateToBookDetail: (Long) -> Unit,
+    onNavigateToBorrowOrderDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -78,7 +80,11 @@ fun ScanScreen(
     LaunchedEffect(uiState.scanState) {
         when (val state = uiState.scanState) {
             is ScanResultState.Success -> {
-                onNavigateToBookDetail(state.rawCode)
+                when (state.type) {
+                    ScanDestinationType.BOOK -> onNavigateToBookDetail(state.targetId)
+                    ScanDestinationType.BORROW_ORDER ->
+                        onNavigateToBorrowOrderDetail(state.targetId)
+                }
                 viewModel.resetScanState()
             }
             is ScanResultState.Error -> {

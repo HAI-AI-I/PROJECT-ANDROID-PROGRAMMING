@@ -67,6 +67,9 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     Optional<BorrowRecord> findByReferenceCode(String referenceCode);
 
+    @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book"})
+    Optional<BorrowRecord> findByReferenceCodeAndUserId(String referenceCode, Long userId);
+
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     List<BorrowRecord> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }
