@@ -314,11 +314,11 @@ fun BorrowStatusSection(
             title = "Sắp đến hạn",
             count = summary.dueSoonCount.toString(),
             iconTint = WarningColor,
-            onClick = { onStatusClick("borrowing") }
+            onClick = { onStatusClick("due_soon") }
         )
         StatusRowItem(
             icon = Icons.Default.AddCircle,
-            title = "Hàng chờ",
+            title = "Chờ nhận",
             count = summary.pendingPickupCount.toString(),
             iconTint = WarningColor,
             onClick = { onStatusClick("pending") }
@@ -328,7 +328,7 @@ fun BorrowStatusSection(
             title = "Quá hạn",
             count = summary.overdueCount.toString(),
             iconTint = ErrorColor,
-            onClick = { onStatusClick("borrowing") }
+            onClick = { onStatusClick("overdue") }
         )
         StatusRowItem(
             icon = Icons.Default.Favorite,

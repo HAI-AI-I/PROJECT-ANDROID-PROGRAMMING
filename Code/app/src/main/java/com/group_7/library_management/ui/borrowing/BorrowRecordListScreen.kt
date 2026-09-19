@@ -9,186 +9,176 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.components.BorrowingTopBar
 import com.group_7.library_management.models.Book
+import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.ui.theme.LibrarySpacing
 import com.group_7.library_management.ui.theme.Success
-
-enum class BorrowStatus { PENDING, BORROWING, RETURNED, OVERDUE }
-
-data class BorrowRecord(
-    val book: Book,
-    val borrowDate: String,
-    val dueDate: String,
-    val status: BorrowStatus,
-)
+import com.group_7.library_management.ui.theme.Warning
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BorrowRecordListScreen(
-    title: String,
-    onBack: () -> Unit = {},
-) {
+fun BorrowRecordListScreen(title: String, onBack: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại")
                     }
                 }
             )
-        },
+        }
     ) { innerPadding ->
-        BorrowRecordListContent(
-            modifier = Modifier.padding(innerPadding)
-        )
+        BorrowRecordListContent(modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
 fun BorrowRecordListContent(
     modifier: Modifier = Modifier,
-    initialTab: BorrowTab = BorrowTab.ALL
+    initialTab: BorrowTab = BorrowTab.ALL,
+    viewModel: BorrowRecordListViewModel = hiltViewModel()
 ) {
-    val records = remember {
-        listOf(
-            BorrowRecord(
-                Book("1", "Clean Architecture", "Robert C. Martin", "Lập trình", borrowFee = 180000, availableCopies = 0),
-                "01/08/2026", "15/08/2026", BorrowStatus.OVERDUE,
-            ),
-            BorrowRecord(
-                Book("2", "Design Patterns", "Gang of Four", "Lập trình", borrowFee = 150000, availableCopies = 0),
-                "05/08/2026", "19/08/2026", BorrowStatus.BORROWING,
-            ),
-            BorrowRecord(
-                Book("6", "Mạng máy tính căn bản", "Lê Văn C", "Mạng máy tính", borrowFee = 100000, availableCopies = 5),
-                "20/07/2026", "03/08/2026", BorrowStatus.RETURNED,
-            ),
-            BorrowRecord(
-                Book("7", "Code Dạo Ký Sự", "Phạm Huy Hoàng", "Lập trình", borrowFee = 50000, availableCopies = 2),
-                "22/08/2026", "05/09/2026", BorrowStatus.PENDING,
-            )
-        )
-    }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var selectedTabName by rememberSaveable { mutableStateOf(initialTab.name) }
+    val selectedTab = BorrowTab.entries.firstOrNull { it.name == selectedTabName } ?: BorrowTab.ALL
 
-    var selectedTab by remember { mutableStateOf(initialTab) }
-    var searchQuery by remember { mutableStateOf("") }
+    LaunchedEffect(initialTab) { selectedTabName = initialTab.name }
 
-    LaunchedEffect(initialTab) {
-        selectedTab = initialTab
-    }
-
-    val tabFiltered = when (selectedTab) {
-        BorrowTab.PENDING -> records.filter { it.status == BorrowStatus.PENDING }
-        BorrowTab.BORROWING -> records.filter { it.status == BorrowStatus.BORROWING || it.status == BorrowStatus.OVERDUE }
-        BorrowTab.ALL -> records
-    }
-
-    val filtered = if (searchQuery.isBlank()) {
-        tabFiltered
-    } else {
-        tabFiltered.filter {
-            it.book.title.contains(searchQuery, ignoreCase = true) ||
-                    it.book.author.contains(searchQuery, ignoreCase = true)
+    val filteredOrders = remember(state.orders, selectedTab) {
+        state.orders.filter { order ->
+            when (selectedTab) {
+                BorrowTab.ALL -> true
+                BorrowTab.PENDING -> order.status == "REQUESTED"
+                BorrowTab.BORROWING -> order.status == "BORROWED" && !order.isDueSoon()
+                BorrowTab.DUE_SOON -> order.status == "BORROWED" && order.isDueSoon()
+                BorrowTab.OVERDUE -> order.status == "OVERDUE"
+            }
         }
     }
-
-    val tabs = BorrowTab.entries
 
     Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        TabRow(selectedTabIndex = selectedTab.ordinal) {
-            tabs.forEach { tab ->
-                Tab(
-                    selected = selectedTab == tab,
-                    onClick = { selectedTab = tab },
-                    text = { Text(tab.title, fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal) }
-                )
+        BorrowingTopBar(
+            selectedTab = selectedTab,
+            onTabSelected = { selectedTabName = it.name }
+        )
+
+        when {
+            state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-        }
-
-        Spacer(modifier = Modifier.height(LibrarySpacing.Small))
-
-
-        Spacer(modifier = Modifier.height(LibrarySpacing.Small))
-
-        if (filtered.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(LibrarySpacing.Large),
-                contentAlignment = Alignment.Center
+            state.errorMessage != null -> BorrowListError(
+                message = requireNotNull(state.errorMessage),
+                onRetry = viewModel::refresh
+            )
+            filteredOrders.isEmpty() -> EmptyBorrowList(selectedTab)
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(horizontal = LibrarySpacing.Medium),
+                verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Bookmark,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
-                    Text(
-                        text = "Không tìm thấy phiếu mượn sách phù hợp",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
-                    Text(
-                        text = "Hãy thử tìm kiếm với từ khóa khác hoặc chuyển sang tab khác.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = LibrarySpacing.Medium),
-                verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium),
-            ) {
-                item { Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall)) }
-                items(filtered, key = { it.book.id }) { record ->
+                item { Spacer(Modifier.height(LibrarySpacing.Small)) }
+                items(filteredOrders, key = { it.id }) { order ->
                     BookListItemCard(
-                        book = record.book,
-                        subtitleOverride = "Mượn: ${record.borrowDate} · Hạn trả: ${record.dueDate}",
-                        trailingContent = { StatusBadge(record.status) },
+                        book = Book(
+                            id = order.bookId.toString(),
+                            title = order.bookTitle,
+                            author = order.bookAuthor,
+                            category = "",
+                            coverImageUrl = order.coverImageUrl,
+                            borrowFee = order.borrowFee
+                        ),
+                        subtitleOverride = orderSubtitle(order),
+                        trailingContent = { StatusBadge(order) }
                     )
                 }
-                item { Spacer(modifier = Modifier.height(LibrarySpacing.Medium)) }
+                item { Spacer(Modifier.height(LibrarySpacing.Medium)) }
             }
         }
     }
 }
 
 @Composable
-private fun StatusBadge(status: BorrowStatus) {
-    val (label, color) = when (status) {
-        BorrowStatus.PENDING -> "Hàng chờ" to MaterialTheme.colorScheme.outline
-        BorrowStatus.BORROWING -> "Đang mượn" to MaterialTheme.colorScheme.onSurfaceVariant
-        BorrowStatus.RETURNED -> "Đã trả" to Success
-        BorrowStatus.OVERDUE -> "Quá hạn" to MaterialTheme.colorScheme.error
-    }
-    Surface(
-        color = color.copy(alpha = 0.1f),
-        shape = MaterialTheme.shapes.extraSmall
+private fun BorrowListError(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Text(message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = onRetry) { Text("Thử lại") }
+    }
+}
+
+@Composable
+private fun EmptyBorrowList(tab: BorrowTab) {
+    Box(Modifier.fillMaxSize().padding(LibrarySpacing.Large), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.Bookmark,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+            Spacer(Modifier.height(LibrarySpacing.Medium))
+            Text("Không có đơn ${tab.title.lowercase()}", fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun StatusBadge(order: BorrowOrder) {
+    val (label, color) = when {
+        order.status == "REQUESTED" -> "Chờ nhận" to MaterialTheme.colorScheme.primary
+        order.status == "BORROWED" && order.isDueSoon() -> "Sắp đến hạn" to Warning
+        order.status == "BORROWED" -> "Đang mượn" to MaterialTheme.colorScheme.primary
+        order.status == "OVERDUE" -> "Quá hạn" to MaterialTheme.colorScheme.error
+        order.status == "RETURNED" -> "Đã trả" to Success
+        else -> "Đã hủy" to MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Surface(color = color.copy(alpha = 0.12f), shape = MaterialTheme.shapes.extraSmall) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
+            label,
             color = color,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
         )
     }
 }
+
+private fun BorrowOrder.isDueSoon(now: Instant = Instant.now()): Boolean {
+    if (status != "BORROWED") return false
+    val due = runCatching { Instant.parse(dueAt) }.getOrNull() ?: return false
+    val remaining = Duration.between(now, due)
+    return !remaining.isNegative && remaining <= Duration.ofDays(DUE_SOON_DAYS)
+}
+
+private fun orderSubtitle(order: BorrowOrder): String {
+    val start = order.borrowedAt ?: order.requestedAt
+    val prefix = if (order.status == "REQUESTED") "Đặt" else "Mượn"
+    return "$prefix: ${formatDate(start)} · Hạn trả: ${formatDate(order.dueAt)}"
+}
+
+private fun formatDate(value: String): String = runCatching {
+    DATE_FORMATTER.format(Instant.parse(value))
+}.getOrDefault(value)
+
+private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    .withZone(ZoneId.systemDefault())
+private const val DUE_SOON_DAYS = 1L

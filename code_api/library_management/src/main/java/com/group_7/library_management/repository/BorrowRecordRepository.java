@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import com.group_7.library_management.entity.BorrowStatus;
 
@@ -30,4 +31,7 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     Optional<BorrowRecord> findByReferenceCode(String referenceCode);
+
+    @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
+    List<BorrowRecord> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }

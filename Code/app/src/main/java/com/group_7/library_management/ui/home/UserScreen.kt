@@ -11,6 +11,8 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -34,8 +36,10 @@ import com.group_7.library_management.ui.book.BorrowFailureScreen
 import com.group_7.library_management.ui.book.BorrowQrScreen
 import com.group_7.library_management.ui.book.BorrowSuccessScreen
 import com.group_7.library_management.ui.qrscan.ScanScreen
+import com.group_7.library_management.ui.home.MemberQrScreen
 import com.group_7.library_management.ui.book.BookListScreen
 import com.group_7.library_management.ui.borrowing.BorrowRecordListContent
+import com.group_7.library_management.ui.borrowing.BorrowTab
 import com.group_7.library_management.ui.favorite.FavoriteScreen
 import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
@@ -55,7 +59,9 @@ fun UserScreen(
 
     val navBackStackEntry by userNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Routes.HOME
-    val pendingBookFilter = remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    val pendingBookFilter = remember { mutableStateOf<String?>(null) }
+    val pendingBorrowTab = remember { mutableStateOf(BorrowTab.ALL) }
+    val borrowScreenResetKey = remember { mutableIntStateOf(0) }
 
     val navigateTab: (String) -> Unit = { route ->
         userNavController.navigate(route) {
@@ -98,6 +104,10 @@ fun UserScreen(
                 currentRoute = currentRoute,
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
+                    if (route == Routes.BORROW) {
+                        pendingBorrowTab.value = BorrowTab.ALL
+                        borrowScreenResetKey.intValue++
+                    }
                     navigateTab(route)
                 },
                 onLogout = {
@@ -143,9 +153,16 @@ fun UserScreen(
                             pendingBookFilter.value = filter
                             navigateTab(Routes.BOOKS)
                         },
-                        onOpenQRClick = { userNavController.navigate(Routes.SCAN_QR) },
+                        onOpenQRClick = { userNavController.navigate(Routes.MEMBER_QR) },
                         onNavigateToBorrowTab = { tabKey ->
-                            userNavController.navigate(Routes.BORROW)
+                            pendingBorrowTab.value = when (tabKey) {
+                                "pending" -> BorrowTab.PENDING
+                                "borrowing" -> BorrowTab.BORROWING
+                                "due_soon" -> BorrowTab.DUE_SOON
+                                "overdue" -> BorrowTab.OVERDUE
+                                else -> BorrowTab.ALL
+                            }
+                            navigateTab(Routes.BORROW)
                         },
                         onNavigateToFavorite = {
                             userNavController.navigate(Routes.FAVORITE)
@@ -245,10 +262,9 @@ fun UserScreen(
                     )
                 }
                 composable(Routes.BORROW) {
-                    BorrowRecordListContent()
-                }
-                composable(Routes.HISTORY) {
-                    BorrowRecordListContent()
+                    androidx.compose.runtime.key(borrowScreenResetKey.intValue) {
+                        BorrowRecordListContent(initialTab = pendingBorrowTab.value)
+                    }
                 }
                 composable(Routes.PROFILE) { backStackEntry ->
                     val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
@@ -276,6 +292,9 @@ fun UserScreen(
                     ScanScreen(
                         onBack = { userNavController.popBackStack() }
                     )
+                }
+                composable(Routes.MEMBER_QR) {
+                    MemberQrScreen(onBack = { userNavController.popBackStack() })
                 }
                 addSupportNavGraph(userNavController)
             }

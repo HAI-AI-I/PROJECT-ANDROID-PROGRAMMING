@@ -28,6 +28,11 @@ public record BorrowOrderResponse(
 ) {
     public static BorrowOrderResponse from(BorrowRecord order) {
         var book = order.getBookCopy().getBook();
+        BorrowStatus effectiveStatus = order.getStatus() == BorrowStatus.BORROWED
+                && order.getDueAt() != null
+                && order.getDueAt().isBefore(Instant.now())
+                ? BorrowStatus.OVERDUE
+                : order.getStatus();
         String authors = book.getAuthors().stream()
                 .map(author -> author.getName())
                 .sorted(String.CASE_INSENSITIVE_ORDER)
@@ -36,7 +41,7 @@ public record BorrowOrderResponse(
         return new BorrowOrderResponse(
                 order.getId(),
                 order.getReferenceCode(),
-                order.getStatus(),
+                effectiveStatus,
                 book.getId(),
                 book.getTitle(),
                 authors,

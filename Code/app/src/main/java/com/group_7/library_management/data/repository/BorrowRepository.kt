@@ -13,6 +13,10 @@ import javax.inject.Inject
 class BorrowRepository @Inject constructor(
     private val borrowApi: BorrowApi
 ) {
+    suspend fun getBorrowOrders(): List<BorrowOrder> {
+        return borrowApi.getBorrowOrders().map { it.toModel() }
+    }
+
     suspend fun createBorrowOrder(bookId: Long, borrowDays: Int): BorrowOrder {
         return borrowApi.createBorrowOrder(
             CreateBorrowOrderRequestDto(bookId, borrowDays)

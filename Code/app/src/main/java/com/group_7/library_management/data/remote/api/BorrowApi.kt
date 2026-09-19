@@ -9,6 +9,9 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface BorrowApi {
+    @GET("api/v1/borrow-orders")
+    suspend fun getBorrowOrders(): List<BorrowOrderResponseDto>
+
     @POST("api/v1/borrow-orders")
     suspend fun createBorrowOrder(
         @Body request: CreateBorrowOrderRequestDto

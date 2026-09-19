@@ -106,6 +106,13 @@ public class BorrowOrderService {
     }
 
     @Transactional(readOnly = true)
+    public List<BorrowOrderResponse> getOrders(Long userId) {
+        return borrowRecordRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(BorrowOrderResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public CurrentBorrowOrderResponse getCurrentOrderForBook(Long userId, Long bookId) {
         BorrowOrderResponse order = borrowRecordRepository
                 .findFirstByUserIdAndBookCopyBookIdAndStatusInOrderByCreatedAtDesc(
