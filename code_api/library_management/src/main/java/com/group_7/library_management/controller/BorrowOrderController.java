@@ -3,6 +3,7 @@ package com.group_7.library_management.controller;
 import com.group_7.library_management.dto.BorrowOrderResponse;
 import com.group_7.library_management.dto.CreateBorrowOrderRequest;
 import com.group_7.library_management.dto.CurrentBorrowOrderResponse;
+import com.group_7.library_management.dto.CancelBorrowOrderResponse;
 import com.group_7.library_management.service.BorrowOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,17 @@ public class BorrowOrderController {
         return borrowOrderService.getCurrentOrderForBook(
                 (Long) authentication.getPrincipal(),
                 bookId
+        );
+    }
+
+    @PostMapping("/{orderId}/cancel")
+    public CancelBorrowOrderResponse cancelOrder(
+            Authentication authentication,
+            @PathVariable Long orderId
+    ) {
+        return borrowOrderService.cancelOrder(
+                (Long) authentication.getPrincipal(),
+                orderId
         );
     }
 }

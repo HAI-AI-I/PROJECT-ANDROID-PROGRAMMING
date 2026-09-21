@@ -19,6 +19,13 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     long countByUserIdAndStatus(Long userId, BorrowStatus status);
 
+    long countByUserIdAndStatusAndCancelledAtGreaterThanEqualAndCancelledAtLessThan(
+            Long userId,
+            BorrowStatus status,
+            Instant from,
+            Instant to
+    );
+
     long countByUserIdAndStatusAndDueAtAfter(
             Long userId,
             BorrowStatus status,
@@ -55,6 +62,14 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     Optional<BorrowRecord> findByIdAndUserId(Long id, Long userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
+    @Query("select b from BorrowRecord b where b.id = :orderId and b.user.id = :userId")
+    Optional<BorrowRecord> findForCancellation(
+            @Param("orderId") Long orderId,
+            @Param("userId") Long userId
+    );
 
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     Optional<BorrowRecord> findFirstByUserIdAndBookCopyBookIdAndStatusInOrderByCreatedAtDesc(

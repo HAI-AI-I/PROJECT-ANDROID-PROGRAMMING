@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +50,8 @@ import java.util.Locale
 fun BorrowOrderItemCard(
     order: BorrowOrder,
     onClick: () -> Unit,
+    onCancelClick: (() -> Unit)? = null,
+    isCancelling: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -149,6 +152,23 @@ fun BorrowOrderItemCard(
                     contentDescription = "Xem chi tiết",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            if (order.status == "REQUESTED" && onCancelClick != null) {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    OutlinedButton(
+                        onClick = onCancelClick,
+                        enabled = !isCancelling
+                    ) {
+                        Text(if (isCancelling) "Đang hủy..." else "Hủy đơn")
+                    }
+                }
             }
         }
     }

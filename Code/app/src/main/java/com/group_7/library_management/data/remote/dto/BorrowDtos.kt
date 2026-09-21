@@ -34,6 +34,11 @@ data class CurrentBorrowOrderResponseDto(
     val order: BorrowOrderResponseDto?
 )
 
+data class CancelBorrowOrderResponseDto(
+    val order: BorrowOrderResponseDto,
+    val remainingCancellations: Int
+)
+
 data class HomeSummaryResponseDto(
     val pendingPickupCount: Long,
     val borrowingCount: Long,

@@ -1,6 +1,7 @@
 package com.group_7.library_management.service;
 
 import com.group_7.library_management.dto.BorrowOrderResponse;
+import com.group_7.library_management.dto.CancelBorrowOrderResponse;
 import com.group_7.library_management.dto.CreateBorrowOrderRequest;
 import com.group_7.library_management.dto.CurrentBorrowOrderResponse;
 import com.group_7.library_management.entity.Book;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +29,9 @@ import java.util.UUID;
 public class BorrowOrderService {
     private static final long DEPOSIT_AMOUNT = 150_000L;
     private static final String PICKUP_LOCATION = "Thư viện UTH";
+    private static final int MONTHLY_CANCELLATION_LIMIT = 5;
+    private static final long CANCELLATION_WINDOW_HOURS = 24L;
+    private static final ZoneId CANCELLATION_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final List<BorrowStatus> ACTIVE_STATUSES = List.of(
             BorrowStatus.REQUESTED,
             BorrowStatus.BORROWED,
@@ -123,6 +128,68 @@ public class BorrowOrderService {
                 .map(BorrowOrderResponse::from)
                 .orElse(null);
         return new CurrentBorrowOrderResponse(order);
+    }
+
+    @Transactional
+    public CancelBorrowOrderResponse cancelOrder(Long userId, Long orderId) {
+        userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        BorrowRecord order = borrowRecordRepository.findForCancellation(orderId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn mượn"));
+
+        if (order.getStatus() != BorrowStatus.REQUESTED) {
+            throw new ConflictException("Chỉ có thể hủy đơn đang chờ nhận sách");
+        }
+
+        Instant now = Instant.now();
+        if (now.isAfter(order.getCreatedAt().plus(CANCELLATION_WINDOW_HOURS, ChronoUnit.HOURS))) {
+            throw new ConflictException("Đơn mượn đã quá thời hạn hủy 24 giờ");
+        }
+
+        var localNow = now.atZone(CANCELLATION_ZONE);
+        Instant monthStart = localNow.withDayOfMonth(1)
+                .toLocalDate()
+                .atStartOfDay(CANCELLATION_ZONE)
+                .toInstant();
+        Instant nextMonthStart = localNow.withDayOfMonth(1)
+                .plusMonths(1)
+                .toLocalDate()
+                .atStartOfDay(CANCELLATION_ZONE)
+                .toInstant();
+        long cancellationsThisMonth = borrowRecordRepository
+                .countByUserIdAndStatusAndCancelledAtGreaterThanEqualAndCancelledAtLessThan(
+                        userId,
+                        BorrowStatus.CANCELLED,
+                        monthStart,
+                        nextMonthStart
+                );
+        if (cancellationsThisMonth >= MONTHLY_CANCELLATION_LIMIT) {
+            throw new ConflictException("Bạn đã sử dụng hết 5 lượt hủy đơn trong tháng này");
+        }
+
+        Book book = order.getBookCopy().getBook();
+        long previousAvailable = bookCopyRepository.countByBookIdAndStatus(
+                book.getId(),
+                BookCopyStatus.AVAILABLE
+        );
+        order.setStatus(BorrowStatus.CANCELLED);
+        order.setCancelledAt(now);
+        order.getBookCopy().setStatus(BookCopyStatus.AVAILABLE);
+        BorrowRecord cancelledOrder = borrowRecordRepository.saveAndFlush(order);
+        bookCopyRepository.flush();
+        availabilitySubscriptionService.notifyAvailabilityChanged(
+                book,
+                previousAvailable,
+                previousAvailable + 1
+        );
+
+        int remainingCancellations = Math.toIntExact(
+                MONTHLY_CANCELLATION_LIMIT - cancellationsThisMonth - 1
+        );
+        return new CancelBorrowOrderResponse(
+                BorrowOrderResponse.from(cancelledOrder),
+                remainingCancellations
+        );
     }
 
     @Transactional

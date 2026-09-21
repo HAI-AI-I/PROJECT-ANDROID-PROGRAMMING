@@ -52,6 +52,7 @@ fun BorrowRecordListContent(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTabName by rememberSaveable { mutableStateOf(initialTab.name) }
+    var orderToCancel by remember { mutableStateOf<BorrowOrder?>(null) }
     val selectedTab = BorrowTab.entries.firstOrNull { it.name == selectedTabName } ?: BorrowTab.ALL
 
     LaunchedEffect(initialTab) { selectedTabName = initialTab.name }
@@ -92,12 +93,43 @@ fun BorrowRecordListContent(
                 items(filteredOrders, key = { it.id }) { order ->
                     BorrowOrderItemCard(
                         order = order,
-                        onClick = { onOrderClick(order.id) }
+                        onClick = { onOrderClick(order.id) },
+                        onCancelClick = if (order.canCancel()) {
+                            { orderToCancel = order }
+                        } else {
+                            null
+                        },
+                        isCancelling = state.cancellingOrderId == order.id
                     )
                 }
                 item { Spacer(Modifier.height(LibrarySpacing.Medium)) }
             }
         }
+    }
+
+    orderToCancel?.let { order ->
+        AlertDialog(
+            onDismissRequest = { orderToCancel = null },
+            title = { Text("Xác nhận hủy đơn") },
+            text = {
+                Text("Bạn có chắc muốn hủy đơn ${order.referenceCode}? Lượt hủy trong tháng sẽ bị trừ.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        orderToCancel = null
+                        viewModel.cancelOrder(order.id)
+                    }
+                ) {
+                    Text("Hủy đơn", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { orderToCancel = null }) {
+                    Text("Không")
+                }
+            }
+        )
     }
 }
 
@@ -135,5 +167,12 @@ private fun BorrowOrder.isDueSoon(now: Instant = Instant.now()): Boolean {
     val due = runCatching { Instant.parse(dueAt) }.getOrNull() ?: return false
     val remaining = Duration.between(now, due)
     return !remaining.isNegative && remaining <= Duration.ofDays(DUE_SOON_DAYS)
+}
+
+private fun BorrowOrder.canCancel(now: Instant = Instant.now()): Boolean {
+    if (status != "REQUESTED") return false
+    val requested = runCatching { Instant.parse(requestedAt) }.getOrNull() ?: return false
+    val elapsed = Duration.between(requested, now)
+    return !elapsed.isNegative && elapsed <= Duration.ofHours(24)
 }
 private const val DUE_SOON_DAYS = 1L

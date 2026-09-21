@@ -51,6 +51,9 @@ public class BorrowRecord {
     @Column(name = "returned_at")
     private Instant returnedAt;
 
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
     @Column(name = "deposit_refunded_at")
     private Instant depositRefundedAt;
 
@@ -129,6 +132,8 @@ public class BorrowRecord {
     public void setDueAt(Instant dueAt) { this.dueAt = dueAt; }
     public Instant getReturnedAt() { return returnedAt; }
     public void setReturnedAt(Instant returnedAt) { this.returnedAt = returnedAt; }
+    public Instant getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(Instant cancelledAt) { this.cancelledAt = cancelledAt; }
     public Instant getDepositRefundedAt() { return depositRefundedAt; }
     public void setDepositRefundedAt(Instant depositRefundedAt) { this.depositRefundedAt = depositRefundedAt; }
     public int getBorrowDays() { return borrowDays; }

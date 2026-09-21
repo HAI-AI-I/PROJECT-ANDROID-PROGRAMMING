@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,9 +34,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +56,7 @@ import com.group_7.library_management.components.BorrowStatusBadge
 import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.ui.book.BorrowOrderViewModel
 import java.text.NumberFormat
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -65,6 +71,7 @@ fun BorrowOrderDetailScreen(
     viewModel: BorrowOrderViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var showCancelConfirmation by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -95,9 +102,36 @@ fun BorrowOrderDetailScreen(
                 order = requireNotNull(state.order),
                 onViewQrCode = onViewQrCode,
                 onBookClick = onBookClick,
+                onCancelClick = { showCancelConfirmation = true },
+                isCancelling = state.isCancelling,
                 modifier = Modifier.padding(innerPadding)
             )
         }
+    }
+
+    if (showCancelConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showCancelConfirmation = false },
+            title = { Text("Xác nhận hủy đơn") },
+            text = {
+                Text("Bạn có chắc muốn hủy đơn này? Lần hủy này sẽ được tính vào giới hạn 5 lần trong tháng.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCancelConfirmation = false
+                        viewModel.cancelOrder()
+                    }
+                ) {
+                    Text("Hủy đơn", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCancelConfirmation = false }) {
+                    Text("Không")
+                }
+            }
+        )
     }
 }
 
@@ -106,6 +140,8 @@ private fun OrderDetailContent(
     order: BorrowOrder,
     onViewQrCode: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
+    onCancelClick: () -> Unit,
+    isCancelling: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -198,6 +234,27 @@ private fun OrderDetailContent(
                 Icon(Icons.Outlined.QrCode2, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Xem mã QR đơn mượn", fontWeight = FontWeight.Bold)
+            }
+        }
+        if (order.canCancel()) {
+            OutlinedButton(
+                onClick = onCancelClick,
+                enabled = !isCancelling,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isCancelling) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    text = if (isCancelling) "Đang hủy..." else "Hủy đơn",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -294,6 +351,13 @@ private fun OrderDetailError(
 private fun formatDateTime(value: String): String = runCatching {
     DATE_TIME_FORMATTER.format(Instant.parse(value))
 }.getOrDefault(value)
+
+private fun BorrowOrder.canCancel(now: Instant = Instant.now()): Boolean {
+    if (status != "REQUESTED") return false
+    val requested = runCatching { Instant.parse(requestedAt) }.getOrNull() ?: return false
+    val elapsed = Duration.between(requested, now)
+    return !elapsed.isNegative && elapsed <= Duration.ofHours(24)
+}
 
 private fun formatMoney(value: Long): String =
     "${NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN")).format(value)} đ"

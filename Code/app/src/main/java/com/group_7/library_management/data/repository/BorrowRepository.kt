@@ -20,6 +20,11 @@ class BorrowRepository @Inject constructor(
     private val homeSummaryDao: HomeSummaryDao,
     private val checkLogin: CheckLogin
 ) {
+    data class CancelResult(
+        val order: BorrowOrder,
+        val remainingCancellations: Int
+    )
+
     suspend fun getBorrowOrders(): List<BorrowOrder> {
         return borrowApi.getBorrowOrders().map { it.toModel() }
     }
@@ -32,6 +37,14 @@ class BorrowRepository @Inject constructor(
 
     suspend fun getBorrowOrder(orderId: Long): BorrowOrder {
         return borrowApi.getBorrowOrder(orderId).toModel()
+    }
+
+    suspend fun cancelBorrowOrder(orderId: Long): CancelResult {
+        val response = borrowApi.cancelBorrowOrder(orderId)
+        return CancelResult(
+            order = response.order.toModel(),
+            remainingCancellations = response.remainingCancellations
+        )
     }
 
     suspend fun getCurrentBorrowOrder(bookId: Long): BorrowOrder? {
