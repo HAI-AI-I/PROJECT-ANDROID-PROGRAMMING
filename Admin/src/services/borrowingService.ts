@@ -1,11 +1,4 @@
-import {
-  borrowingChartData,
-  dashboardStats,
-  initialBorrowRequests,
-  overdueBooks,
-  recentBorrowings,
-} from "@/data/borrowings";
-import { apiClient, toApiId } from "@/services/apiClient";
+import { apiClient } from "@/services/apiClient";
 import type {
   Borrowing,
   BorrowRequest,
@@ -13,11 +6,6 @@ import type {
   DashboardStats,
   OverdueBook,
 } from "@/types/Borrowing";
-
-let borrowingsStore: Borrowing[] = [...recentBorrowings];
-let requestsStore: BorrowRequest[] = [...initialBorrowRequests];
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface BorrowingFilters {
   search?: string;
@@ -34,48 +22,35 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-function filterBorrowings(filters: BorrowingFilters): Borrowing[] {
-  let result = [...borrowingsStore];
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    result = result.filter(
-      (b) =>
-        b.id.toLowerCase().includes(q) ||
-        b.readerName.toLowerCase().includes(q) ||
-        b.bookTitle.toLowerCase().includes(q) ||
-        b.readerId.toLowerCase().includes(q)
-    );
-  }
-  if (filters.status) result = result.filter((b) => b.status === filters.status);
-  return result;
-}
-
 export const borrowingService = {
   async getDashboardStats(): Promise<DashboardStats> {
-    const summary = await apiClient.get<{ totalBooks: number; borrowingBooks: number; totalReaders: number; overdueBooks: number }>("/dashboard");
-    return { totalBooks: summary.totalBooks, currentlyBorrowed: summary.borrowingBooks, totalReaders: summary.totalReaders, overdueCount: summary.overdueBooks };
+    const summary = await apiClient.get<{ borrowingCount: number; overdueCount: number }>("/home/summary");
+    return { totalBooks: 0, currentlyBorrowed: summary.borrowingCount, totalReaders: 0, overdueCount: summary.overdueCount };
   },
 
   async getBorrowingChartData(): Promise<BorrowingChartData[]> {
-    const trend = await apiClient.get<{ month: string; count: number }[]>("/statistics/borrowing-trend");
-    return trend.map((item) => ({ day: item.month, count: item.count }));
+    return [];
   },
 
   async getRecentBorrowings(): Promise<Borrowing[]> {
-    const items = await apiClient.get<ApiRecentBorrowing[]>("/dashboard/recent-borrowings");
-    return items.map((item) => ({ id: `BR-${String(item.id).padStart(3, "0")}`, readerId: "", readerName: item.readerName, bookId: "", bookTitle: item.bookTitle, borrowDate: item.borrowDate, dueDate: item.dueDate, status: item.status.toLowerCase() as Borrowing["status"] }));
+    const items = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
+    return items.map(mapBorrowing).slice(0, 5);
   },
 
   async getOverdueBooks(): Promise<OverdueBook[]> {
-    const items = await apiClient.get<ApiOverdueBook[]>("/dashboard/overdue-books");
-    return items.map((item) => ({ id: `O-${item.id}`, readerName: item.readerName, bookTitle: item.bookTitle, dueDate: "", overdueDays: item.overdueDays }));
+    const items = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
+    return items.filter((item) => item.status.toLowerCase() === "overdue").map((item) => ({ id: item.referenceCode, readerName: item.borrowerName, bookTitle: item.bookTitle, dueDate: formatDate(item.dueAt), overdueDays: item.dueAt ? Math.max(0, Math.floor((Date.now() - new Date(item.dueAt).getTime()) / 86400000)) : 0 }));
   },
 
   async getBorrowings(filters: BorrowingFilters = {}): Promise<PaginatedResult<Borrowing>> {
-    await delay();
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 8;
-    const filtered = filterBorrowings(filters);
+    const orders = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
+    const query = filters.search?.toLowerCase();
+    const filtered = orders.map(mapBorrowing).filter((item) =>
+      (!query || [item.id, item.readerName, item.bookTitle, item.readerId].some((value) => value.toLowerCase().includes(query))) &&
+      (!filters.status || item.status === filters.status)
+    );
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = (page - 1) * pageSize;
@@ -83,69 +58,57 @@ export const borrowingService = {
   },
 
   async getBorrowingById(id: string): Promise<Borrowing | null> {
-    await delay();
-    return borrowingsStore.find((b) => b.id === id || b.readerId === id) ?? null;
+    try {
+      return mapBorrowing(await apiClient.get<ApiBorrowOrder>(`/admin/borrow-orders/${encodeURIComponent(id)}`));
+    } catch { return null; }
   },
 
   async searchForReturn(query: string): Promise<Borrowing | null> {
-    await delay();
-    const q = query.trim().toLowerCase();
-    return (
-      borrowingsStore.find(
-        (b) =>
-          (b.id.toLowerCase() === q || b.readerId.toLowerCase() === q) &&
-          (b.status === "borrowing" || b.status === "overdue")
-      ) ?? null
-    );
+    try {
+      const result = mapBorrowing(await apiClient.get<ApiBorrowOrder>(`/admin/borrow-orders/${encodeURIComponent(query.trim())}`));
+      return result.status === "borrowing" || result.status === "overdue" ? result : null;
+    } catch { return null; }
   },
 
   async confirmReturn(id: string): Promise<Borrowing | null> {
-    await delay();
-    const idx = borrowingsStore.findIndex((b) => b.id === id);
-    if (idx === -1) return null;
-    borrowingsStore[idx] = {
-      ...borrowingsStore[idx],
-      status: "returned",
-      returnDate: new Date().toLocaleDateString("vi-VN"),
-    };
-    return borrowingsStore[idx];
+    try {
+      return mapBorrowing(await apiClient.post<ApiBorrowOrder>(`/admin/borrow-orders/${encodeURIComponent(id)}/return`, {}));
+    } catch { return null; }
   },
 
   async getBorrowRequests(): Promise<BorrowRequest[]> {
-    await delay();
-    return requestsStore.filter((r) => r.status === "pending");
+    throw new Error("Admin lấy danh sách yêu cầu mượn");
   },
 
   async approveRequest(id: string): Promise<BorrowRequest | null> {
-    await delay();
-    const idx = requestsStore.findIndex((r) => r.id === id);
-    if (idx === -1) return null;
-    const req = requestsStore[idx];
-    requestsStore[idx] = { ...req, status: "approved" };
-    borrowingsStore = [
-      {
-        id: `BR-${String(borrowingsStore.length + 1).padStart(3, "0")}`,
-        readerId: req.readerId,
-        readerName: req.readerName,
-        bookId: req.bookId,
-        bookTitle: req.bookTitle,
-        borrowDate: new Date().toLocaleDateString("vi-VN"),
-        dueDate: new Date(Date.now() + 14 * 86400000).toLocaleDateString("vi-VN"),
-        status: "borrowing",
-      },
-      ...borrowingsStore,
-    ];
-    return requestsStore[idx];
+    throw new Error(`Duyệt yêu cầu mượn (${id})`);
   },
 
   async rejectRequest(id: string): Promise<BorrowRequest | null> {
-    await delay();
-    const idx = requestsStore.findIndex((r) => r.id === id);
-    if (idx === -1) return null;
-    requestsStore[idx] = { ...requestsStore[idx], status: "rejected" };
-    return requestsStore[idx];
+    throw new Error(`Từ chối yêu cầu mượn (${id})`);
   },
 };
 
-interface ApiRecentBorrowing { id: number; readerName: string; bookTitle: string; borrowDate: string; dueDate: string; status: string; }
-interface ApiOverdueBook { id: number; readerName: string; bookTitle: string; overdueDays: number; }
+interface ApiBorrowOrder {
+  id: number; referenceCode: string; status: string; bookId: number; bookTitle: string;
+  borrowerId: number; borrowerName: string; requestedAt: string; borrowedAt?: string;
+  dueAt?: string; returnedAt?: string;
+}
+
+function mapBorrowing(item: ApiBorrowOrder): Borrowing {
+  return {
+    id: item.referenceCode,
+    readerId: String(item.borrowerId),
+    readerName: item.borrowerName,
+    bookId: String(item.bookId),
+    bookTitle: item.bookTitle,
+    borrowDate: formatDate(item.borrowedAt ?? item.requestedAt),
+    dueDate: formatDate(item.dueAt),
+    returnDate: formatDate(item.returnedAt),
+    status: item.status.toLowerCase() as Borrowing["status"],
+  };
+}
+
+function formatDate(value?: string): string {
+  return value ? new Date(value).toLocaleDateString("vi-VN") : "-";
+}

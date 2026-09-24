@@ -25,14 +25,16 @@ export const bookService = {
     if (filters.search) params.set("search", filters.search);
     if (filters.category) params.set("category", filters.category);
     if (filters.status) params.set("status", filters.status);
-    const books = await apiClient.get<ApiBook[]>(`/books?${params.toString()}`);
-    const filtered = books.map(mapBook);
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return { items, total, page, pageSize, totalPages };
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    const response = await apiClient.get<ApiPagedBooks>(`/books?${params.toString()}`);
+    return {
+      items: response.items.map(mapBook),
+      total: response.total,
+      page: response.page,
+      pageSize: response.pageSize,
+      totalPages: response.totalPages,
+    };
   },
 
   async getBookById(id: string): Promise<Book | null> {
@@ -81,6 +83,14 @@ interface ApiBook {
   quantity: number;
   availableQuantity: number;
   cover?: string;
+}
+
+interface ApiPagedBooks {
+  items: ApiBook[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 function mapBook(book: ApiBook): Book {
