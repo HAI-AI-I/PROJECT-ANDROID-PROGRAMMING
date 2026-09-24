@@ -46,6 +46,10 @@ import com.group_7.library_management.ui.profile.EditProfileScreen
 import com.group_7.library_management.ui.profile.ProfileScreen
 import com.group_7.library_management.ui.support.addSupportNavGraph
 import com.group_7.library_management.ui.profile.ProfileViewModel
+import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
+import com.group_7.library_management.ui.auth.ChangePasswordStartScreen
+import com.group_7.library_management.ui.auth.ConfirmCodeResetAuthScreen
+import com.group_7.library_management.ui.auth.RestPassword
 import kotlinx.coroutines.launch
 
 @Composable
@@ -301,6 +305,9 @@ fun UserScreen(
                     ProfileScreen(
                         viewModel = profileViewModel,
                         onEditProfileClick = { userNavController.navigate(Routes.EDIT_PROFILE) },
+                        onChangePasswordClick = {
+                            userNavController.navigate(Routes.CHANGE_PASSWORD)
+                        },
                         onLogoutClick = { userViewModel.logout(onLogout) }
                     )
                 }
@@ -313,6 +320,54 @@ fun UserScreen(
                         viewModel = profileViewModel,
                         onNavigateBack = { userNavController.popBackStack() },
                         onSaved = { userNavController.popBackStack() }
+                    )
+                }
+                composable(Routes.CHANGE_PASSWORD) {
+                    ChangePasswordStartScreen(
+                        onNavigateBack = { userNavController.popBackStack() },
+                        onCodeSent = { requestId, method ->
+                            userNavController.navigate(
+                                Routes.passwordResetCode(requestId, method.name, "change")
+                            )
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.PASSWORD_RESET_CODE,
+                    arguments = listOf(
+                        navArgument("requestId") { type = NavType.StringType },
+                        navArgument("verificationMethod") { type = NavType.StringType },
+                        navArgument("flow") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val requestId = backStackEntry.arguments?.getString("requestId").orEmpty()
+                    val method = runCatching {
+                        RegistrationVerificationMethod.valueOf(
+                            backStackEntry.arguments?.getString("verificationMethod").orEmpty()
+                        )
+                    }.getOrDefault(RegistrationVerificationMethod.EMAIL)
+                    val flow = backStackEntry.arguments?.getString("flow") ?: "change"
+                    ConfirmCodeResetAuthScreen(
+                        requestId = requestId,
+                        method = method,
+                        onNavigateBack = { userNavController.popBackStack() },
+                        onVerified = { resetToken ->
+                            userNavController.navigate(Routes.passwordReset(resetToken, flow))
+                        }
+                    )
+                }
+                composable(
+                    route = Routes.PASSWORD_RESET,
+                    arguments = listOf(
+                        navArgument("resetToken") { type = NavType.StringType },
+                        navArgument("flow") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val resetToken = backStackEntry.arguments?.getString("resetToken").orEmpty()
+                    RestPassword(
+                        resetToken = resetToken,
+                        onNavigateBack = { userNavController.popBackStack() },
+                        onSuccess = onLogout
                     )
                 }
                 composable(Routes.FAVORITE) {

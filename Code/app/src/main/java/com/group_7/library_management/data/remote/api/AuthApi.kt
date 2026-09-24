@@ -2,6 +2,13 @@ package com.group_7.library_management.data.remote.api
 
 import com.group_7.library_management.data.remote.dto.AuthResponseDto
 import com.group_7.library_management.data.remote.dto.LoginRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordChangeCodeRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordCodeRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordCodeResponseDto
+import com.group_7.library_management.data.remote.dto.PasswordResendRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordResetRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordVerificationRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordVerificationResponseDto
 import com.group_7.library_management.data.remote.dto.RegisterRequestDto
 import com.group_7.library_management.data.remote.dto.RegistrationCodeResponseDto
 import com.group_7.library_management.data.remote.dto.ResendRegistrationCodeRequestDto
@@ -44,6 +51,31 @@ interface AuthApi {
 
     @POST("api/v1/auth/login")
     suspend fun login(@Body request: LoginRequestDto): AuthResponseDto
+
+    @POST("api/v1/auth/password/forgot/code")
+    suspend fun sendForgotPasswordCode(
+        @Body request: PasswordCodeRequestDto
+    ): PasswordCodeResponseDto
+
+    @POST("api/v1/auth/password/change/code")
+    suspend fun sendChangePasswordCode(
+        @Body request: PasswordChangeCodeRequestDto
+    ): PasswordCodeResponseDto
+
+    @POST("api/v1/auth/password/code/resend")
+    suspend fun resendPasswordCode(
+        @Body request: PasswordResendRequestDto
+    ): PasswordCodeResponseDto
+
+    @POST("api/v1/auth/password/code/verify")
+    suspend fun verifyPasswordCode(
+        @Body request: PasswordVerificationRequestDto
+    ): PasswordVerificationResponseDto
+
+    @POST("api/v1/auth/password/reset")
+    suspend fun resetPassword(
+        @Body request: PasswordResetRequestDto
+    ): Response<Unit>
 
     @POST("api/v1/auth/logout")
     suspend fun logout(): Response<Unit>

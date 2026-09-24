@@ -33,13 +33,22 @@ public class RegistrationSmsService {
     }
 
     public void sendRegistrationCode(String phone, String code) {
+        sendCode(phone, "Ma xac nhan dang ky Library Management cua ban la: " + code
+                + ". Ma co hieu luc trong 5 phut.");
+    }
+
+    public void sendPasswordResetCode(String phone, String code) {
+        sendCode(phone, "Ma xac nhan thay doi mat khau Library Management cua ban la: " + code
+                + ". Ma co hieu luc trong 5 phut.");
+    }
+
+    private void sendCode(String phone, String text) {
         ensureConfigured();
         InfobipSmsRequest request = new InfobipSmsRequest(List.of(
                 new InfobipMessage(
                         List.of(new InfobipDestination(toInternationalDigits(phone))),
                         sender,
-                        "Ma xac nhan dang ky Library Management cua ban la: " + code
-                                + ". Ma co hieu luc trong 5 phut."
+                        text
                 )
         ));
 

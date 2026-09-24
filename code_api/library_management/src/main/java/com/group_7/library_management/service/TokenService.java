@@ -56,6 +56,12 @@ public class TokenService {
     }
 
     @Transactional
+    public void revokeAllUserTokens(Long userId) {
+        authTokenRepository.deleteAllByUserId(userId);
+        biometricTokenRepository.deleteAllByUserId(userId);
+    }
+
+    @Transactional
     public String issueBiometricToken(User user) {
         String rawToken = generateToken();
         biometricTokenRepository.save(new BiometricToken(hash(rawToken), user));

@@ -26,6 +26,24 @@ public class RegistrationEmailService {
     }
 
     public void sendRegistrationCode(String recipient, String code) {
+        sendCode(
+                recipient,
+                code,
+                "Mã xác nhận đăng ký Library Management",
+                "Mã xác nhận đăng ký của bạn là: "
+        );
+    }
+
+    public void sendPasswordResetCode(String recipient, String code) {
+        sendCode(
+                recipient,
+                code,
+                "Mã xác nhận thay đổi mật khẩu Library Management",
+                "Mã xác nhận thay đổi mật khẩu của bạn là: "
+        );
+    }
+
+    private void sendCode(String recipient, String code, String subject, String introduction) {
         if (senderAddress.isBlank()) {
             throw new EmailDeliveryException(
                     "Máy chủ chưa được cấu hình tài khoản Gmail để gửi mã xác nhận"
@@ -35,9 +53,9 @@ public class RegistrationEmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(senderAddress);
         message.setTo(recipient);
-        message.setSubject("Mã xác nhận đăng ký Library Management");
+        message.setSubject(subject);
         long minutes = expiration.toMinutes();
-        message.setText("Mã xác nhận của bạn là: " + code
+        message.setText(introduction + code
                 + "\n\nMã có hiệu lực trong "+ minutes + " phút. Không cung cấp mã này cho người khác.");
         try {
             mailSender.send(message);

@@ -7,12 +7,18 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val FORGOT_PASSWORD = "forgot_password"
-    const val CONFIRM_CODE_RESET_AUTH = "confirm_code_reset_auth"
+    const val CHANGE_PASSWORD = "change_password"
+    const val PASSWORD_RESET_CODE =
+        "password_reset_code/{requestId}/{verificationMethod}/{flow}"
+    fun passwordResetCode(requestId: String, verificationMethod: String, flow: String) =
+        "password_reset_code/$requestId/$verificationMethod/$flow"
+    const val PASSWORD_RESET = "password_reset/{resetToken}/{flow}"
+    fun passwordReset(resetToken: String, flow: String) =
+        "password_reset/$resetToken/$flow"
     const val CONFIRM_CODE_REGIS_AUTH =
         "confirm_code_regis_auth/{registrationId}/{verificationMethod}"
     fun confirmRegistration(registrationId: String, verificationMethod: String) =
         "confirm_code_regis_auth/$registrationId/$verificationMethod"
-    const val RESET_PASSWORD_AUTH = "reset_password_auth"
 
     // Main group
     const val HOME = "home"

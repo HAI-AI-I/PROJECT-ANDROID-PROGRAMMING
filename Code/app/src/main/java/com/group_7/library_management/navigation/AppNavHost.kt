@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import com.group_7.library_management.ui.auth.ConfirmCodeRegisAuthScreen
@@ -82,18 +84,34 @@ fun AppNavHost(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onSubmit = {
-                    navController.navigate(Routes.CONFIRM_CODE_RESET_AUTH)
+                onCodeSent = { requestId, method ->
+                    navController.navigate(
+                        Routes.passwordResetCode(requestId, method.name, "forgot")
+                    )
                 }
             )
         }
-        composable(route= Routes.CONFIRM_CODE_RESET_AUTH){
+        composable(
+            route = Routes.PASSWORD_RESET_CODE,
+            arguments = listOf(
+                navArgument("requestId") { type = NavType.StringType },
+                navArgument("verificationMethod") { type = NavType.StringType },
+                navArgument("flow") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val requestId = backStackEntry.arguments?.getString("requestId").orEmpty()
+            val method = runCatching {
+                RegistrationVerificationMethod.valueOf(
+                    backStackEntry.arguments?.getString("verificationMethod").orEmpty()
+                )
+            }.getOrDefault(RegistrationVerificationMethod.EMAIL)
+            val flow = backStackEntry.arguments?.getString("flow") ?: "forgot"
             ConfirmCodeResetAuthScreen(
-                onNavigateBack={
-                    navController.popBackStack()
-                },
-                onSubmit={
-                    navController.navigate(Routes.RESET_PASSWORD_AUTH)
+                requestId = requestId,
+                method = method,
+                onNavigateBack = { navController.popBackStack() },
+                onVerified = { resetToken ->
+                    navController.navigate(Routes.passwordReset(resetToken, flow))
                 }
             )
         }
@@ -120,12 +138,20 @@ fun AppNavHost(
                 }
             )
         }
-        composable ( route= Routes.RESET_PASSWORD_AUTH ){
+        composable(
+            route = Routes.PASSWORD_RESET,
+            arguments = listOf(
+                navArgument("resetToken") { type = NavType.StringType },
+                navArgument("flow") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val resetToken = backStackEntry.arguments?.getString("resetToken").orEmpty()
             RestPassword(
-                onNavigateBack = {navController.popBackStack()},
-                onSubmit = {
+                resetToken = resetToken,
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.RESET_PASSWORD_AUTH) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )

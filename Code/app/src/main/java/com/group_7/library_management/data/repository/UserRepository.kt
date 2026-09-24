@@ -5,6 +5,12 @@ import com.group_7.library_management.data.local.entity.UserEntity
 import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.dto.LoginRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordChangeCodeRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordCodeRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordCodeResponseDto
+import com.group_7.library_management.data.remote.dto.PasswordResendRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordResetRequestDto
+import com.group_7.library_management.data.remote.dto.PasswordVerificationRequestDto
 import com.group_7.library_management.data.remote.dto.RegisterRequestDto
 import com.group_7.library_management.data.remote.dto.RegistrationCodeResponseDto
 import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
@@ -107,6 +113,47 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun sendForgotPasswordCode(
+        identifier: String,
+        method: RegistrationVerificationMethod
+    ): Result<PasswordCodeResponseDto> = apiResult {
+        authApi.sendForgotPasswordCode(
+            PasswordCodeRequestDto(identifier.trim(), method.name)
+        )
+    }
+
+    suspend fun sendChangePasswordCode(
+        method: RegistrationVerificationMethod
+    ): Result<PasswordCodeResponseDto> = apiResult {
+        authApi.sendChangePasswordCode(PasswordChangeCodeRequestDto(method.name))
+    }
+
+    suspend fun resendPasswordCode(
+        requestId: String
+    ): Result<PasswordCodeResponseDto> = apiResult {
+        authApi.resendPasswordCode(PasswordResendRequestDto(requestId))
+    }
+
+    suspend fun verifyPasswordCode(
+        requestId: String,
+        code: String
+    ): Result<String> = apiResult {
+        authApi.verifyPasswordCode(
+            PasswordVerificationRequestDto(requestId, code)
+        ).resetToken
+    }
+
+    suspend fun resetPassword(
+        resetToken: String,
+        newPassword: String
+    ): Result<Unit> = apiResult {
+        val response = authApi.resetPassword(
+            PasswordResetRequestDto(resetToken, newPassword)
+        )
+        if (!response.isSuccessful) throw HttpException(response)
+        checkLogin.clearLogin()
+    }
+
     suspend fun getUserById(id: Long): UserEntity? = userDao.getUserById(id)
 
     suspend fun getLatestUser(): UserEntity? = userDao.getLatestUser()
@@ -142,6 +189,14 @@ class UserRepository @Inject constructor(
             isDeleted = false,
             updateAt = joinDate
         )
+    }
+
+    private suspend fun <T> apiResult(block: suspend () -> T): Result<T> {
+        return try {
+            Result.success(block())
+        } catch (exception: Exception) {
+            Result.failure(toReadableException(exception))
+        }
     }
 
     private fun toReadableException(exception: Exception): Exception {

@@ -18,7 +18,9 @@ import com.group_7.library_management.ui.theme.LibrarySpacing
 @Composable
 fun ChangePasswordScreen(
     onSubmit: (String) -> Unit,
-    onNavigateBack:()->Unit,
+    onNavigateBack: () -> Unit,
+    isLoading: Boolean = false,
+    serverErrorMessage: String? = null
 ) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -36,18 +38,16 @@ fun ChangePasswordScreen(
                 .padding(horizontal = LibrarySpacing.Large, vertical = LibrarySpacing.Huge),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (onNavigateBack != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Quay lại",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Quay lại",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
 
@@ -85,9 +85,10 @@ fun ChangePasswordScreen(
             )
 
             // Hiển thị lỗi
-            if (errorMessage.isNotEmpty()) {
+            val shownError = errorMessage.ifBlank { serverErrorMessage.orEmpty() }
+            if (shownError.isNotEmpty()) {
                 Text(
-                    text = errorMessage,
+                    text = shownError,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.error
                     ),
@@ -101,8 +102,17 @@ fun ChangePasswordScreen(
 
             // Nút submit
             AuthButton(
-                text = "CẬP NHẬT  MẬT KHẨU",
-                onClick ={onSubmit(password)}
+                text = if (isLoading) "ĐANG CẬP NHẬT..." else "CẬP NHẬT MẬT KHẨU",
+                enabled = !isLoading,
+                onClick = {
+                    errorMessage = when {
+                        password.length < 6 -> "Mật khẩu phải có ít nhất 6 ký tự"
+                        password.length > 72 -> "Mật khẩu không được vượt quá 72 ký tự"
+                        password != confirmPassword -> "Mật khẩu xác nhận không khớp"
+                        else -> ""
+                    }
+                    if (errorMessage.isEmpty()) onSubmit(password)
+                }
             )
         }
     }

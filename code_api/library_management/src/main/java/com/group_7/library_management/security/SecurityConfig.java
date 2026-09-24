@@ -29,6 +29,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/register/phone/code",
                                 "/api/v1/auth/register/phone/resend",
                                 "/api/v1/auth/register/phone/verify",
+                                "/api/v1/auth/password/forgot/code",
+                                "/api/v1/auth/password/code/resend",
+                                "/api/v1/auth/password/code/verify",
+                                "/api/v1/auth/password/reset",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/biometric/login"
                         ).permitAll()

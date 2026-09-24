@@ -43,6 +43,39 @@ data class ResendRegistrationCodeRequestDto(
     val registrationId: String
 )
 
+data class PasswordCodeRequestDto(
+    val identifier: String,
+    val channel: String
+)
+
+data class PasswordChangeCodeRequestDto(
+    val channel: String
+)
+
+data class PasswordCodeResponseDto(
+    val requestId: String,
+    val destination: String,
+    val expiresInSeconds: Long
+)
+
+data class PasswordResendRequestDto(
+    val requestId: String
+)
+
+data class PasswordVerificationRequestDto(
+    val requestId: String,
+    val code: String
+)
+
+data class PasswordVerificationResponseDto(
+    val resetToken: String
+)
+
+data class PasswordResetRequestDto(
+    val resetToken: String,
+    val newPassword: String
+)
+
 enum class RegistrationVerificationMethod {
     EMAIL,
     SMS

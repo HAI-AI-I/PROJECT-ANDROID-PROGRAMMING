@@ -110,6 +110,103 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun requestForgotPasswordCode(
+        identifier: String,
+        method: RegistrationVerificationMethod,
+        onSuccess: (String) -> Unit
+    ) {
+        executePasswordRequest(
+            request = { userRepository.sendForgotPasswordCode(identifier, method) },
+            onSuccess = onSuccess
+        )
+    }
+
+    fun requestChangePasswordCode(
+        method: RegistrationVerificationMethod,
+        onSuccess: (String) -> Unit
+    ) {
+        executePasswordRequest(
+            request = { userRepository.sendChangePasswordCode(method) },
+            onSuccess = onSuccess
+        )
+    }
+
+    private fun executePasswordRequest(
+        request: suspend () -> Result<com.group_7.library_management.data.remote.dto.PasswordCodeResponseDto>,
+        onSuccess: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            request().onSuccess { response ->
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                onSuccess(response.requestId)
+            }.onFailure { exception ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = exception.message ?: "Không thể gửi mã xác nhận"
+                )
+            }
+        }
+    }
+
+    fun verifyPasswordCode(
+        requestId: String,
+        code: String,
+        onSuccess: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            userRepository.verifyPasswordCode(requestId, code)
+                .onSuccess { resetToken ->
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                    onSuccess(resetToken)
+                }
+                .onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = exception.message ?: "Mã xác nhận không hợp lệ"
+                    )
+                }
+        }
+    }
+
+    fun resendPasswordCode(requestId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            userRepository.resendPasswordCode(requestId)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                }
+                .onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = exception.message ?: "Không thể gửi lại mã xác nhận"
+                    )
+                }
+        }
+    }
+
+    fun resetPassword(
+        resetToken: String,
+        newPassword: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            userRepository.resetPassword(resetToken, newPassword)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                    onSuccess()
+                }
+                .onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = exception.message ?: "Không thể thay đổi mật khẩu"
+                    )
+                }
+        }
+    }
+
     fun loginWithBiometrics(
         savedUserId: String? = null,
         onSuccess: (Long) -> Unit
