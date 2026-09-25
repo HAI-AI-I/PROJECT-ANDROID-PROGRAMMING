@@ -61,7 +61,7 @@ fun BorrowRecordListContent(
         state.orders.filter { order ->
             when (selectedTab) {
                 BorrowTab.ALL -> true
-                BorrowTab.PENDING -> order.status == "REQUESTED"
+                BorrowTab.PENDING -> order.status == "PENDING_PAYMENT" || order.status == "REQUESTED"
                 BorrowTab.BORROWING -> order.status == "BORROWED" && !order.isDueSoon()
                 BorrowTab.DUE_SOON -> order.status == "BORROWED" && order.isDueSoon()
                 BorrowTab.OVERDUE -> order.status == "OVERDUE"
@@ -170,7 +170,7 @@ private fun BorrowOrder.isDueSoon(now: Instant = Instant.now()): Boolean {
 }
 
 private fun BorrowOrder.canCancel(now: Instant = Instant.now()): Boolean {
-    if (status != "REQUESTED") return false
+    if (status != "PENDING_PAYMENT" && status != "REQUESTED") return false
     val requested = runCatching { Instant.parse(requestedAt) }.getOrNull() ?: return false
     val elapsed = Duration.between(requested, now)
     return !elapsed.isNegative && elapsed <= Duration.ofHours(24)

@@ -10,6 +10,7 @@ import com.group_7.library_management.entity.BookCopyStatus;
 import com.group_7.library_management.entity.BorrowRecord;
 import com.group_7.library_management.entity.BorrowStatus;
 import com.group_7.library_management.entity.User;
+import com.group_7.library_management.entity.PaymentMethod;
 import com.group_7.library_management.exception.ConflictException;
 import com.group_7.library_management.exception.ResourceNotFoundException;
 import com.group_7.library_management.repository.BookCopyRepository;
@@ -33,6 +34,7 @@ public class BorrowOrderService {
     private static final long CANCELLATION_WINDOW_HOURS = 24L;
     private static final ZoneId CANCELLATION_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final List<BorrowStatus> ACTIVE_STATUSES = List.of(
+            BorrowStatus.PENDING_PAYMENT,
             BorrowStatus.REQUESTED,
             BorrowStatus.BORROWED,
             BorrowStatus.OVERDUE
@@ -137,8 +139,12 @@ public class BorrowOrderService {
         BorrowRecord order = borrowRecordRepository.findForCancellation(orderId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn mượn"));
 
-        if (order.getStatus() != BorrowStatus.REQUESTED) {
-            throw new ConflictException("Chỉ có thể hủy đơn đang chờ nhận sách");
+        if (order.getStatus() != BorrowStatus.PENDING_PAYMENT
+                && order.getStatus() != BorrowStatus.REQUESTED) {
+            throw new ConflictException("Chỉ có thể hủy đơn đang chờ thanh toán hoặc chờ nhận sách");
+        }
+        if (order.getPaidAmount() > 0L) {
+            throw new ConflictException("Đơn đã thanh toán, vui lòng liên hệ thư viện để được hỗ trợ hủy và hoàn tiền");
         }
 
         Instant now = Instant.now();
@@ -211,6 +217,9 @@ public class BorrowOrderService {
         order.setStatus(BorrowStatus.BORROWED);
         order.setBorrowedAt(now);
         order.setDueAt(now.plus(order.getBorrowDays(), ChronoUnit.DAYS));
+        if (order.getPaidAmount() < order.getTotalAmount()) {
+            order.markPaid(order.getTotalAmount(), now, PaymentMethod.CASH);
+        }
         order.getBookCopy().setStatus(BookCopyStatus.BORROWED);
         return BorrowOrderResponse.from(borrowRecordRepository.saveAndFlush(order));
     }

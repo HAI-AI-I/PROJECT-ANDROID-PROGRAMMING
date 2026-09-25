@@ -66,6 +66,7 @@ import java.util.Locale
 @Composable
 fun BorrowOrderDetailScreen(
     onBack: () -> Unit,
+    onPayOrder: (Long) -> Unit,
     onViewQrCode: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
     viewModel: BorrowOrderViewModel = hiltViewModel()
@@ -100,6 +101,7 @@ fun BorrowOrderDetailScreen(
 
             state.order != null -> OrderDetailContent(
                 order = requireNotNull(state.order),
+                onPayOrder = onPayOrder,
                 onViewQrCode = onViewQrCode,
                 onBookClick = onBookClick,
                 onCancelClick = { showCancelConfirmation = true },
@@ -138,6 +140,7 @@ fun BorrowOrderDetailScreen(
 @Composable
 private fun OrderDetailContent(
     order: BorrowOrder,
+    onPayOrder: (Long) -> Unit,
     onViewQrCode: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
     onCancelClick: () -> Unit,
@@ -210,7 +213,7 @@ private fun OrderDetailContent(
             order.returnedAt?.let { DetailRow("Thời gian trả", formatDateTime(it)) }
         }
 
-        DetailCard(title = "Thanh toán tại thư viện") {
+        DetailCard(title = "Thông tin thanh toán") {
             DetailRow("Phí mượn", formatMoney(order.borrowFee))
             DetailRow("Tiền cọc hoàn lại", formatMoney(order.depositAmount))
             HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
@@ -225,7 +228,17 @@ private fun OrderDetailContent(
             }
         }
 
-        if (order.status != "RETURNED" && order.status != "CANCELLED") {
+        if (order.status == "PENDING_PAYMENT") {
+            Button(
+                onClick = { onPayOrder(order.id) },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Outlined.QrCode2, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Thanh toán", fontWeight = FontWeight.Bold)
+            }
+        } else if (order.status != "RETURNED" && order.status != "CANCELLED") {
             Button(
                 onClick = { onViewQrCode(order.id) },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -353,7 +366,7 @@ private fun formatDateTime(value: String): String = runCatching {
 }.getOrDefault(value)
 
 private fun BorrowOrder.canCancel(now: Instant = Instant.now()): Boolean {
-    if (status != "REQUESTED") return false
+    if (status != "PENDING_PAYMENT" && status != "REQUESTED") return false
     val requested = runCatching { Instant.parse(requestedAt) }.getOrNull() ?: return false
     val elapsed = Duration.between(requested, now)
     return !elapsed.isNegative && elapsed <= Duration.ofHours(24)

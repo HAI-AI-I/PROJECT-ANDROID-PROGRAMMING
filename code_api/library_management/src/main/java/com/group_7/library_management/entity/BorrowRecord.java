@@ -72,6 +72,19 @@ public class BorrowRecord {
     @Column(name = "total_amount", nullable = false)
     private long totalAmount;
 
+    @Column(name = "payment_code", unique = true, length = 40)
+    private String paymentCode;
+
+    @Column(name = "paid_amount", nullable = false)
+    private long paidAmount;
+
+    @Column(name = "paid_at")
+    private Instant paidAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentMethod paymentMethod;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -101,13 +114,14 @@ public class BorrowRecord {
         this.referenceCode = referenceCode;
         this.user = user;
         this.bookCopy = bookCopy;
-        this.status = BorrowStatus.REQUESTED;
+        this.status = BorrowStatus.PENDING_PAYMENT;
         this.borrowDays = borrowDays;
         this.dueAt = dueAt;
         this.pickupLocation = pickupLocation;
         this.borrowFee = borrowFee;
         this.depositAmount = depositAmount;
         this.totalAmount = Math.addExact(borrowFee, depositAmount);
+        this.paymentCode = "UTH" + referenceCode.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
     }
 
     @PrePersist
@@ -141,6 +155,16 @@ public class BorrowRecord {
     public long getBorrowFee() { return borrowFee; }
     public long getDepositAmount() { return depositAmount; }
     public long getTotalAmount() { return totalAmount; }
+    public String getPaymentCode() { return paymentCode; }
+    public void setPaymentCode(String paymentCode) { this.paymentCode = paymentCode; }
+    public long getPaidAmount() { return paidAmount; }
+    public Instant getPaidAt() { return paidAt; }
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void markPaid(long amount, Instant paidAt, PaymentMethod paymentMethod) {
+        this.paidAmount = amount;
+        this.paidAt = paidAt;
+        this.paymentMethod = paymentMethod;
+    }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

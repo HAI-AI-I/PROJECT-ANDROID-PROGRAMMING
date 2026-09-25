@@ -82,6 +82,11 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     Optional<BorrowRecord> findByReferenceCode(String referenceCode);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
+    @Query("select b from BorrowRecord b where b.paymentCode = :paymentCode")
+    Optional<BorrowRecord> findByPaymentCodeForUpdate(@Param("paymentCode") String paymentCode);
+
     @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book"})
     Optional<BorrowRecord> findByReferenceCodeAndUserId(String referenceCode, Long userId);
 

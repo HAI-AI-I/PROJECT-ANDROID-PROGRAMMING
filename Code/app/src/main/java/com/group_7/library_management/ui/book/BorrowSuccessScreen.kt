@@ -72,7 +72,7 @@ private fun BorrowSuccessContent(order: BorrowOrder, onViewQrCode: (Long) -> Uni
             Spacer(Modifier.height(18.dp))
             Text("Đặt mượn sách thành công!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(6.dp))
-            Text("Mang mã đơn đến thủ thư để nhận sách và thanh toán.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Text("Thanh toán thành công. Mang mã đơn đến thủ thư để nhận sách.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Spacer(Modifier.height(20.dp))
 
             Card(
@@ -102,11 +102,12 @@ private fun BorrowSuccessContent(order: BorrowOrder, onViewQrCode: (Long) -> Uni
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Thanh toán tại thủ thư", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text("Thông tin thanh toán", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     OrderRow("Phí mượn", money(order.borrowFee))
                     OrderRow("Tiền cọc (được hoàn lại)", money(order.depositAmount))
                     HorizontalDivider()
                     OrderRow("Tổng cần trả", money(order.totalAmount), true)
+                    OrderRow("Đã thanh toán", money(order.paidAmount), true)
                 }
             }
 

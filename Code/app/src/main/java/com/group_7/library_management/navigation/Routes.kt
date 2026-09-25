@@ -48,6 +48,8 @@ object Routes {
     fun bookBorrowConfirm(bookId: String) = "book_borrow_confirm/$bookId"
     const val BORROW_SUCCESS = "borrow_success/{orderId}"
     fun borrowSuccess(orderId: Long) = "borrow_success/$orderId"
+    const val BORROW_PAYMENT = "borrow_payment/{orderId}"
+    fun borrowPayment(orderId: Long) = "borrow_payment/$orderId"
     const val BORROW_QR = "borrow_qr/{orderId}"
     fun borrowQr(orderId: Long) = "borrow_qr/$orderId"
     const val BORROW_FAILURE = "borrow_failure"

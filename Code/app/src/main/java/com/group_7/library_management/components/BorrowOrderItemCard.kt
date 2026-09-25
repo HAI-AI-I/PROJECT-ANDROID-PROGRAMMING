@@ -154,7 +154,7 @@ fun BorrowOrderItemCard(
                 )
             }
 
-            if (order.status == "REQUESTED" && onCancelClick != null) {
+            if ((order.status == "PENDING_PAYMENT" || order.status == "REQUESTED") && onCancelClick != null) {
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
                 )
@@ -222,6 +222,7 @@ private fun CoverPlaceholder() {
 
 @Composable
 private fun borrowStatusStyle(order: BorrowOrder): Pair<String, Color> = when {
+    order.status == "PENDING_PAYMENT" -> "Chờ thanh toán" to Warning
     order.status == "REQUESTED" -> "Chờ nhận" to MaterialTheme.colorScheme.primary
     order.status == "BORROWED" && order.isDueSoon() -> "Sắp đến hạn" to Warning
     order.status == "BORROWED" -> "Đang mượn" to MaterialTheme.colorScheme.primary
@@ -231,6 +232,7 @@ private fun borrowStatusStyle(order: BorrowOrder): Pair<String, Color> = when {
 }
 
 private fun orderDateLabel(order: BorrowOrder): String = when (order.status) {
+    "PENDING_PAYMENT" -> "Ngày đặt · Hạn trả dự kiến"
     "REQUESTED" -> "Ngày đặt · Hạn trả dự kiến"
     "RETURNED" -> "Ngày mượn · Ngày trả"
     else -> "Ngày mượn · Hạn trả"

@@ -33,6 +33,7 @@ import com.group_7.library_management.ui.book.BookDetailScreen
 import com.group_7.library_management.ui.book.BookReviewsScreen
 import com.group_7.library_management.ui.book.BorrowConfirmScreen
 import com.group_7.library_management.ui.book.BorrowFailureScreen
+import com.group_7.library_management.ui.book.BorrowPaymentScreen
 import com.group_7.library_management.ui.book.BorrowQrScreen
 import com.group_7.library_management.ui.book.BorrowSuccessScreen
 import com.group_7.library_management.ui.qrscan.ScanScreen
@@ -214,7 +215,7 @@ fun UserScreen(
                 ) {
                     BorrowConfirmScreen(
                         onSuccess = { orderId ->
-                            userNavController.navigate(Routes.borrowSuccess(orderId)) {
+                            userNavController.navigate(Routes.borrowPayment(orderId)) {
                                 popUpTo(Routes.BOOK_BORROW_CONFIRM) { inclusive = true }
                                 launchSingleTop = true
                             }
@@ -225,6 +226,26 @@ fun UserScreen(
                             }
                         },
                         onBack = { userNavController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = Routes.BORROW_PAYMENT,
+                    arguments = listOf(navArgument("orderId") { type = NavType.LongType })
+                ) {
+                    BorrowPaymentScreen(
+                        onBack = { userNavController.popBackStack() },
+                        onBackToHome = {
+                            userNavController.navigate(Routes.HOME) {
+                                popUpTo(Routes.HOME) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        onPaymentSuccess = { orderId ->
+                            userNavController.navigate(Routes.borrowSuccess(orderId)) {
+                                popUpTo(Routes.BORROW_PAYMENT) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
                 composable(
@@ -292,6 +313,9 @@ fun UserScreen(
                 ) {
                     BorrowOrderDetailScreen(
                         onBack = { userNavController.popBackStack() },
+                        onPayOrder = { orderId ->
+                            userNavController.navigate(Routes.borrowPayment(orderId))
+                        },
                         onViewQrCode = { orderId ->
                             userNavController.navigate(Routes.borrowQr(orderId))
                         },

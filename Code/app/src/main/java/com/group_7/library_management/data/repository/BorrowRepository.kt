@@ -8,6 +8,7 @@ import com.group_7.library_management.data.remote.dto.BorrowOrderResponseDto
 import com.group_7.library_management.data.remote.dto.CreateBorrowOrderRequestDto
 import com.group_7.library_management.data.remote.dto.HomeSummaryResponseDto
 import com.group_7.library_management.models.BorrowOrder
+import com.group_7.library_management.models.BorrowPayment
 import com.group_7.library_management.models.UserBorrowSummary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -49,6 +50,23 @@ class BorrowRepository @Inject constructor(
 
     suspend fun getCurrentBorrowOrder(bookId: Long): BorrowOrder? {
         return borrowApi.getCurrentBorrowOrder(bookId).order?.toModel()
+    }
+
+    suspend fun getBorrowPayment(orderId: Long): BorrowPayment {
+        val response = borrowApi.getBorrowPayment(orderId)
+        return BorrowPayment(
+            orderId = response.orderId,
+            referenceCode = response.referenceCode,
+            paymentCode = response.paymentCode,
+            amount = response.amount,
+            paidAmount = response.paidAmount,
+            paymentStatus = response.paymentStatus,
+            bankCode = response.bankCode,
+            accountNumber = response.accountNumber,
+            accountName = response.accountName,
+            qrUrl = response.qrUrl,
+            paidAt = response.paidAt
+        )
     }
 
     fun getBorrowSummary(): Flow<UserBorrowSummary> = flow {
@@ -117,6 +135,10 @@ class BorrowRepository @Inject constructor(
         depositAmount = depositAmount,
         totalAmount = totalAmount,
         paidAmount = paidAmount,
+        paymentCode = paymentCode,
+        paymentStatus = paymentStatus,
+        paymentMethod = paymentMethod,
+        paidAt = paidAt,
         depositRefunded = depositRefunded,
         remainingRefundAmount = remainingRefundAmount
     )

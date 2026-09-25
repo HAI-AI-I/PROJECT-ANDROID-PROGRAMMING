@@ -2,6 +2,7 @@ package com.group_7.library_management.dto;
 
 import com.group_7.library_management.entity.BorrowRecord;
 import com.group_7.library_management.entity.BorrowStatus;
+import com.group_7.library_management.entity.PaymentMethod;
 
 import java.time.Instant;
 
@@ -26,6 +27,10 @@ public record BorrowOrderResponse(
         long depositAmount,
         long totalAmount,
         long paidAmount,
+        String paymentCode,
+        String paymentStatus,
+        PaymentMethod paymentMethod,
+        Instant paidAt,
         boolean depositRefunded,
         long remainingRefundAmount
 ) {
@@ -41,10 +46,13 @@ public record BorrowOrderResponse(
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .reduce((left, right) -> left + ", " + right)
                 .orElse("");
-        long paidAmount = effectiveStatus == BorrowStatus.REQUESTED
-                || effectiveStatus == BorrowStatus.CANCELLED
-                ? 0L
-                : order.getTotalAmount();
+        long paidAmount = order.getPaidAmount();
+        if (paidAmount == 0L
+                && effectiveStatus != BorrowStatus.PENDING_PAYMENT
+                && effectiveStatus != BorrowStatus.REQUESTED
+                && effectiveStatus != BorrowStatus.CANCELLED) {
+            paidAmount = order.getTotalAmount();
+        }
         boolean depositRefunded = order.getDepositRefundedAt() != null;
         long remainingRefundAmount = effectiveStatus == BorrowStatus.RETURNED && !depositRefunded
                 ? order.getDepositAmount()
@@ -70,6 +78,10 @@ public record BorrowOrderResponse(
                 order.getDepositAmount(),
                 order.getTotalAmount(),
                 paidAmount,
+                order.getPaymentCode(),
+                paidAmount >= order.getTotalAmount() ? "PAID" : "UNPAID",
+                order.getPaymentMethod(),
+                order.getPaidAt(),
                 depositRefunded,
                 remainingRefundAmount
         );

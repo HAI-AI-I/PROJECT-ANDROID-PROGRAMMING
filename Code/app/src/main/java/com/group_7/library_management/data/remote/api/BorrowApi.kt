@@ -5,6 +5,7 @@ import com.group_7.library_management.data.remote.dto.CreateBorrowOrderRequestDt
 import com.group_7.library_management.data.remote.dto.CurrentBorrowOrderResponseDto
 import com.group_7.library_management.data.remote.dto.HomeSummaryResponseDto
 import com.group_7.library_management.data.remote.dto.CancelBorrowOrderResponseDto
+import com.group_7.library_management.data.remote.dto.BorrowPaymentResponseDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -36,4 +37,9 @@ interface BorrowApi {
     suspend fun getCurrentBorrowOrder(
         @Path("bookId") bookId: Long
     ): CurrentBorrowOrderResponseDto
+
+    @GET("api/v1/payments/borrow-orders/{orderId}")
+    suspend fun getBorrowPayment(
+        @Path("orderId") orderId: Long
+    ): BorrowPaymentResponseDto
 }

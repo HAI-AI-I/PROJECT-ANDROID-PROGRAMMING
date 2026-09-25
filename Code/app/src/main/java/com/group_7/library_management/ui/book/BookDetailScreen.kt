@@ -179,6 +179,7 @@ private fun BookDetailBottomBar(
             ) {
                 Text(
                     when (borrowStatus) {
+                        "PENDING_PAYMENT" -> "Chờ thanh toán"
                         "REQUESTED" -> "Chờ lấy sách"
                         "BORROWED" -> "Đang mượn"
                         "OVERDUE" -> "Đã quá hạn"
