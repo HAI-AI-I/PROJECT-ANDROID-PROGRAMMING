@@ -1,10 +1,14 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8386/api/v1").replace(/\/$/, "");
+
+const getAccessToken = () =>
+  typeof window === "undefined" ? null : window.localStorage.getItem("library_access_token");
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
       ...options?.headers,
     },
     cache: "no-store",
@@ -12,6 +16,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const message = await response.text();
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.localStorage.removeItem("library_access_token");
+      window.localStorage.removeItem("library_user");
+    }
     throw new Error(message || `API request failed: ${response.status}`);
   }
 

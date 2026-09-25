@@ -22,9 +22,17 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
     let active = true;
 
     const refreshUnreadState = async () => {
-      const notifications = await notificationService.getNotifications();
-      if (!active) return;
-      setHasUnreadNotifications(notifications.some((notification) => !notification.isRead));
+      if (!window.localStorage.getItem("library_access_token")) {
+        setHasUnreadNotifications(false);
+        return;
+      }
+      try {
+        const notifications = await notificationService.getNotifications();
+        if (!active) return;
+        setHasUnreadNotifications(notifications.some((notification) => !notification.isRead));
+      } catch {
+        if (active) setHasUnreadNotifications(false);
+      }
     };
 
     refreshUnreadState();

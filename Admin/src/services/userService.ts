@@ -24,10 +24,14 @@ export const userService = {
     const pageSize = filters.pageSize ?? 8;
     const params = new URLSearchParams();
     if (filters.search) params.set("search", filters.search);
-    if (filters.role) params.set("role", filters.role.toUpperCase());
-    if (filters.status) params.set("status", filters.status.toUpperCase());
-    const users = await apiClient.get<ApiUser[]>(`/users?${params.toString()}`);
-    const filtered = users.map((user) => ({ userId: `U-${String(user.id).padStart(3, "0")}`, name: user.fullName, email: user.email, role: user.role.toLowerCase() as User["role"], status: (user.status.toLowerCase() === "blocked" ? "inactive" : user.status.toLowerCase()) as User["status"], avatar: user.avatar, createdDate: new Date(user.createdAt).toLocaleDateString("vi-VN") }));
+    const users = await apiClient.get<ApiUser[]>(`/admin/users?${params.toString()}`);
+    let filtered = users.map((user) => ({ userId: `U-${String(user.id).padStart(3, "0")}`, name: user.fullName, email: user.email, role: user.role.toLowerCase() as User["role"], status: (user.active ? "active" : "inactive") as User["status"], avatar: undefined, createdDate: new Date(user.createdAt).toLocaleDateString("vi-VN") }));
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
+      filtered = filtered.filter((user) => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query));
+    }
+    if (filters.role) filtered = filtered.filter((user) => user.role === filters.role);
+    if (filters.status) filtered = filtered.filter((user) => user.status === filters.status);
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const start = (page - 1) * pageSize;
@@ -35,4 +39,4 @@ export const userService = {
   },
 };
 
-interface ApiUser { id: number; fullName: string; email: string; role: string; status: string; avatar?: string; createdAt: string; }
+interface ApiUser { id: number; fullName: string; email: string; phone?: string; role: string; active: boolean; createdAt: string; }
