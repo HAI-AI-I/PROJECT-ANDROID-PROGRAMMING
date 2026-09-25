@@ -95,7 +95,10 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
-    fun markAsClicked(id: String) {
+    fun markAsClicked(
+        id: String,
+        onSuccess: (NotificationItem) -> Unit = {}
+    ) {
         if (!ensureNetwork()) return
         viewModelScope.launch {
             runCatching { notificationRepository.markAsClicked(id) }
@@ -105,6 +108,7 @@ class NotificationViewModel @Inject constructor(
                             if (it.id == updatedNotification.id) updatedNotification else it
                         }
                     }
+                    onSuccess(updatedNotification)
                 }
                 .onFailure(::showCrudError)
         }

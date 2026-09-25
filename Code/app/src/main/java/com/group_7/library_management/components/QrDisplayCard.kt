@@ -37,22 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 
-/**
- * Hiển thị mã QR kèm thông tin và các nút hành động.
- *
- * Component này chỉ chịu trách nhiệm về UI. Toàn bộ logic lưu ảnh và
- * chia sẻ được xử lý bởi màn hình gọi thông qua [onSave] và [onShare],
- * giữ đúng nguyên tắc separation of concerns của dự án.
- *
- * @param qrContent Nội dung được mã hóa trong mã QR.
- * @param code      Chuỗi mã hiển thị bên dưới ảnh QR (ví dụ: mã đơn mượn, mã thành viên).
- * @param title     Tiêu đề chính (ví dụ: tên sách, tên thành viên).
- * @param description Mô tả hướng dẫn người dùng.
- * @param onSave    Callback khi nhấn "Lưu ảnh". Truyền [Bitmap] QR đã render để Screen xử lý.
- * @param onShare   Callback khi nhấn "Chia sẻ". Truyền [Bitmap] QR đã render để Screen xử lý.
- * @param onBackToHome Callback về trang chủ. Nếu null, nút sẽ không hiển thị.
- * @param details   Slot nội dung bổ sung, hiển thị bên dưới phần mô tả.
- */
 @Composable
 fun QrDisplayCard(
     qrContent: String,
@@ -109,7 +93,6 @@ fun QrDisplayCard(
 
         details()
 
-        // Chỉ hiển thị khu vực action buttons nếu có ít nhất 1 callback
         if (onSave != null || onShare != null || onBackToHome != null) {
             Spacer(Modifier.height(22.dp))
 

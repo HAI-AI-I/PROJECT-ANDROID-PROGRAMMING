@@ -137,6 +137,23 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_13_14 = object : Migration(13, 14) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE notifications ADD COLUMN actionType TEXT NOT NULL DEFAULT 'NONE'"
+            )
+            db.execSQL("ALTER TABLE notifications ADD COLUMN targetId INTEGER")
+            db.execSQL(
+                """
+                UPDATE notifications
+                SET actionType = 'BOOK_DETAIL',
+                    targetId = bookId
+                WHERE bookId IS NOT NULL
+                """.trimIndent()
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -156,7 +173,8 @@ object  DatabaseModule {
             MIGRATION_9_10,
             MIGRATION_10_11,
             MIGRATION_11_12,
-            MIGRATION_12_13
+            MIGRATION_12_13,
+            MIGRATION_13_14
         )
         .fallbackToDestructiveMigration(true)
         .build()

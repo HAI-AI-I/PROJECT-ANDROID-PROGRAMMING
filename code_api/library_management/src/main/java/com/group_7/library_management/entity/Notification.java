@@ -47,6 +47,13 @@ public class Notification {
     @Column(nullable = false, length = 20)
     private NotificationType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "action_type", length = 40)
+    private NotificationActionType actionType;
+
+    @Column(name = "target_id")
+    private Long targetId;
+
     @Column(name = "clicked_at")
     private Instant clickedAt;
 
@@ -71,6 +78,25 @@ public class Notification {
         this.title = title;
         this.message = message;
         this.type = type;
+        this.actionType = book == null
+                ? NotificationActionType.NONE
+                : NotificationActionType.BOOK_DETAIL;
+        this.targetId = book == null ? null : book.getId();
+    }
+
+    public Notification(
+            String notificationKey, User user, Book book,
+            String title, String message, NotificationType type,
+            NotificationActionType actionType, Long targetId
+    ) {
+        this.notificationKey = notificationKey;
+        this.user = user;
+        this.book = book;
+        this.title = title;
+        this.message = message;
+        this.type = type;
+        this.actionType = actionType;
+        this.targetId = targetId;
     }
 
     @PrePersist
@@ -85,6 +111,14 @@ public class Notification {
     public String getTitle() { return title; }
     public String getMessage() { return message; }
     public NotificationType getType() { return type; }
+    public NotificationActionType getActionType() {
+        if (actionType != null) return actionType;
+        return book == null ? NotificationActionType.NONE : NotificationActionType.BOOK_DETAIL;
+    }
+    public Long getTargetId() {
+        if (targetId != null) return targetId;
+        return book == null ? null : book.getId();
+    }
     public Instant getClickedAt() { return clickedAt; }
     public void setClickedAt(Instant clickedAt) { this.clickedAt = clickedAt; }
     public Instant getReadAt() { return readAt; }

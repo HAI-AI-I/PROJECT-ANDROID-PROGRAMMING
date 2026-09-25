@@ -6,6 +6,8 @@ data class NotificationResponseDto(
     val message: String,
     val type: String,
     val bookId: Long?,
+    val actionType: String?,
+    val targetId: Long?,
     val isRead: Boolean,
     val isClicked: Boolean,
     val createdAt: String,

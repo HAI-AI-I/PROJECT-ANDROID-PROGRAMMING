@@ -61,7 +61,8 @@ fun BorrowRecordListContent(
         state.orders.filter { order ->
             when (selectedTab) {
                 BorrowTab.ALL -> true
-                BorrowTab.PENDING -> order.status == "PENDING_PAYMENT" || order.status == "REQUESTED"
+                BorrowTab.PENDING_PAYMENT -> order.status == "PENDING_PAYMENT"
+                BorrowTab.PENDING -> order.status == "REQUESTED"
                 BorrowTab.BORROWING -> order.status == "BORROWED" && !order.isDueSoon()
                 BorrowTab.DUE_SOON -> order.status == "BORROWED" && order.isDueSoon()
                 BorrowTab.OVERDUE -> order.status == "OVERDUE"

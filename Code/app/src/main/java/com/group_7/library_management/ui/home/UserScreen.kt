@@ -288,7 +288,63 @@ fun UserScreen(
                     )
                 }
                 composable(Routes.NOTIFICATIONS) {
-                    NotificationsContent()
+                    NotificationsContent(
+                        onNotificationClick = { notification ->
+                            when (notification.actionType) {
+                                NotificationActionType.BOOK_DETAIL -> {
+                                    notification.targetId?.let { bookId ->
+                                        userNavController.navigate(
+                                            Routes.bookDetail(bookId.toString())
+                                        )
+                                    }
+                                }
+
+                                NotificationActionType.BOOK_REVIEWS -> {
+                                    notification.targetId?.let { bookId ->
+                                        userNavController.navigate(
+                                            Routes.bookReviews(bookId.toString())
+                                        )
+                                    }
+                                }
+
+                                NotificationActionType.BORROW_ORDER_DETAIL -> {
+                                    notification.targetId?.let { orderId ->
+                                        userNavController.navigate(
+                                            Routes.borrowOrderDetail(orderId)
+                                        )
+                                    }
+                                }
+
+                                NotificationActionType.BORROW_PAYMENT -> {
+                                    notification.targetId?.let { orderId ->
+                                        userNavController.navigate(
+                                            Routes.borrowPayment(orderId)
+                                        )
+                                    }
+                                }
+
+                                NotificationActionType.BORROW_LIST -> {
+                                    pendingBorrowTab.value = BorrowTab.ALL
+                                    borrowScreenResetKey.intValue++
+                                    navigateTab(Routes.BORROW)
+                                }
+
+                                NotificationActionType.FAVORITE_LIST -> {
+                                    navigateTab(Routes.FAVORITE)
+                                }
+
+                                NotificationActionType.PROFILE -> {
+                                    navigateTab(Routes.PROFILE)
+                                }
+
+                                NotificationActionType.SUPPORT -> {
+                                    userNavController.navigate(Routes.HELP)
+                                }
+
+                                NotificationActionType.NONE -> Unit
+                            }
+                        }
+                    )
                 }
                 composable(Routes.BOOKS) {
                     BookListScreen(

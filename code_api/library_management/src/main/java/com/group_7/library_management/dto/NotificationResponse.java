@@ -1,6 +1,7 @@
 package com.group_7.library_management.dto;
 
 import com.group_7.library_management.entity.Notification;
+import com.group_7.library_management.entity.NotificationActionType;
 import com.group_7.library_management.entity.NotificationType;
 
 import java.time.Instant;
@@ -11,6 +12,8 @@ public record NotificationResponse(
         String message,
         NotificationType type,
         Long bookId,
+        NotificationActionType actionType,
+        Long targetId,
         boolean isRead,
         boolean isClicked,
         Instant createdAt,
@@ -28,6 +31,8 @@ public record NotificationResponse(
                 notification.getMessage(),
                 notification.getType(),
                 bookId,
+                notification.getActionType(),
+                notification.getTargetId(),
                 notification.isRead(),
                 notification.getClickedAt() != null,
                 notification.getCreatedAt(),

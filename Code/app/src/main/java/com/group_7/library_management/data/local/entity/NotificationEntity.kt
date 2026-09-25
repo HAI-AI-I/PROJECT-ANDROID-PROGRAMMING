@@ -9,6 +9,8 @@ data class NotificationEntity(
     val id: Long? = null,
     val userId: Long = 0,
     val bookId: Long? = null,
+    val actionType: String = "NONE",
+    val targetId: Long? = null,
     val title: String,
     val message: String,
     val time: String,

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    boolean existsByNotificationKey(String notificationKey);
+
     List<Notification> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
             Long userId,
             Pageable pageable

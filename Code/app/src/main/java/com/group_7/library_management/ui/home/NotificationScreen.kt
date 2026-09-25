@@ -24,6 +24,18 @@ enum class NotificationType {
     WARNING, SUCCESS, ERROR, INFO,BOOK
 }
 
+enum class NotificationActionType {
+    BOOK_DETAIL,
+    BOOK_REVIEWS,
+    BORROW_ORDER_DETAIL,
+    BORROW_PAYMENT,
+    BORROW_LIST,
+    FAVORITE_LIST,
+    PROFILE,
+    SUPPORT,
+    NONE
+}
+
 data class NotificationItem(
     val id: String,
     val title: String,
@@ -31,13 +43,16 @@ data class NotificationItem(
     val time: String,
     val date: String,
     val type: NotificationType,
+    val actionType: NotificationActionType = NotificationActionType.NONE,
+    val targetId: Long? = null,
     val isRead: Boolean = false
 )
 
 @Composable
 fun NotificationsContent(
     modifier: Modifier = Modifier,
-    viewModel: NotificationViewModel = hiltViewModel()
+    viewModel: NotificationViewModel = hiltViewModel(),
+    onNotificationClick: (NotificationItem) -> Unit = {}
 ) {
     val notifications by viewModel.notificationsFlow.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -218,7 +233,10 @@ fun NotificationsContent(
                     NotificationCard(
                         item = notification,
                         onClick = {
-                            viewModel.markAsClicked(notification.id)
+                            viewModel.markAsClicked(
+                                id = notification.id,
+                                onSuccess = onNotificationClick
+                            )
                         },
                         onDelete = {
                             viewModel.deleteNotification(notification.id)

@@ -92,4 +92,17 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     List<BorrowRecord> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book"})
+    List<BorrowRecord> findAllByStatusAndDueAtBetween(
+            BorrowStatus status,
+            Instant from,
+            Instant to
+    );
+
+    @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book"})
+    List<BorrowRecord> findAllByStatusInAndDueAtBefore(
+            Collection<BorrowStatus> statuses,
+            Instant dueAt
+    );
 }
