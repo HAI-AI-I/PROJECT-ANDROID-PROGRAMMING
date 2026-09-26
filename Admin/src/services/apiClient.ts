@@ -1,5 +1,13 @@
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8386/api/v1").replace(/\/$/, "");
 
+export const AUTH_UNAUTHORIZED_EVENT = "auth:unauthorized";
+
+export function clearAuthSession() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem("library_access_token");
+  window.localStorage.removeItem("library_user");
+}
+
 const getAccessToken = () =>
   typeof window === "undefined" ? null : window.localStorage.getItem("library_access_token");
 
@@ -16,9 +24,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const message = await response.text();
-    if (response.status === 401 && typeof window !== "undefined") {
-      window.localStorage.removeItem("library_access_token");
-      window.localStorage.removeItem("library_user");
+    if ((response.status === 401 || response.status === 403) && typeof window !== "undefined") {
+      clearAuthSession();
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
     }
     throw new Error(message || `API request failed: ${response.status}`);
   }

@@ -1,28 +1,86 @@
 import { apiClient, toApiId } from "@/services/apiClient";
 import type { SupportRequest } from "@/types/SupportRequest";
 
+interface ApiSupportRequest {
+  id: number;
+  userId: number;
+  userFullName: string;
+  userEmail: string;
+  bookId?: number | null;
+  bookTitle?: string | null;
+  subject: string;
+  message: string;
+  status: string;
+  adminReply?: string | null;
+  repliedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PagedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export const supportService = {
   async getRequests(): Promise<SupportRequest[]> {
-    const items = await apiClient.get<ApiSupportRequest[]>("/support");
-    return items.map(mapRequest);
+    const result = await apiClient.get<PagedResponse<ApiSupportRequest>>(
+      "/admin/support-requests?page=1&pageSize=100",
+    );
+    return result.items.map(mapRequest);
   },
 
-  async getRequestById(id: string): Promise<SupportRequest | null> {
-    try { return mapRequest(await apiClient.get<ApiSupportRequest>(`/support/${toApiId(id)}`)); } catch { return null; }
+  async getRequestById(id: string): Promise<SupportRequest> {
+    const item = await apiClient.get<ApiSupportRequest>(
+      `/admin/support-requests/${toApiId(id)}`,
+    );
+    return mapRequest(item);
   },
 
-  async reply(id: string, reply: string): Promise<SupportRequest | null> {
-    try { return mapRequest(await apiClient.patch<ApiSupportRequest>(`/support/${toApiId(id)}/reply`, { adminReply: reply })); } catch { return null; }
+  async reply(id: string, reply: string): Promise<SupportRequest> {
+    const item = await apiClient.patch<ApiSupportRequest>(
+      `/admin/support-requests/${toApiId(id)}/reply`,
+      { adminReply: reply.trim() },
+    );
+    return mapRequest(item);
   },
 
-  async markResolved(id: string): Promise<SupportRequest | null> {
-    try { return mapRequest(await apiClient.patch<ApiSupportRequest>(`/support/${toApiId(id)}/resolve`)); } catch { return null; }
+  async markResolved(id: string): Promise<SupportRequest> {
+    const item = await apiClient.patch<ApiSupportRequest>(
+      `/admin/support-requests/${toApiId(id)}/resolve`,
+    );
+    return mapRequest(item);
   },
 
-  async closeRequest(id: string): Promise<SupportRequest | null> {
-    try { return mapRequest(await apiClient.patch<ApiSupportRequest>(`/support/${toApiId(id)}/close`)); } catch { return null; }
+  async closeRequest(id: string): Promise<SupportRequest> {
+    const item = await apiClient.patch<ApiSupportRequest>(
+      `/admin/support-requests/${toApiId(id)}/close`,
+    );
+    return mapRequest(item);
   },
 };
 
-interface ApiSupportRequest { id: number; userId: number; subject: string; message: string; status: string; adminReply?: string; createdAt: string; }
-function mapRequest(item: ApiSupportRequest): SupportRequest { return { id: `S-${String(item.id).padStart(3, "0")}`, userName: `User #${item.userId}`, userEmail: "", subject: item.subject, message: item.message, createdDate: new Date(item.createdAt).toLocaleDateString("vi-VN"), status: item.status.toLowerCase() as SupportRequest["status"], reply: item.adminReply }; }
+function mapRequest(item: ApiSupportRequest): SupportRequest {
+  return {
+    id: `S-${String(item.id).padStart(3, "0")}`,
+    userName: item.userFullName,
+    userEmail: item.userEmail,
+    bookTitle: item.bookTitle ?? undefined,
+    subject: item.subject,
+    message: item.message,
+    createdDate: formatDateTime(item.createdAt),
+    status: item.status.toLowerCase() as SupportRequest["status"],
+    reply: item.adminReply ?? undefined,
+    repliedDate: item.repliedAt ? formatDateTime(item.repliedAt) : undefined,
+  };
+}
+
+function formatDateTime(value: string): string {
+  return new Intl.DateTimeFormat("vi-VN", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
+}

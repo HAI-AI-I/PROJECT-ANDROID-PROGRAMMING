@@ -1,23 +1,29 @@
 import { apiClient } from "@/services/apiClient";
+import type { AdminStatistics } from "@/types/Analytics";
 
 export const statisticsService = {
-  async getStatistics() {
-    const [summary, borrowTrend, booksByCategory, popularBooks, activeReaders] = await Promise.all([
-      apiClient.get<{ totalBorrowings: number; totalReturns: number; totalOverdue: number }>("/statistics"),
-      apiClient.get<{ month: string; count: number }[]>("/statistics/borrowing-trend"),
-      apiClient.get<{ name: string; value: number }[]>("/statistics/books-by-category"),
-      apiClient.get<{ title: string; count: number }[]>("/statistics/popular-books"),
-      apiClient.get<{ name: string; value: number }[]>("/statistics/active-readers"),
-    ]);
+  async getStatistics(): Promise<AdminStatistics> {
+    const response = await apiClient.get<ApiStatistics>("/admin/analytics/statistics");
     return {
-      totalBorrows: summary.totalBorrowings,
-      totalReturns: summary.totalReturns,
-      overdueBooks: summary.totalOverdue,
-      borrowTrend,
-      returnTrend: borrowTrend,
-      booksByCategory: booksByCategory.map((item) => ({ category: item.name, count: item.value })),
-      popularBooks,
-      activeReaders: activeReaders.map((item) => ({ name: item.name, count: item.value })),
+      totalBorrows: response.totalBorrows,
+      totalReturns: response.totalReturns,
+      overdueBooks: response.overdueBooks,
+      borrowTrend: response.borrowTrend,
+      returnTrend: response.returnTrend,
+      booksByCategory: response.booksByCategory,
+      popularBooks: response.popularBooks.map((item) => ({ title: item.name, count: item.count })),
+      activeReaders: response.activeReaders,
     };
   },
 };
+
+interface ApiStatistics {
+  totalBorrows: number;
+  totalReturns: number;
+  overdueBooks: number;
+  borrowTrend: { month: string; count: number }[];
+  returnTrend: { month: string; count: number }[];
+  booksByCategory: { category: string; count: number }[];
+  popularBooks: { name: string; count: number }[];
+  activeReaders: { name: string; count: number }[];
+}

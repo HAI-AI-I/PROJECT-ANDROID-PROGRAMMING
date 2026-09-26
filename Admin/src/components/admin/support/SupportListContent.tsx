@@ -18,31 +18,48 @@ export default function SupportListContent() {
   const [error, setError] = useState(false);
 
   const fetchData = useCallback(async () => {
-    setLoading(true); setError(false);
-    try { setRequests(await supportService.getRequests()); }
-    catch { setError(true); } finally { setLoading(false); }
+    setLoading(true);
+    setError(false);
+    try {
+      setRequests(await supportService.getRequests());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   return (
     <>
-      <div className={pageStyles.pageHeader}><h2 className={pageStyles.pageTitle}>Hỗ trợ</h2></div>
+      <div className={pageStyles.pageHeader}>
+        <h2 className={pageStyles.pageTitle}>Yêu cầu hỗ trợ</h2>
+      </div>
       <div className={pageStyles.card}>
-        {loading ? <LoadingState /> : error ? <ErrorState onRetry={fetchData} /> : requests.length === 0 ? (
-          <EmptyState title="Không có yêu cầu hỗ trợ" />
+        {loading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState onRetry={fetchData} />
+        ) : requests.length === 0 ? (
+          <EmptyState title="Chưa có yêu cầu hỗ trợ" />
         ) : (
           <div className={styles.list}>
-            {requests.map((req) => (
-              <div key={req.id} className={styles.card}>
+            {requests.map((request) => (
+              <div key={request.id} className={styles.card}>
                 <div className={styles.info}>
-                  <p className={styles.name}>{req.userName}</p>
-                  <p className={styles.subject}>{req.subject}</p>
-                  <p className={styles.date}>{req.createdDate}</p>
+                  <p className={styles.name}>{request.userName}</p>
+                  <p className={styles.subject}>{request.subject}</p>
+                  {request.bookTitle && <p className={styles.date}>Sách: {request.bookTitle}</p>}
+                  <p className={styles.date}>{request.createdDate}</p>
                 </div>
                 <div className={styles.cardActions}>
-                  {getSupportStatusBadge(req.status)}
-                  <Link href={`/admin/support/${req.id}`}><Button size="sm" variant="secondary">Xem chi tiết</Button></Link>
+                  {getSupportStatusBadge(request.status)}
+                  <Link href={`/admin/support/${request.id}`}>
+                    <Button size="sm" variant="secondary">Xem chi tiết</Button>
+                  </Link>
                 </div>
               </div>
             ))}

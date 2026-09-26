@@ -1,8 +1,10 @@
 export type BorrowingStatus =
+  | "pending_payment"
+  | "requested"
   | "borrowing"
   | "returned"
   | "overdue"
-  | "pending";
+  | "cancelled";
 
 export interface Borrowing {
   id: string;
@@ -10,10 +12,20 @@ export interface Borrowing {
   readerName: string;
   bookId: string;
   bookTitle: string;
+  copyBarcode?: string;
+  requestedDate?: string;
   borrowDate: string;
   dueDate: string;
   returnDate?: string;
   status: BorrowingStatus;
+  borrowFee?: number;
+  depositAmount?: number;
+  totalAmount?: number;
+  paidAmount?: number;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  depositRefunded?: boolean;
+  remainingRefundAmount?: number;
   overdueDays?: number;
   fineAmount?: number;
 }
@@ -25,7 +37,8 @@ export interface BorrowRequest {
   bookId: string;
   bookTitle: string;
   requestDate: string;
-  status: "pending" | "approved" | "rejected";
+  copyBarcode?: string;
+  status: "requested";
 }
 
 export interface OverdueBook {

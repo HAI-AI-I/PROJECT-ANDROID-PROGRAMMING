@@ -52,7 +52,7 @@ export const initialReaders: Reader[] = [
     email: "vothif@email.com",
     phone: "0956789012",
     booksBorrowing: 1,
-    status: "suspended",
+    status: "inactive",
     registeredDate: "18/06/2025",
   },
   ...Array.from({ length: 18 }, (_, index): Reader => {
@@ -63,7 +63,7 @@ export const initialReaders: Reader[] = [
       email: `reader${number}@email.com`,
       phone: `09${String(70000000 + number).slice(-8)}`,
       booksBorrowing: index % 4,
-      status: ["active", "active", "inactive", "suspended"][index % 4] as Reader["status"],
+      status: ["active", "active", "inactive"][index % 3] as Reader["status"],
       registeredDate: `${String((index % 28) + 1).padStart(2, "0")}/${String((index % 9) + 1).padStart(2, "0")}/2026`,
     };
   }),

@@ -45,8 +45,9 @@ export default function BorrowingsListContent() {
         </div>
         <Select className={pageStyles.filterSelect} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} placeholder="Trạng thái"
           options={[
+            { value: "pending_payment", label: "Chờ thanh toán" }, { value: "requested", label: "Chờ nhận" },
             { value: "borrowing", label: "Đang mượn" }, { value: "returned", label: "Đã trả" },
-            { value: "overdue", label: "Quá hạn" }, { value: "pending", label: "Chờ duyệt" },
+            { value: "overdue", label: "Quá hạn" }, { value: "cancelled", label: "Đã hủy" },
           ]} />
       </div>
       <div className={pageStyles.card}>
@@ -58,6 +59,8 @@ export default function BorrowingsListContent() {
               { key: "id", header: "Mã phiếu" },
               { key: "readerName", header: "Độc giả" },
               { key: "bookTitle", header: "Sách" },
+              { key: "copyBarcode", header: "Mã bản sách" },
+              { key: "requestedDate", header: "Ngày yêu cầu" },
               { key: "borrowDate", header: "Ngày mượn" },
               { key: "dueDate", header: "Hạn trả" },
               { key: "status", header: "Trạng thái", render: (b) => getBorrowingStatusBadge(b.status) },

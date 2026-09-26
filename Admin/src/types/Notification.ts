@@ -1,4 +1,4 @@
-export type NotificationType = "overdue" | "borrow_request" | "system";
+export type NotificationType = "info" | "warning" | "success" | "error";
 
 export interface Notification {
   id: string;

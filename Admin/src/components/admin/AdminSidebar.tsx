@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { BookOpen, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { navGroups } from "@/config/navigation";
 import styles from "./AdminSidebar.module.scss";
@@ -11,6 +11,7 @@ interface AdminSidebarProps {
   mobileOpen: boolean;
   onToggleCollapse: () => void;
   onNavClick?: () => void;
+  onLogout: () => Promise<void>;
 }
 
 export default function AdminSidebar({
@@ -18,14 +19,14 @@ export default function AdminSidebar({
   mobileOpen,
   onToggleCollapse,
   onNavClick,
+  onLogout,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const showLabels = !collapsed || mobileOpen;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     onNavClick?.();
-    router.push("/login");
+    await onLogout();
   };
 
   return (

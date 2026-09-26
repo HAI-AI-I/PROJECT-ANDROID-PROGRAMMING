@@ -24,11 +24,14 @@ fun MySupportRequestsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val tabs = listOf("Tất cả", "Đang xử lý", "Đã giải quyết")
+    val tabs = listOf("Tất cả", "Đang xử lý", "Đã xử lý", "Đã đóng")
 
     val filteredRequests = when (uiState.selectedRequestTab) {
-        "Đang xử lý" -> uiState.supportRequests.filter { it.status == "Đang xử lý" }
-        "Đã giải quyết" -> uiState.supportRequests.filter { it.status == "Đã giải quyết" }
+        "Đang xử lý" -> uiState.supportRequests.filter {
+            it.status == "OPEN" || it.status == "IN_PROGRESS"
+        }
+        "Đã xử lý" -> uiState.supportRequests.filter { it.status == "RESOLVED" }
+        "Đã đóng" -> uiState.supportRequests.filter { it.status == "CLOSED" }
         else -> uiState.supportRequests
     }
 
@@ -39,6 +42,14 @@ fun MySupportRequestsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = viewModel::refreshSupportData,
+                        enabled = !uiState.isLoading
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Tải lại")
                     }
                 }
             )
@@ -65,7 +76,31 @@ fun MySupportRequestsScreen(
 
             Spacer(modifier = Modifier.height(LibrarySpacing.Small))
 
-            if (filteredRequests.isEmpty()) {
+            if (uiState.isLoading && uiState.supportRequests.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (uiState.error != null && uiState.supportRequests.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(LibrarySpacing.Large),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = uiState.error.orEmpty(),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(LibrarySpacing.Small))
+                    Button(onClick = viewModel::refreshSupportData) {
+                        Text("Thử lại")
+                    }
+                }
+            } else if (filteredRequests.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -101,7 +136,7 @@ fun MySupportRequestsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = req.bookTitle,
+                                        text = req.bookTitle ?: "Yêu cầu chung",
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary,
@@ -131,6 +166,32 @@ fun MySupportRequestsScreen(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
+
+                                if (!req.adminReply.isNullOrBlank()) {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    HorizontalDivider()
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = "Phản hồi từ thư viện",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Success
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = req.adminReply,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    req.repliedDate?.let { repliedDate ->
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = repliedDate,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -143,14 +204,24 @@ fun MySupportRequestsScreen(
 
 @Composable
 private fun StatusBadge(status: String) {
-    val isDone = status == "Đã giải quyết"
-    val color = if (isDone) Success else MaterialTheme.colorScheme.tertiary
+    val color = when (status) {
+        "RESOLVED" -> Success
+        "CLOSED" -> MaterialTheme.colorScheme.onSurfaceVariant
+        "IN_PROGRESS" -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.tertiary
+    }
     Surface(
         color = color.copy(alpha = 0.15f),
         shape = MaterialTheme.shapes.extraSmall
     ) {
         Text(
-            text = status,
+            text = when (status) {
+                "OPEN" -> "Mới gửi"
+                "IN_PROGRESS" -> "Đang xử lý"
+                "RESOLVED" -> "Đã xử lý"
+                "CLOSED" -> "Đã đóng"
+                else -> status
+            },
             style = MaterialTheme.typography.labelSmall,
             color = color,
             fontWeight = FontWeight.Bold,

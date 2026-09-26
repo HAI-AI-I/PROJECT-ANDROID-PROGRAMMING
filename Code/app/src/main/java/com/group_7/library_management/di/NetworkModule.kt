@@ -8,6 +8,7 @@ import com.group_7.library_management.data.remote.api.BookApi
 import com.group_7.library_management.data.remote.api.BorrowApi
 import com.group_7.library_management.data.remote.api.NotificationApi
 import com.group_7.library_management.data.remote.api.ScanApi
+import com.group_7.library_management.data.remote.api.SupportApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -74,4 +75,8 @@ object  NetworkModule {
     @Provides
     @Singleton
     fun provideScanApi(retrofit: Retrofit): ScanApi = retrofit.create(ScanApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSupportApi(retrofit: Retrofit): SupportApi = retrofit.create(SupportApi::class.java)
 }

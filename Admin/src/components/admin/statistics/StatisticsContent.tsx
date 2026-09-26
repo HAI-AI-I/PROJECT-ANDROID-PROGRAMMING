@@ -8,14 +8,12 @@ import Card from "@/components/ui/Card";
 import LoadingState from "@/components/ui/LoadingState";
 import ErrorState from "@/components/ui/ErrorState";
 import { statisticsService } from "@/services/statisticsService";
-import { statisticsData } from "@/data/statistics";
+import type { AdminStatistics } from "@/types/Analytics";
 import pageStyles from "@/styles/page.module.scss";
 import styles from "./StatisticsContent.module.scss";
 
-type Stats = typeof statisticsData;
-
 export default function StatisticsContent() {
-  const [data, setData] = useState<Stats | null>(null);
+  const [data, setData] = useState<AdminStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 

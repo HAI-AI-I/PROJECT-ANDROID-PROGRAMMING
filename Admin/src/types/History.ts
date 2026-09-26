@@ -1,8 +1,7 @@
 export type HistoryAction =
+  | "request"
   | "borrow"
   | "return"
-  | "extend"
-  | "fine"
   | "cancel_request";
 
 export interface HistoryRecord {
@@ -10,6 +9,7 @@ export interface HistoryRecord {
   action: HistoryAction;
   userName: string;
   bookTitle: string;
+  referenceCode: string;
   description: string;
   date: string;
 }

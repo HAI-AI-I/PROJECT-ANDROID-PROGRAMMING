@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import BookDetail from "./BookDetail";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
+import ErrorState from "@/components/ui/ErrorState";
 import { bookService } from "@/services/bookService";
 import type { Book, BookBorrowHistory } from "@/types/Book";
 
@@ -15,19 +16,28 @@ export default function BookDetailPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [history, setHistory] = useState<BookBorrowHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    async function load() {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
       const [bookData, historyData] = await Promise.all([
         bookService.getBookById(id),
         bookService.getBookHistory(id),
       ]);
       setBook(bookData);
       setHistory(historyData);
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
-    load();
   }, [id]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   if (loading) {
     return (
@@ -36,6 +46,8 @@ export default function BookDetailPage() {
       </p>
     );
   }
+
+  if (error) return <ErrorState onRetry={load} />;
 
   if (!book) {
     return (

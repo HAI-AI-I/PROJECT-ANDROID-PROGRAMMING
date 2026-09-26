@@ -17,7 +17,7 @@ import com.group_7.library_management.data.local.entity.SupportRequestEntity
 
 @Database(
     entities = [BookEntity::class, FavoriteBookEntity::class, NotificationEntity::class, UserEntity::class, SupportRequestEntity::class, HomeSummaryEntity::class],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

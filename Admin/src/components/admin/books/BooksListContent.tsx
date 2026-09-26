@@ -12,8 +12,8 @@ import LoadingState from "@/components/ui/LoadingState";
 import ErrorState from "@/components/ui/ErrorState";
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
-import { bookCategories } from "@/data/books";
 import { bookService } from "@/services/bookService";
+import type { BookCategory } from "@/services/bookService";
 import type { Book } from "@/types/Book";
 import styles from "./BooksListContent.module.scss";
 
@@ -30,6 +30,7 @@ export default function BooksListContent() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
+  const [categories, setCategories] = useState<BookCategory[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Book | null>(null);
   const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -58,6 +59,12 @@ export default function BooksListContent() {
   useEffect(() => {
     fetchBooks();
   }, [fetchBooks]);
+
+  useEffect(() => {
+    bookService.getCategories()
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -117,7 +124,7 @@ export default function BooksListContent() {
               setPage(1);
             }}
             placeholder="Thể loại"
-            options={bookCategories.map((c) => ({ value: c, label: c }))}
+            options={categories.map((item) => ({ value: item.slug, label: item.name }))}
           />
           <Select
             className={styles.filterSelect}

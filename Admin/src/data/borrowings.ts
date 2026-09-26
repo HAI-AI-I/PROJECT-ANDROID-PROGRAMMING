@@ -64,7 +64,7 @@ export const recentBorrowings: Borrowing[] = [
     bookTitle: "Mạng máy tính căn bản",
     borrowDate: "10/09/2026",
     dueDate: "24/09/2026",
-    status: "pending",
+    status: "requested",
   },
   {
     id: "BR-005",
@@ -127,7 +127,7 @@ export const initialBorrowRequests: BorrowRequest[] = [
     bookId: "B-002",
     bookTitle: "Design Patterns",
     requestDate: "11/09/2026",
-    status: "pending",
+    status: "requested",
   },
   {
     id: "REQ-002",
@@ -136,7 +136,7 @@ export const initialBorrowRequests: BorrowRequest[] = [
     bookId: "B-008",
     bookTitle: "Code Dạo Ký Sự",
     requestDate: "11/09/2026",
-    status: "pending",
+    status: "requested",
   },
   {
     id: "REQ-003",
@@ -145,6 +145,6 @@ export const initialBorrowRequests: BorrowRequest[] = [
     bookId: "B-003",
     bookTitle: "Kotlin in Action",
     requestDate: "10/09/2026",
-    status: "pending",
+    status: "requested",
   },
 ];

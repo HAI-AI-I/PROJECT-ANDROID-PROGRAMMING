@@ -15,6 +15,7 @@ import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
 import com.group_7.library_management.data.remote.api.NotificationApi
+import com.group_7.library_management.data.remote.api.SupportApi
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.FavoriteRepository
 import com.group_7.library_management.data.repository.NotificationRepository
@@ -154,6 +155,30 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_14_15 = object : Migration(14, 15) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS support_requests")
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS support_requests (
+                    id INTEGER NOT NULL,
+                    userId INTEGER NOT NULL,
+                    bookId INTEGER,
+                    bookTitle TEXT,
+                    subject TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    adminReply TEXT,
+                    repliedAt TEXT,
+                    createdAt TEXT NOT NULL,
+                    updatedAt TEXT NOT NULL,
+                    PRIMARY KEY(id)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -174,7 +199,8 @@ object  DatabaseModule {
             MIGRATION_10_11,
             MIGRATION_11_12,
             MIGRATION_12_13,
-            MIGRATION_13_14
+            MIGRATION_13_14,
+            MIGRATION_14_15
         )
         .fallbackToDestructiveMigration(true)
         .build()
@@ -248,7 +274,11 @@ object  DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideSupportRepository(supportRequestDao: SupportRequestDao): SupportRepository {
-        return SupportRepository(supportRequestDao)
+    fun provideSupportRepository(
+        supportRequestDao: SupportRequestDao,
+        supportApi: SupportApi,
+        checkLogin: CheckLogin
+    ): SupportRepository {
+        return SupportRepository(supportRequestDao, supportApi, checkLogin)
     }
 }

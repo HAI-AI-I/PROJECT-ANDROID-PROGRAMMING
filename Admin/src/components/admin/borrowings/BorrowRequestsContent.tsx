@@ -19,7 +19,7 @@ export default function BorrowRequestsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [approveTarget, setApproveTarget] = useState<BorrowRequest | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<BorrowRequest | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(false);
@@ -32,23 +32,22 @@ export default function BorrowRequestsContent() {
 
   const handleApprove = async () => {
     if (!approveTarget) return;
-    await borrowingService.approveRequest(approveTarget.id);
-    showToast("Duyệt yêu cầu thành công");
-    setApproveTarget(null);
-    fetchData();
-  };
-
-  const handleReject = async () => {
-    if (!rejectTarget) return;
-    await borrowingService.rejectRequest(rejectTarget.id);
-    showToast("Đã từ chối yêu cầu");
-    setRejectTarget(null);
-    fetchData();
+    setProcessing(true);
+    try {
+      await borrowingService.approveRequest(approveTarget.id);
+      showToast("Đã xác nhận giao sách cho độc giả");
+      setApproveTarget(null);
+      await fetchData();
+    } catch (requestError) {
+      showToast(requestError instanceof Error ? requestError.message : "Không thể giao sách", "error");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
     <>
-      <div className={pageStyles.pageHeader}><h2 className={pageStyles.pageTitle}>Yêu cầu mượn sách</h2></div>
+      <div className={pageStyles.pageHeader}><h2 className={pageStyles.pageTitle}>Yêu cầu nhận sách</h2></div>
       <div className={pageStyles.card}>
         {loading ? <LoadingState /> : error ? <ErrorState onRetry={fetchData} /> : requests.length === 0 ? (
           <EmptyState title="Không có yêu cầu mượn" description="Tất cả yêu cầu đã được xử lý." />
@@ -58,13 +57,11 @@ export default function BorrowRequestsContent() {
               { key: "id", header: "Mã yêu cầu" },
               { key: "readerName", header: "Độc giả" },
               { key: "bookTitle", header: "Sách" },
+              { key: "copyBarcode", header: "Mã bản sách" },
               { key: "requestDate", header: "Ngày yêu cầu" },
               { key: "status", header: "Trạng thái", render: (req) => getBorrowingStatusBadge(req.status) },
               { key: "actions", header: "Thao tác", sortable: false, render: (req) => (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <Button variant="secondary" size="sm" onClick={() => setRejectTarget(req)}>Từ chối</Button>
-                  <Button size="sm" onClick={() => setApproveTarget(req)}>Duyệt</Button>
-                </div>
+                <Button size="sm" onClick={() => setApproveTarget(req)}>Xác nhận giao</Button>
               )},
             ]}
             data={requests}
@@ -72,11 +69,8 @@ export default function BorrowRequestsContent() {
           />
         )}
       </div>
-      <Modal open={!!approveTarget} title="Duyệt yêu cầu" onConfirm={handleApprove} onCancel={() => setApproveTarget(null)}>
-        Bạn có chắc muốn duyệt yêu cầu mượn sách <strong>{approveTarget?.bookTitle}</strong> của <strong>{approveTarget?.readerName}</strong>?
-      </Modal>
-      <Modal open={!!rejectTarget} title="Từ chối yêu cầu" confirmLabel="Từ chối" variant="danger" onConfirm={handleReject} onCancel={() => setRejectTarget(null)}>
-        Bạn có chắc muốn từ chối yêu cầu mượn sách <strong>{rejectTarget?.bookTitle}</strong>?
+      <Modal open={!!approveTarget} title="Xác nhận giao sách" confirmLabel={processing ? "Đang xử lý..." : "Xác nhận giao"} onConfirm={handleApprove} onCancel={() => setApproveTarget(null)}>
+        Xác nhận đã giao bản sách <strong>{approveTarget?.copyBarcode}</strong> của sách <strong>{approveTarget?.bookTitle}</strong> cho <strong>{approveTarget?.readerName}</strong>?
       </Modal>
     </>
   );

@@ -1,6 +1,7 @@
 package com.group_7.library_management.controller;
 
 import com.group_7.library_management.dto.BookResponse;
+import com.group_7.library_management.dto.BookDetailResponse;
 import com.group_7.library_management.dto.CreateBookRequest;
 import com.group_7.library_management.dto.PagedResponse;
 import com.group_7.library_management.dto.UpdateBookRequest;
@@ -40,6 +41,7 @@ public class BookController {
     public PagedResponse<BookResponse> getBooks(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(defaultValue = "newest") String sort
@@ -47,7 +49,7 @@ public class BookController {
         int safePage = Math.max(page, 1) - 1;
         int safePageSize = normalizePageSize(pageSize);
         Pageable pageable = PageRequest.of(safePage, safePageSize, resolveSort(sort));
-        return PagedResponse.from(bookService.searchBooks(search, category, pageable));
+        return PagedResponse.from(bookService.searchBooks(search, category, status, pageable));
     }
 
     @GetMapping("/latest")
@@ -68,6 +70,11 @@ public class BookController {
     @GetMapping("/{id}")
     public BookResponse getBook(@PathVariable Long id) {
         return bookService.getBook(id);
+    }
+
+    @GetMapping("/{id}/detail")
+    public BookDetailResponse getBookDetail(@PathVariable Long id) {
+        return bookService.getBookDetail(id);
     }
 
     @GetMapping("/{id}/related")

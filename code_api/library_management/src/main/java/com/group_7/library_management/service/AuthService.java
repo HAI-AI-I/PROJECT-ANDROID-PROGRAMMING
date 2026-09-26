@@ -78,6 +78,14 @@ public class AuthService {
         return new UnauthorizedException("Email, số điện thoại hoặc mật khẩu không chính xác");
     }
 
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .filter(User::isActive)
+                .orElseThrow(() -> new UnauthorizedException("Tài khoản không còn hoạt động"));
+        return UserResponse.from(user);
+    }
+
     public void logout(String rawToken) {
         tokenService.revokeToken(rawToken);
     }

@@ -122,14 +122,20 @@ export const bookBorrowHistory: Record<string, BookBorrowHistory[]> = {
   "B-001": [
     {
       id: "BH-001",
+      readerId: "1",
       readerName: "Nguyễn Văn A",
+      copyBarcode: "BOOK-000001-DEMO0001",
+      requestedDate: "01/09/2026",
       borrowDate: "01/09/2026",
       dueDate: "15/09/2026",
       status: "borrowing",
     },
     {
       id: "BH-002",
+      readerId: "2",
       readerName: "Trần Thị B",
+      copyBarcode: "BOOK-000001-DEMO0002",
+      requestedDate: "20/08/2026",
       borrowDate: "20/08/2026",
       dueDate: "03/09/2026",
       returnDate: "02/09/2026",
@@ -139,7 +145,10 @@ export const bookBorrowHistory: Record<string, BookBorrowHistory[]> = {
   "B-007": [
     {
       id: "BH-003",
+      readerId: "1",
       readerName: "Nguyễn Văn A",
+      copyBarcode: "BOOK-000007-DEMO0001",
+      requestedDate: "01/09/2026",
       borrowDate: "01/09/2026",
       dueDate: "08/09/2026",
       status: "overdue",

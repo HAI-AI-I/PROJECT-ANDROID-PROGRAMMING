@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import Pagination from "@/components/ui/Pagination";
@@ -20,13 +20,22 @@ import pageStyles from "@/styles/page.module.scss";
 const PAGE_SIZE = 8;
 
 function Avatar({ name }: { name: string }) {
-  const initials = name.split(" ").slice(-2).map((w) => w[0]).join("").toUpperCase();
+  const initials = name.split(" ").slice(-2).map((word) => word[0]).join("").toUpperCase();
   return (
     <div style={{
-      width: 32, height: 32, borderRadius: 8, background: "var(--primary)",
-      color: "white", display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 12, fontWeight: 600,
-    }}>{initials}</div>
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      background: "var(--primary)",
+      color: "white",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 12,
+      fontWeight: 600,
+    }}>
+      {initials}
+    </div>
   );
 }
 
@@ -40,16 +49,21 @@ export default function ReadersListContent() {
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<Reader | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<Reader | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
-      const result = await readerService.getReaders({ search, status: status || undefined, page, pageSize: PAGE_SIZE });
+      const result = await readerService.getReaders({
+        search,
+        status: status || undefined,
+        page,
+        pageSize: PAGE_SIZE,
+      });
       setReaders(result.items);
       setTotal(result.total);
-      setTotalPages(result.totalPages);
+      setTotalPages(Math.max(result.totalPages, 1));
     } catch {
       setError(true);
     } finally {
@@ -59,11 +73,16 @@ export default function ReadersListContent() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    const ok = await readerService.deleteReader(deleteTarget.readerId);
-    if (ok) { showToast("Xóa độc giả thành công"); setDeleteTarget(null); fetchData(); }
-    else showToast("Không thể xóa độc giả", "error");
+  const handleDeactivate = async () => {
+    if (!deactivateTarget) return;
+    try {
+      await readerService.deactivateReader(deactivateTarget.readerId);
+      showToast("Khóa tài khoản độc giả thành công");
+      setDeactivateTarget(null);
+      await fetchData();
+    } catch (requestError) {
+      showToast(requestError instanceof Error ? requestError.message : "Không thể khóa tài khoản độc giả", "error");
+    }
   };
 
   return (
@@ -75,12 +94,12 @@ export default function ReadersListContent() {
       <div className={pageStyles.toolbar}>
         <div className={pageStyles.searchWrap}>
           <Search size={16} color="var(--text-tertiary)" />
-          <input placeholder="Tìm kiếm độc giả..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+          <input placeholder="Tìm theo tên, email hoặc số điện thoại..." value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
         </div>
-        <Select className={pageStyles.filterSelect} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          placeholder="Trạng thái" options={[
-            { value: "active", label: "Hoạt động" }, { value: "inactive", label: "Không hoạt động" }, { value: "suspended", label: "Tạm khóa" },
-          ]} />
+        <Select className={pageStyles.filterSelect} value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} placeholder="Trạng thái" options={[
+          { value: "active", label: "Hoạt động" },
+          { value: "inactive", label: "Đã khóa" },
+        ]} />
       </div>
       <div className={pageStyles.card}>
         {loading ? <LoadingState /> : error ? <ErrorState onRetry={fetchData} /> : readers.length === 0 ? (
@@ -89,27 +108,27 @@ export default function ReadersListContent() {
           <>
             <Table columns={[
               { key: "readerId", header: "Mã" },
-              { key: "avatar", header: "Avatar", render: (r) => <Avatar name={r.name} /> },
-              { key: "name", header: "Họ tên", render: (r) => <span style={{ fontWeight: 500 }}>{r.name}</span> },
+              { key: "avatar", header: "Avatar", render: (reader) => <Avatar name={reader.name} /> },
+              { key: "name", header: "Họ tên", render: (reader) => <span style={{ fontWeight: 500 }}>{reader.name}</span> },
               { key: "email", header: "Email" },
               { key: "phone", header: "SĐT" },
               { key: "booksBorrowing", header: "Đang mượn" },
-              { key: "status", header: "Trạng thái", render: (r) => getReaderStatusBadge(r.status) },
+              { key: "status", header: "Trạng thái", render: (reader) => getReaderStatusBadge(reader.status) },
               { key: "registeredDate", header: "Ngày đăng ký" },
-              { key: "actions", header: "Thao tác", sortable: false, render: (r) => (
+              { key: "actions", header: "Thao tác", sortable: false, render: (reader) => (
                 <div style={{ display: "flex", gap: 4 }}>
-                  <Link href={`/admin/readers/${r.readerId}`}><Button variant="ghost" size="icon"><Eye size={16} /></Button></Link>
-                  <Link href={`/admin/readers/${r.readerId}/edit`}><Button variant="ghost" size="icon"><Pencil size={16} /></Button></Link>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(r)}><Trash2 size={16} /></Button>
+                  <Link href={`/admin/readers/${reader.readerId}`}><Button variant="ghost" size="icon"><Eye size={16} /></Button></Link>
+                  <Link href={`/admin/readers/${reader.readerId}/edit`}><Button variant="ghost" size="icon"><Pencil size={16} /></Button></Link>
+                  {reader.status === "active" && <Button variant="ghost" size="icon" onClick={() => setDeactivateTarget(reader)}><Trash2 size={16} /></Button>}
                 </div>
               )},
-            ]} data={readers} keyExtractor={(r) => r.readerId} />
+            ]} data={readers} keyExtractor={(reader) => reader.readerId} />
             <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
           </>
         )}
       </div>
-      <Modal open={!!deleteTarget} title="Xóa độc giả" confirmLabel="Xóa" variant="danger" onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)}>
-        Bạn có chắc muốn xóa độc giả <strong>{deleteTarget?.name}</strong>?
+      <Modal open={!!deactivateTarget} title="Khóa tài khoản độc giả" confirmLabel="Khóa tài khoản" variant="danger" onConfirm={handleDeactivate} onCancel={() => setDeactivateTarget(null)}>
+        Tài khoản <strong>{deactivateTarget?.name}</strong> sẽ không thể đăng nhập cho đến khi được kích hoạt lại.
       </Modal>
     </>
   );

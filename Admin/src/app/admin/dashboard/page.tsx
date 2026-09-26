@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import DashboardContent from "@/components/admin/dashboard/DashboardContent";
 import LoadingState from "@/components/ui/LoadingState";
 import ErrorState from "@/components/ui/ErrorState";
-import { borrowingService } from "@/services/borrowingService";
+import { analyticsService } from "@/services/analyticsService";
 import type { Borrowing, BorrowingChartData, DashboardStats, OverdueBook } from "@/types/Borrowing";
 
 export default function DashboardPage() {
@@ -19,13 +19,18 @@ export default function DashboardPage() {
   const loadDashboard = useCallback(async () => {
     setError(false);
     try {
-      const [stats, chartData, recentBorrowings, overdueBooks] = await Promise.all([
-        borrowingService.getDashboardStats(),
-        borrowingService.getBorrowingChartData(),
-        borrowingService.getRecentBorrowings(),
-        borrowingService.getOverdueBooks(),
-      ]);
-      setData({ stats, chartData, recentBorrowings, overdueBooks });
+      const dashboard = await analyticsService.getDashboard();
+      setData({
+        stats: {
+          totalBooks: dashboard.totalBooks,
+          currentlyBorrowed: dashboard.currentlyBorrowed,
+          totalReaders: dashboard.totalReaders,
+          overdueCount: dashboard.overdueCount,
+        },
+        chartData: dashboard.chartData,
+        recentBorrowings: dashboard.recentBorrowings,
+        overdueBooks: dashboard.overdueBooks,
+      });
     } catch {
       setError(true);
     }

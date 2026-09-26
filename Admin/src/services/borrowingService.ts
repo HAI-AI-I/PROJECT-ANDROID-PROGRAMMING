@@ -2,9 +2,6 @@ import { apiClient } from "@/services/apiClient";
 import type {
   Borrowing,
   BorrowRequest,
-  BorrowingChartData,
-  DashboardStats,
-  OverdueBook,
 } from "@/types/Borrowing";
 
 export interface BorrowingFilters {
@@ -23,38 +20,14 @@ export interface PaginatedResult<T> {
 }
 
 export const borrowingService = {
-  async getDashboardStats(): Promise<DashboardStats> {
-    const summary = await apiClient.get<{ borrowingCount: number; overdueCount: number }>("/home/summary");
-    return { totalBooks: 0, currentlyBorrowed: summary.borrowingCount, totalReaders: 0, overdueCount: summary.overdueCount };
-  },
-
-  async getBorrowingChartData(): Promise<BorrowingChartData[]> {
-    return [];
-  },
-
-  async getRecentBorrowings(): Promise<Borrowing[]> {
-    const items = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
-    return items.map(mapBorrowing).slice(0, 5);
-  },
-
-  async getOverdueBooks(): Promise<OverdueBook[]> {
-    const items = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
-    return items.filter((item) => item.status.toLowerCase() === "overdue").map((item) => ({ id: item.referenceCode, readerName: item.borrowerName, bookTitle: item.bookTitle, dueDate: formatDate(item.dueAt), overdueDays: item.dueAt ? Math.max(0, Math.floor((Date.now() - new Date(item.dueAt).getTime()) / 86400000)) : 0 }));
-  },
-
   async getBorrowings(filters: BorrowingFilters = {}): Promise<PaginatedResult<Borrowing>> {
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 8;
-    const orders = await apiClient.get<ApiBorrowOrder[]>("/borrow-orders");
-    const query = filters.search?.toLowerCase();
-    const filtered = orders.map(mapBorrowing).filter((item) =>
-      (!query || [item.id, item.readerName, item.bookTitle, item.readerId].some((value) => value.toLowerCase().includes(query))) &&
-      (!filters.status || item.status === filters.status)
-    );
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const start = (page - 1) * pageSize;
-    return { items: filtered.slice(start, start + pageSize), total, page, pageSize, totalPages };
+    const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (filters.search) params.set("search", filters.search);
+    if (filters.status) params.set("status", filters.status);
+    const result = await apiClient.get<ApiPagedBorrowOrders>(`/admin/borrow-orders?${params}`);
+    return { ...result, items: result.items.map(mapBorrowing) };
   },
 
   async getBorrowingById(id: string): Promise<Borrowing | null> {
@@ -63,49 +36,118 @@ export const borrowingService = {
     } catch { return null; }
   },
 
-  async searchForReturn(query: string): Promise<Borrowing | null> {
-    try {
-      const result = mapBorrowing(await apiClient.get<ApiBorrowOrder>(`/admin/borrow-orders/${encodeURIComponent(query.trim())}`));
-      return result.status === "borrowing" || result.status === "overdue" ? result : null;
-    } catch { return null; }
+  async getReturnQueue(): Promise<Borrowing[]> {
+    const statuses = ["borrowing", "overdue", "returned"];
+    const results = await Promise.all(statuses.map((status) =>
+      apiClient.get<ApiPagedBorrowOrders>(
+        `/admin/borrow-orders?status=${status}&page=1&pageSize=100`
+      )
+    ));
+    return results
+      .flatMap((result) => result.items)
+      .map(mapBorrowing)
+      .filter((item) => item.status !== "returned" || (item.remainingRefundAmount ?? 0) > 0);
   },
 
-  async confirmReturn(id: string): Promise<Borrowing | null> {
-    try {
-      return mapBorrowing(await apiClient.post<ApiBorrowOrder>(`/admin/borrow-orders/${encodeURIComponent(id)}/return`, {}));
-    } catch { return null; }
+  async searchForReturn(query: string): Promise<Borrowing> {
+    const params = new URLSearchParams({ query: query.trim() });
+    return mapBorrowing(await apiClient.get<ApiBorrowOrder>(
+      `/admin/borrow-orders/return-search?${params}`
+    ));
+  },
+
+  async confirmReturn(id: string): Promise<Borrowing> {
+    return mapBorrowing(await apiClient.post<ApiBorrowOrder>(
+      `/admin/borrow-orders/${encodeURIComponent(id)}/return`,
+      {}
+    ));
+  },
+
+  async confirmDepositRefund(id: string): Promise<Borrowing> {
+    return mapBorrowing(await apiClient.post<ApiBorrowOrder>(
+      `/admin/borrow-orders/${encodeURIComponent(id)}/refund-deposit`,
+      {}
+    ));
   },
 
   async getBorrowRequests(): Promise<BorrowRequest[]> {
-    throw new Error("Admin lấy danh sách yêu cầu mượn");
+    const result = await apiClient.get<ApiPagedBorrowOrders>(
+      "/admin/borrow-orders?status=requested&page=1&pageSize=100"
+    );
+    return result.items.map(mapBorrowRequest);
   },
 
-  async approveRequest(id: string): Promise<BorrowRequest | null> {
-    throw new Error(`Duyệt yêu cầu mượn (${id})`);
-  },
-
-  async rejectRequest(id: string): Promise<BorrowRequest | null> {
-    throw new Error(`Từ chối yêu cầu mượn (${id})`);
+  async approveRequest(id: string): Promise<Borrowing> {
+    const order = await apiClient.post<ApiBorrowOrder>(
+      `/admin/borrow-orders/${encodeURIComponent(id)}/pickup`,
+      {}
+    );
+    return mapBorrowing(order);
   },
 };
 
 interface ApiBorrowOrder {
   id: number; referenceCode: string; status: string; bookId: number; bookTitle: string;
   borrowerId: number; borrowerName: string; requestedAt: string; borrowedAt?: string;
-  dueAt?: string; returnedAt?: string;
+  dueAt?: string; returnedAt?: string; copyBarcode: string;
+  borrowFee: number; depositAmount: number; totalAmount: number; paidAmount: number;
+  paymentStatus: string; paymentMethod?: string; depositRefunded: boolean;
+  remainingRefundAmount: number;
+}
+
+interface ApiPagedBorrowOrders {
+  items: ApiBorrowOrder[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 function mapBorrowing(item: ApiBorrowOrder): Borrowing {
+  const statusMap: Record<string, Borrowing["status"]> = {
+    PENDING_PAYMENT: "pending_payment",
+    REQUESTED: "requested",
+    BORROWED: "borrowing",
+    RETURNED: "returned",
+    OVERDUE: "overdue",
+    CANCELLED: "cancelled",
+  };
   return {
     id: item.referenceCode,
     readerId: String(item.borrowerId),
     readerName: item.borrowerName,
     bookId: String(item.bookId),
     bookTitle: item.bookTitle,
+    copyBarcode: item.copyBarcode,
+    requestedDate: formatDate(item.requestedAt),
     borrowDate: formatDate(item.borrowedAt ?? item.requestedAt),
     dueDate: formatDate(item.dueAt),
     returnDate: formatDate(item.returnedAt),
-    status: item.status.toLowerCase() as Borrowing["status"],
+    status: statusMap[item.status] ?? "requested",
+    borrowFee: item.borrowFee,
+    depositAmount: item.depositAmount,
+    totalAmount: item.totalAmount,
+    paidAmount: item.paidAmount,
+    paymentStatus: item.paymentStatus,
+    paymentMethod: item.paymentMethod,
+    depositRefunded: item.depositRefunded,
+    remainingRefundAmount: item.remainingRefundAmount,
+    overdueDays: item.dueAt && new Date(item.dueAt).getTime() < Date.now()
+      ? Math.max(0, Math.floor((Date.now() - new Date(item.dueAt).getTime()) / 86400000))
+      : 0,
+  };
+}
+
+function mapBorrowRequest(item: ApiBorrowOrder): BorrowRequest {
+  return {
+    id: item.referenceCode,
+    readerId: String(item.borrowerId),
+    readerName: item.borrowerName,
+    bookId: String(item.bookId),
+    bookTitle: item.bookTitle,
+    requestDate: formatDate(item.requestedAt),
+    copyBarcode: item.copyBarcode,
+    status: "requested",
   };
 }
 

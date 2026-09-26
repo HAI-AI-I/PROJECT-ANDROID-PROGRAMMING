@@ -46,7 +46,7 @@ export default function UsersListContent() {
         </div>
         <div className={pageStyles.filters}>
           <Select className={pageStyles.filterSelect} value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }} placeholder="Vai trò"
-            options={[{ value: "admin", label: "Admin" }, { value: "librarian", label: "Librarian" }, { value: "reader", label: "Reader" }]} />
+            options={[{ value: "admin", label: "Quản trị viên" }, { value: "reader", label: "Độc giả" }]} />
           <Select className={pageStyles.filterSelect} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} placeholder="Trạng thái"
             options={[{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Không hoạt động" }]} />
         </div>

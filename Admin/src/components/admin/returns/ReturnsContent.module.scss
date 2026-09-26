@@ -87,6 +87,18 @@
   font-weight: 600;
 }
 
+.refund {
+  color: var(--warning);
+  font-weight: 700;
+}
+
+.refunded {
+  display: block;
+  color: var(--success);
+  font-weight: 600;
+  text-align: center;
+}
+
 .confirmBtn {
   margin-top: 20px;
 

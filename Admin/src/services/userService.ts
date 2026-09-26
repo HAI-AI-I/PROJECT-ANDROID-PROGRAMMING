@@ -24,18 +24,23 @@ export const userService = {
     const pageSize = filters.pageSize ?? 8;
     const params = new URLSearchParams();
     if (filters.search) params.set("search", filters.search);
-    const users = await apiClient.get<ApiUser[]>(`/admin/users?${params.toString()}`);
-    let filtered = users.map((user) => ({ userId: `U-${String(user.id).padStart(3, "0")}`, name: user.fullName, email: user.email, role: user.role.toLowerCase() as User["role"], status: (user.active ? "active" : "inactive") as User["status"], avatar: undefined, createdDate: new Date(user.createdAt).toLocaleDateString("vi-VN") }));
-    if (filters.search) {
-      const query = filters.search.toLowerCase();
-      filtered = filtered.filter((user) => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query));
-    }
-    if (filters.role) filtered = filtered.filter((user) => user.role === filters.role);
-    if (filters.status) filtered = filtered.filter((user) => user.status === filters.status);
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const start = (page - 1) * pageSize;
-    return { items: filtered.slice(start, start + pageSize), total, page, pageSize, totalPages };
+    if (filters.role) params.set("role", filters.role === "reader" ? "USER" : "ADMIN");
+    if (filters.status) params.set("active", String(filters.status === "active"));
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    const result = await apiClient.get<PaginatedResult<ApiUser>>(`/admin/users?${params.toString()}`);
+    return {
+      ...result,
+      items: result.items.map((user) => ({
+        userId: `U-${String(user.id).padStart(3, "0")}`,
+        name: user.fullName,
+        email: user.email,
+        role: (user.role === "ADMIN" ? "admin" : "reader") as User["role"],
+        status: (user.active ? "active" : "inactive") as User["status"],
+        avatar: undefined,
+        createdDate: new Date(user.createdAt).toLocaleDateString("vi-VN"),
+      })),
+    };
   },
 };
 

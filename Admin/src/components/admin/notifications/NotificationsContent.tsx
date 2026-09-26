@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Trash2, CheckCheck } from "lucide-react";
+import { CheckCheck, Plus, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -17,9 +17,17 @@ import pageStyles from "@/styles/page.module.scss";
 import styles from "./NotificationsContent.module.scss";
 
 const typeLabels: Record<NotificationType, string> = {
-  overdue: "Quá hạn",
-  borrow_request: "Yêu cầu mượn",
-  system: "Hệ thống",
+  info: "Thông tin",
+  warning: "Cảnh báo",
+  success: "Thành công",
+  error: "Khẩn cấp",
+};
+
+const typeVariants: Record<NotificationType, "default" | "warning" | "success" | "danger"> = {
+  info: "default",
+  warning: "warning",
+  success: "success",
+  error: "danger",
 };
 
 export default function NotificationsContent() {
@@ -27,88 +35,116 @@ export default function NotificationsContent() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Notification | null>(null);
-  const [form, setForm] = useState<NotificationFormData>({ title: "", message: "", type: "system" });
+  const [form, setForm] = useState<NotificationFormData>({ title: "", message: "", type: "info" });
 
   const fetchData = useCallback(async () => {
-    setLoading(true); setError(false);
-    try { setItems(await notificationService.getNotifications()); }
-    catch { setError(true); } finally { setLoading(false); }
+    setLoading(true);
+    setError(false);
+    try {
+      setItems(await notificationService.getNotifications());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleCreate = async () => {
-    if (!form.title.trim() || !form.message.trim()) return;
-    await notificationService.createNotification(form);
-    showToast("Tạo thông báo thành công");
-    setForm({ title: "", message: "", type: "system" });
-    setShowForm(false);
-    fetchData();
+  const handleBroadcast = async () => {
+    if (!form.title.trim() || !form.message.trim()) {
+      showToast("Vui lòng nhập đầy đủ tiêu đề và nội dung", "error");
+      return;
+    }
+    setProcessing(true);
+    try {
+      const recipientCount = await notificationService.broadcast(form);
+      showToast(`Đã gửi thông báo cho ${recipientCount} độc giả`);
+      setForm({ title: "", message: "", type: "info" });
+      setShowForm(false);
+    } catch (requestError) {
+      showToast(requestError instanceof Error ? requestError.message : "Không thể gửi thông báo", "error");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await notificationService.deleteNotification(deleteTarget.id);
-    showToast("Xóa thông báo thành công");
-    setDeleteTarget(null);
-    fetchData();
+    try {
+      await notificationService.deleteNotification(deleteTarget.id);
+      showToast("Xóa thông báo thành công");
+      setDeleteTarget(null);
+      await fetchData();
+    } catch (requestError) {
+      showToast(requestError instanceof Error ? requestError.message : "Không thể xóa thông báo", "error");
+    }
+  };
+
+  const handleReadAll = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      showToast("Đã đánh dấu tất cả là đã đọc");
+      await fetchData();
+    } catch (requestError) {
+      showToast(requestError instanceof Error ? requestError.message : "Không thể cập nhật thông báo", "error");
+    }
   };
 
   return (
     <>
       <div className={pageStyles.pageHeader}>
-        <h2 className={pageStyles.pageTitle}>Thông báo</h2>
+        <h2 className={pageStyles.pageTitle}>Thông báo của quản trị viên</h2>
         <div className={styles.topActions}>
-          <Button variant="secondary" size="sm" onClick={async () => { await notificationService.markAllAsRead(); showToast("Đã đánh dấu tất cả đã đọc"); fetchData(); }}>
+          <Button variant="secondary" size="sm" onClick={handleReadAll}>
             <CheckCheck size={16} />Đọc tất cả
           </Button>
-          <Button size="sm" onClick={() => setShowForm(!showForm)}><Plus size={16} />Tạo thông báo</Button>
+          <Button size="sm" onClick={() => setShowForm((visible) => !visible)}>
+            <Plus size={16} />Gửi thông báo
+          </Button>
         </div>
       </div>
 
       {showForm && (
         <div className={styles.form}>
-          <p className={styles.formTitle}>Tạo thông báo mới</p>
+          <p className={styles.formTitle}>Gửi thông báo đến toàn bộ độc giả đang hoạt động</p>
           <div className={styles.formGrid}>
-            <Input label="Tiêu đề" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <Input label="Nội dung" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-            <Select label="Loại" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as NotificationType })}
-              options={Object.entries(typeLabels).map(([v, l]) => ({ value: v, label: l }))} />
+            <Input label="Tiêu đề" maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
+            <Input label="Nội dung" maxLength={1000} value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} />
+            <Select label="Mức độ" value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as NotificationType })} options={
+              Object.entries(typeLabels).map(([value, label]) => ({ value, label }))
+            } />
           </div>
           <div className={styles.formActions}>
             <Button variant="secondary" onClick={() => setShowForm(false)}>Hủy</Button>
-            <Button onClick={handleCreate}>Tạo</Button>
+            <Button onClick={handleBroadcast} disabled={processing}>{processing ? "Đang gửi..." : "Gửi cho độc giả"}</Button>
           </div>
         </div>
       )}
 
       <div className={pageStyles.card}>
         {loading ? <LoadingState /> : error ? <ErrorState onRetry={fetchData} /> : items.length === 0 ? (
-          <EmptyState title="Không có thông báo" />
+          <EmptyState title="Tài khoản Admin chưa có thông báo" />
         ) : (
           <div className={styles.list}>
-            {items.map((n) => (
-              <div key={n.id} className={`${styles.item} ${!n.isRead ? styles.unread : ""}`}>
-                {!n.isRead && <div className={styles.dot} />}
+            {items.map((notification) => (
+              <div key={notification.id} className={`${styles.item} ${!notification.isRead ? styles.unread : ""}`}>
+                {!notification.isRead && <div className={styles.dot} />}
                 <div className={styles.content}>
-                  <p className={styles.title}>{n.title}</p>
-                  <p className={styles.message}>{n.message}</p>
+                  <p className={styles.title}>{notification.title}</p>
+                  <p className={styles.message}>{notification.message}</p>
                   <div className={styles.meta}>
-                    <Badge variant="default">{typeLabels[n.type]}</Badge>
-                    <span className={styles.date}>{n.createdDate}</span>
-                    {!n.isRead && <Badge variant="primary">Chưa đọc</Badge>}
+                    <Badge variant={typeVariants[notification.type]}>{typeLabels[notification.type]}</Badge>
+                    <span className={styles.date}>{notification.createdDate}</span>
+                    {!notification.isRead && <Badge variant="primary">Chưa đọc</Badge>}
                   </div>
                 </div>
                 <div className={styles.actions}>
-                  {!n.isRead && (
-                    <Button variant="ghost" size="icon" title="Đánh dấu đã đọc"
-                      onClick={async () => { await notificationService.markAsRead(n.id); fetchData(); }}>
-                      <CheckCheck size={16} />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(n)}><Trash2 size={16} /></Button>
+                  {!notification.isRead && <Button variant="ghost" size="icon" title="Đánh dấu đã đọc" onClick={async () => { await notificationService.markAsRead(notification.id); await fetchData(); }}><CheckCheck size={16} /></Button>}
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(notification)}><Trash2 size={16} /></Button>
                 </div>
               </div>
             ))}
@@ -117,7 +153,7 @@ export default function NotificationsContent() {
       </div>
 
       <Modal open={!!deleteTarget} title="Xóa thông báo" confirmLabel="Xóa" variant="danger" onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)}>
-        Bạn có chắc muốn xóa thông báo <strong>{deleteTarget?.title}</strong>?
+        Bạn có chắc muốn xóa thông báo <strong>{deleteTarget?.title}</strong> khỏi tài khoản Admin?
       </Modal>
     </>
   );

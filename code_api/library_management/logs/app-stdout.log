@@ -1,0 +1,1070 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-26T11:59:09.092+07:00  INFO 8248 --- [library_management] [           main] c.g.l.LibraryManagementApplication       : Starting LibraryManagementApplication v0.0.1-SNAPSHOT using Java 24.0.2 with PID 8248 (D:\learn_android_programming\project_mobile_group2\PROJECT-ANDROID-PROGRAMMING\code_api\library_management\target\library_management-0.0.1-SNAPSHOT.jar started by hai in D:\learn_android_programming\project_mobile_group2\PROJECT-ANDROID-PROGRAMMING\code_api\library_management)
+2026-09-26T11:59:09.098+07:00  INFO 8248 --- [library_management] [           main] c.g.l.LibraryManagementApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-09-26T11:59:09.099+07:00 DEBUG 8248 --- [library_management] [           main] o.s.boot.SpringApplication               : Loading source class com.group_7.library_management.LibraryManagementApplication
+2026-09-26T11:59:09.174+07:00 DEBUG 8248 --- [library_management] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@6ce86ce1
+2026-09-26T11:59:10.215+07:00  INFO 8248 --- [library_management] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-26T11:59:10.246+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.group_7.library_management'. Automatic @Repository and @Entity scanning is enabled.
+2026-09-26T11:59:10.359+07:00  INFO 8248 --- [library_management] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 131 ms. Found 17 JPA repository interfaces.
+2026-09-26T11:59:19.149+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: D:\learn_android_programming\project_mobile_group2\PROJECT-ANDROID-PROGRAMMING\code_api\library_management\target\library_management-0.0.1-SNAPSHOT.jar
+2026-09-26T11:59:19.150+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: D:\learn_android_programming\project_mobile_group2\PROJECT-ANDROID-PROGRAMMING\code_api\library_management\target\library_management-0.0.1-SNAPSHOT.jar
+2026-09-26T11:59:19.150+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2026-09-26T11:59:19.184+07:00  INFO 8248 --- [library_management] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8386 (http)
+2026-09-26T11:59:19.200+07:00  INFO 8248 --- [library_management] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-26T11:59:19.200+07:00  INFO 8248 --- [library_management] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-26T11:59:19.227+07:00 DEBUG 8248 --- [library_management] [           main] b.w.c.s.WebApplicationContextInitializer : Published root WebApplicationContext as ServletContext attribute with name [org.springframework.web.context.WebApplicationContext.ROOT]
+2026-09-26T11:59:19.228+07:00  INFO 8248 --- [library_management] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 10054 ms
+2026-09-26T11:59:19.459+07:00  INFO 8248 --- [library_management] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-26T11:59:19.552+07:00  INFO 8248 --- [library_management] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.5.Final
+2026-09-26T11:59:20.303+07:00  INFO 8248 --- [library_management] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-26T11:59:20.355+07:00  INFO 8248 --- [library_management] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-26T11:59:20.599+07:00  INFO 8248 --- [library_management] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@a7bbdbc
+2026-09-26T11:59:20.601+07:00  INFO 8248 --- [library_management] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-26T11:59:20.688+07:00  INFO 8248 --- [library_management] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/library_management?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.3
+	Default catalog/schema: library_management/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-26T11:59:22.039+07:00  INFO 8248 --- [library_management] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-26T11:59:22.113+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table book_copies modify column status enum ('AVAILABLE','BORROWED','DAMAGED','LOST','MAINTENANCE','RESERVED') not null
+2026-09-26T11:59:22.127+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table borrow_records modify column payment_method enum ('CASH','SEPAY')
+2026-09-26T11:59:22.144+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table borrow_records modify column status enum ('BORROWED','CANCELLED','OVERDUE','PENDING_PAYMENT','REQUESTED','RETURNED') not null
+2026-09-26T11:59:22.159+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table notifications modify column action_type enum ('BOOK_DETAIL','BOOK_REVIEWS','BORROW_LIST','BORROW_ORDER_DETAIL','BORROW_PAYMENT','FAVORITE_LIST','NONE','PROFILE','SUPPORT')
+2026-09-26T11:59:22.168+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table notifications modify column type enum ('BOOK','ERROR','INFO','SUCCESS','WARNING') not null
+2026-09-26T11:59:22.176+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table password_reset_verifications modify column verification_channel enum ('EMAIL','SMS') not null
+2026-09-26T11:59:22.187+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table registration_verifications modify column verification_channel enum ('EMAIL','SMS')
+2026-09-26T11:59:22.197+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table support_requests modify column status enum ('CLOSED','IN_PROGRESS','OPEN','RESOLVED') not null
+2026-09-26T11:59:22.207+07:00 DEBUG 8248 --- [library_management] [           main] org.hibernate.SQL                        : alter table users modify column role enum ('ADMIN','USER') not null
+2026-09-26T11:59:22.264+07:00  INFO 8248 --- [library_management] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-26T11:59:22.327+07:00  INFO 8248 --- [library_management] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-26T11:59:22.599+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: springSecurityFilterChain urls=[/*] order=-100, characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105, bearerTokenAuthenticationFilter urls=[/*] order=2147483647
+2026-09-26T11:59:22.600+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-09-26T11:59:22.635+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.s.f.OrderedRequestContextFilter    : Filter 'requestContextFilter' configured for use
+2026-09-26T11:59:22.637+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.s.f.OrderedCharacterEncodingFilter : Filter 'characterEncodingFilter' configured for use
+2026-09-26T11:59:22.637+07:00 DEBUG 8248 --- [library_management] [           main] .DelegatingFilterProxyRegistrationBean$1 : Filter 'springSecurityFilterChain' configured for use
+2026-09-26T11:59:22.638+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.s.filter.OrderedFormContentFilter  : Filter 'formContentFilter' configured for use
+2026-09-26T11:59:25.378+07:00  WARN 8248 --- [library_management] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 94ae3554-0972-4d05-9b41-9a6b4bc15303
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-09-26T11:59:25.389+07:00  INFO 8248 --- [library_management] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-09-26T11:59:25.733+07:00 DEBUG 8248 --- [library_management] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 83 mappings in 'requestMappingHandlerMapping'
+2026-09-26T11:59:25.763+07:00 DEBUG 8248 --- [library_management] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2026-09-26T11:59:25.800+07:00 DEBUG 8248 --- [library_management] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-09-26T11:59:25.874+07:00 DEBUG 8248 --- [library_management] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-09-26T11:59:26.054+07:00  INFO 8248 --- [library_management] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8386 (http) with context path '/'
+2026-09-26T11:59:26.063+07:00 DEBUG 8248 --- [library_management] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+
+============================
+CONDITIONS EVALUATION REPORT
+============================
+
+
+Positive matches:
+-----------------
+
+   AopAutoConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.aop.auto=true) matched (OnPropertyCondition)
+
+   AopAutoConfiguration.AspectJAutoProxyingConfiguration matched:
+      - @ConditionalOnClass found required class 'org.aspectj.weaver.Advice' (OnClassCondition)
+
+   AopAutoConfiguration.AspectJAutoProxyingConfiguration.CglibAutoProxyConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=true) matched (OnPropertyCondition)
+
+   ApplicationAvailabilityAutoConfiguration#applicationAvailability matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.availability.ApplicationAvailability; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataJpaRepositoriesAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.data.jpa.repository.JpaRepository' (OnClassCondition)
+      - @ConditionalOnBooleanProperty (spring.data.jpa.repositories.enabled=true) matched (OnPropertyCondition)
+      - @ConditionalOnBean (types: javax.sql.DataSource; SearchStrategy: all) found bean 'dataSource'; @ConditionalOnMissingBean (types: org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean,org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
+      - @ConditionalOnMissingBean (types: io.r2dbc.spi.ConnectionFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration.PooledDataSourceConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.PooledDataSourceAvailable PooledDataSource found supported DataSource; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.ExplicitType @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (DataSourceAutoConfiguration.PooledDataSourceCondition)
+      - @ConditionalOnMissingBean (types: javax.sql.DataSource,javax.sql.XADataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration.PooledDataSourceConfiguration#jdbcConnectionDetails matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceConfiguration.Hikari matched:
+      - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
+      - @ConditionalOnProperty (spring.datasource.type=com.zaxxer.hikari.HikariDataSource) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: javax.sql.DataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceInitializationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.jdbc.datasource.init.DatabasePopulator' (OnClassCondition)
+      - SQL InitializationDatabase Initialization default value is EMBEDDED (OnSqlInitializationCondition)
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource'; @ConditionalOnMissingBean (types: org.springframework.boot.sql.autoconfigure.init.ApplicationScriptDatabaseInitializer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.HikariPoolDataSourceMetadataProviderConfiguration matched:
+      - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.core.JdbcTemplate', 'org.springframework.transaction.TransactionManager' (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration.JdbcTransactionManagerConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource' (OnBeanCondition)
+
+   DataWebAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'org.springframework.data.web.PageableHandlerMethodArgumentResolver', 'org.springframework.web.servlet.config.annotation.WebMvcConfigurer' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.data.web.PageableHandlerMethodArgumentResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataWebAutoConfiguration#pageableCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataWebAutoConfiguration#sortCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.data.web.config.SortHandlerMethodArgumentResolverCustomizer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataWebAutoConfiguration#springDataWebSettings matched:
+      - @ConditionalOnMissingBean (types: org.springframework.data.web.config.SpringDataWebSettings; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DefaultTaskSchedulerConfiguration matched:
+      - @ConditionalOnMissingBean (names: taskScheduler; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DefaultTaskSchedulerConfiguration#taskScheduler matched:
+      - @ConditionalOnBean (types: org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder; SearchStrategy: all) found bean 'threadPoolTaskSchedulerBuilder' (OnBeanCondition)
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   DispatcherServletAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.web.servlet.DispatcherServlet' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
+      - Default DispatcherServlet did not find dispatcher servlet beans (DispatcherServletAutoConfiguration.DefaultDispatcherServletCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
+      - DispatcherServlet Registration did not find servlet registration bean (DispatcherServletAutoConfiguration.DispatcherServletRegistrationCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration#dispatcherServletRegistration matched:
+      - @ConditionalOnBean (names: dispatcherServlet types: org.springframework.web.servlet.DispatcherServlet; SearchStrategy: all) found bean 'dispatcherServlet' (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.servlet.DispatcherServlet' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   ErrorMvcAutoConfiguration#basicErrorController matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.error.ErrorController; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration#errorAttributes matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.error.ErrorAttributes; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.DefaultErrorViewResolverConfiguration#conventionErrorViewResolver matched:
+      - @ConditionalOnBean (types: org.springframework.web.servlet.DispatcherServlet; SearchStrategy: all) found bean 'dispatcherServlet'; @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.autoconfigure.error.ErrorViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.web.error.whitelabel.enabled=true) matched (OnPropertyCondition)
+      - ErrorTemplate Missing did not find error template view (ErrorMvcAutoConfiguration.ErrorTemplateMissingCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#beanNameViewResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.BeanNameViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#defaultErrorView matched:
+      - @ConditionalOnMissingBean (names: error; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   HibernateJpaAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean', 'jakarta.persistence.EntityManager', 'org.hibernate.engine.spi.SessionImplementor' (OnClassCondition)
+
+   HibernateJpaConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource' (OnBeanCondition)
+
+   HttpEncodingAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.web.filter.CharacterEncodingFilter' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnBooleanProperty (spring.servlet.encoding.enabled=true) matched (OnPropertyCondition)
+
+   HttpEncodingAutoConfiguration#characterEncodingFilter matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.filter.CharacterEncodingFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   HttpMessageConvertersAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.http.converter.HttpMessageConverter' (OnClassCondition)
+      - NoneNestedConditions 0 matched 1 did not; NestedCondition on HttpMessageConvertersAutoConfiguration.NotReactiveWebApplicationCondition.ReactiveWebApplication did not find reactive web application classes (HttpMessageConvertersAutoConfiguration.NotReactiveWebApplicationCondition)
+
+   HttpMessageConvertersAutoConfiguration.StringHttpMessageConverterConfiguration#stringHttpMessageConvertersCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.http.converter.StringHttpMessageConverter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'tools.jackson.databind.json.JsonMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration#jacksonJsonMapper matched:
+      - @ConditionalOnMissingBean (types: tools.jackson.databind.json.JsonMapper; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration#jsonFactory matched:
+      - @ConditionalOnMissingBean (types: tools.jackson.core.json.JsonFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration#jsonMapperBuilder matched:
+      - @ConditionalOnMissingBean (types: tools.jackson.databind.json.JsonMapper$Builder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration.JsonProblemDetailsConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.http.ProblemDetail' (OnClassCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonJsonHttpMessageConverterConfiguration matched:
+      - @ConditionalOnClass found required class 'tools.jackson.databind.json.JsonMapper' (OnClassCondition)
+      - @ConditionalOnProperty (spring.http.converters.preferred-json-mapper=jackson) matched (OnPropertyCondition)
+      - @ConditionalOnBean (types: tools.jackson.databind.json.JsonMapper; SearchStrategy: all) found bean 'jacksonJsonMapper' (OnBeanCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonJsonHttpMessageConverterConfiguration#jacksonJsonHttpMessageConvertersCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.http.converter.json.JacksonJsonHttpMessageConverter ignored: org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter,org.springframework.data.rest.webmvc.alps.AlpsJacksonJsonHttpMessageConverter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JdbcClientAutoConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate; SearchStrategy: all) found a single bean 'namedParameterJdbcTemplate'; @ConditionalOnMissingBean (types: org.springframework.jdbc.core.simple.JdbcClient; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JdbcTemplateAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.core.JdbcTemplate' (OnClassCondition)
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource' (OnBeanCondition)
+
+   JdbcTemplateConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.jdbc.core.JdbcOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration#entityManagerFactory matched:
+      - @ConditionalOnMissingBean (types: org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean,jakarta.persistence.EntityManagerFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration#entityManagerFactoryBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.jpa.EntityManagerFactoryBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration#jpaVendorAdapter matched:
+      - @ConditionalOnMissingBean (types: org.springframework.orm.jpa.JpaVendorAdapter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration#transactionManager matched:
+      - @ConditionalOnMissingBean (types: org.springframework.transaction.TransactionManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration.PersistenceManagedTypesConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean,jakarta.persistence.EntityManagerFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JpaBaseConfiguration.PersistenceManagedTypesConfiguration#persistenceManagedTypes matched:
+      - @ConditionalOnMissingBean (types: org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JtaAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.transaction.Transaction' (OnClassCondition)
+      - @ConditionalOnBooleanProperty (spring.jta.enabled=true) matched (OnPropertyCondition)
+
+   LifecycleAutoConfiguration#defaultLifecycleProcessor matched:
+      - @ConditionalOnMissingBean (names: lifecycleProcessor; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   MailSenderAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.mail.internet.MimeMessage', 'jakarta.activation.MimeType', 'org.springframework.mail.MailSender' (OnClassCondition)
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on MailSenderAutoConfiguration.MailSenderCondition.JndiNameProperty @ConditionalOnProperty (spring.mail.jndi-name) did not find property 'spring.mail.jndi-name'; NestedCondition on MailSenderAutoConfiguration.MailSenderCondition.HostProperty @ConditionalOnProperty (spring.mail.host) matched (MailSenderAutoConfiguration.MailSenderCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.mail.MailSender; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   MailSenderPropertiesConfiguration matched:
+      - @ConditionalOnProperty (spring.mail.host) matched (OnPropertyCondition)
+
+   MailSenderPropertiesConfiguration#mailSender matched:
+      - @ConditionalOnMissingBean (types: org.springframework.mail.javamail.JavaMailSender; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   MultipartAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.multipart.support.StandardServletMultipartResolver', 'jakarta.servlet.MultipartConfigElement' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnBooleanProperty (spring.servlet.multipart.enabled=true) matched (OnPropertyCondition)
+
+   MultipartAutoConfiguration#multipartConfigElement matched:
+      - @ConditionalOnMissingBean (types: jakarta.servlet.MultipartConfigElement; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   MultipartAutoConfiguration#multipartResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   NamedParameterJdbcTemplateConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.jdbc.core.JdbcTemplate; SearchStrategy: all) found a single bean 'jdbcTemplate'; @ConditionalOnMissingBean (types: org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   PersistenceExceptionTranslationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor' (OnClassCondition)
+
+   PersistenceExceptionTranslationAutoConfiguration#persistenceExceptionTranslationPostProcessor matched:
+      - @ConditionalOnBooleanProperty (spring.persistence.exceptiontranslation.enabled=true) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   PropertyPlaceholderAutoConfiguration#propertySourcesPlaceholderConfigurer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.context.support.PropertySourcesPlaceholderConfigurer; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   SecurityAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.DefaultAuthenticationEventPublisher' (OnClassCondition)
+
+   SecurityAutoConfiguration#authenticationEventPublisher matched:
+      - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationEventPublisher; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   SecurityFilterAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer', 'org.springframework.security.config.http.SessionCreationPolicy' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   SecurityFilterAutoConfiguration#securityFilterChainRegistration matched:
+      - @ConditionalOnBean (names: springSecurityFilterChain; SearchStrategy: all) found bean 'springSecurityFilterChain' (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   ServletWebSecurityAutoConfiguration.EnableWebSecurityConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration.PathPatternRequestMatcherBuilderConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath' (OnClassCondition)
+      - @ConditionalOnBean (types: org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath; SearchStrategy: all) found bean 'dispatcherServletRegistration' (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration.PathPatternRequestMatcherBuilderConfiguration#pathPatternRequestMatcherBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher$Builder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   SslAutoConfiguration#sslBundleRegistry matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.ssl.SslBundleRegistry,org.springframework.boot.ssl.SslBundles; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutionAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor' (OnClassCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.SimpleAsyncTaskExecutorBuilderConfiguration#simpleAsyncTaskExecutorBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) did not find any beans (TaskExecutorConfigurations.OnExecutorCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutor matched:
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskExecutorConfigurations.ThreadPoolTaskExecutorBuilderConfiguration#threadPoolTaskExecutorBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.ThreadPoolTaskExecutorBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskSchedulingAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler' (OnClassCondition)
+
+   TaskSchedulingAutoConfiguration#scheduledBeanLazyInitializationExcludeFilter matched:
+      - @ConditionalOnBean (names: org.springframework.scheduling.config.internalScheduledAnnotationProcessor; SearchStrategy: all) found bean 'org.springframework.scheduling.config.internalScheduledAnnotationProcessor' (OnBeanCondition)
+
+   TaskSchedulingConfigurations.SimpleAsyncTaskSchedulerBuilderConfiguration#simpleAsyncTaskSchedulerBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskSchedulingConfigurations.TaskSchedulerConfiguration matched:
+      - @ConditionalOnBean (names: org.springframework.scheduling.config.internalScheduledAnnotationProcessor; SearchStrategy: all) found bean 'org.springframework.scheduling.config.internalScheduledAnnotationProcessor'; @ConditionalOnMissingBean (types: org.springframework.scheduling.TaskScheduler,java.util.concurrent.ScheduledExecutorService; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskSchedulingConfigurations.ThreadPoolTaskSchedulerBuilderConfiguration#threadPoolTaskSchedulerBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TomcatServletWebServerAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.ServletRequest', 'org.apache.catalina.startup.Tomcat', 'org.apache.coyote.UpgradeProtocol', 'org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   TomcatServletWebServerAutoConfiguration#tomcatServletWebServerFactory matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.web.server.servlet.ServletWebServerFactory; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   TomcatWebServerConfiguration matched:
+      - @ConditionalOnWarDeployment the application is not deployed as a WAR file. (OnWarDeploymentCondition)
+
+   TomcatWebServerConfiguration.TomcatWebSocketConfiguration matched:
+      - @ConditionalOnClass found required class 'org.apache.tomcat.websocket.server.WsSci' (OnClassCondition)
+
+   TransactionAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.transaction.PlatformTransactionManager' (OnClassCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration matched:
+      - @ConditionalOnBean (types: org.springframework.transaction.TransactionManager; SearchStrategy: all) found bean 'transactionManager'; @ConditionalOnMissingBean (types: org.springframework.transaction.annotation.AbstractTransactionManagementConfiguration; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration.CglibAutoProxyConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=true) matched (OnPropertyCondition)
+
+   TransactionAutoConfiguration.TransactionTemplateConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.transaction.PlatformTransactionManager; SearchStrategy: all) found a single bean 'transactionManager' (OnBeanCondition)
+
+   TransactionAutoConfiguration.TransactionTemplateConfiguration#transactionTemplate matched:
+      - @ConditionalOnMissingBean (types: org.springframework.transaction.support.TransactionOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionManagerCustomizationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.transaction.PlatformTransactionManager' (OnClassCondition)
+
+   TransactionManagerCustomizationAutoConfiguration#platformTransactionManagerCustomizers matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.transaction.autoconfigure.TransactionManagerCustomizers; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - AnyNestedCondition 1 matched 2 did not; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured)
+      - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ValidationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.validation.executable.ExecutableValidator' (OnClassCondition)
+      - @ConditionalOnResource found location classpath:META-INF/services/jakarta.validation.spi.ValidationProvider (OnResourceCondition)
+
+   ValidationAutoConfiguration#defaultValidator matched:
+      - @ConditionalOnMissingBean (types: jakarta.validation.Validator; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ValidationAutoConfiguration#methodValidationPostProcessor matched:
+      - @ConditionalOnMissingBean (types: org.springframework.validation.beanvalidation.MethodValidationPostProcessor; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.servlet.DispatcherServlet', 'org.springframework.web.servlet.config.annotation.WebMvcConfigurer' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration#formContentFilter matched:
+      - @ConditionalOnBooleanProperty (spring.mvc.formcontent.filter.enabled=true) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.web.filter.FormContentFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#flashMapManager matched:
+      - @ConditionalOnMissingBean (names: flashMapManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#localeResolver matched:
+      - @ConditionalOnMissingBean (names: localeResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#viewNameTranslator matched:
+      - @ConditionalOnMissingBean (names: viewNameTranslator; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#defaultViewResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.InternalResourceViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#requestContextFilter matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.context.request.RequestContextListener,org.springframework.web.filter.RequestContextFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#viewResolver matched:
+      - @ConditionalOnBean (types: org.springframework.web.servlet.ViewResolver; SearchStrategy: all) found beans 'defaultViewResolver', 'beanNameViewResolver', 'mvcViewResolver'; @ConditionalOnMissingBean (names: viewResolver types: org.springframework.web.servlet.view.ContentNegotiatingViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+   AopAutoConfiguration.AspectJAutoProxyingConfiguration.JdkDynamicAutoProxyConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=false) did not find property 'spring.aop.proxy-target-class' (OnPropertyCondition)
+
+   AopAutoConfiguration.ClassProxyingConfiguration:
+      Did not match:
+         - @ConditionalOnMissingClass found unwanted class 'org.aspectj.weaver.Advice' (OnClassCondition)
+
+   DataJpaRepositoriesAutoConfiguration#entityManagerFactoryBootstrapExecutorCustomizer:
+      Did not match:
+         - @ConditionalOnProperty (spring.data.jpa.repositories.bootstrap-mode=deferred) did not find property 'spring.data.jpa.repositories.bootstrap-mode' (OnPropertyCondition)
+
+   DataRepositoryMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBean did not find required type 'io.micrometer.core.instrument.MeterRegistry' (OnBeanCondition)
+
+   DataSourceAutoConfiguration.EmbeddedDatabaseConfiguration:
+      Did not match:
+         - EmbeddedDataSource spring.datasource.url is set (DataSourceAutoConfiguration.EmbeddedDatabaseCondition)
+
+   DataSourceCheckpointRestoreConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.crac.Resource' (OnClassCondition)
+
+   DataSourceConfiguration.Dbcp2:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
+
+   DataSourceConfiguration.Generic:
+      Did not match:
+         - @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (OnPropertyCondition)
+
+   DataSourceConfiguration.OracleUcp:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'oracle.ucp.jdbc.PoolDataSourceImpl', 'oracle.jdbc.OracleConnection' (OnClassCondition)
+
+   DataSourceConfiguration.Tomcat:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
+
+   DataSourceHealthContributorAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEnabledHealthIndicator' (OnClassCondition)
+
+   DataSourceJmxConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.jmx.enabled=true) did not find property 'spring.jmx.enabled' (OnPropertyCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.CommonsDbcp2PoolDataSourceMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.OracleUcpPoolDataSourceMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'oracle.ucp.jdbc.PoolDataSource', 'oracle.jdbc.OracleConnection' (OnClassCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.TomcatDataSourcePoolMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
+
+   DataSourcePoolMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.core.instrument.MeterRegistry' (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration.JdbcTransactionManagerConfiguration#transactionManager:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.transaction.TransactionManager; SearchStrategy: all) found beans of type 'org.springframework.transaction.TransactionManager' transactionManager (OnBeanCondition)
+
+   DefaultTaskSchedulerConfiguration#taskSchedulerVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+      Matched:
+         - @ConditionalOnBean (types: org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder; SearchStrategy: all) found bean 'simpleAsyncTaskSchedulerBuilder' (OnBeanCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletConfiguration#multipartResolver:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) did not find any beans of type org.springframework.web.multipart.MultipartResolver (OnBeanCondition)
+
+   GsonHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.google.gson.Gson' (OnClassCondition)
+
+   HibernateMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.core.instrument.MeterRegistry' (OnClassCondition)
+
+   Jackson2HttpMessageConvertersConfiguration.MappingJackson2HttpMessageConverterConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.fasterxml.jackson.databind.ObjectMapper' (OnClassCondition)
+
+   Jackson2HttpMessageConvertersConfiguration.MappingJackson2XmlHttpMessageConverterConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.fasterxml.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration.CborConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.cbor.CBORMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration.XmlConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonXmlHttpMessageConverterConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JmxAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.jmx.enabled=true) did not find property 'spring.jmx.enabled' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.jmx.export.MBeanExporter' (OnClassCondition)
+
+   JndiDataSourceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnProperty (spring.datasource.jndi-name) did not find property 'spring.datasource.jndi-name' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
+
+   JndiJtaConfiguration:
+      Did not match:
+         - @ConditionalOnJndi JNDI environment is not available (OnJndiCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.transaction.jta.JtaTransactionManager' (OnClassCondition)
+
+   JpaBaseConfiguration.JpaWebConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.jpa.open-in-view=true) found different value in property 'spring.jpa.open-in-view' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.web.servlet.config.annotation.WebMvcConfigurer' (OnClassCondition)
+         - found 'session' scope (OnWebApplicationCondition)
+
+   JsonbHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.json.bind.Jsonb' (OnClassCondition)
+
+   KotlinSerializationHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'kotlinx.serialization.Serializable', 'kotlinx.serialization.json.Json' (OnClassCondition)
+
+   LazyConnectionDataSourceConfiguration:
+      Did not match:
+         - @ConditionalOnProperty (spring.datasource.connection-fetch=lazy) did not find property 'spring.datasource.connection-fetch' (OnPropertyCondition)
+
+   MailHealthContributorAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEnabledHealthIndicator' (OnClassCondition)
+
+   MailSenderJndiConfiguration:
+      Did not match:
+         - @ConditionalOnProperty (spring.mail.jndi-name) did not find property 'spring.mail.jndi-name' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'jakarta.mail.Session' (OnClassCondition)
+
+   MailSenderValidatorAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.mail.test-connection=true) did not find property 'spring.mail.test-connection' (OnPropertyCondition)
+
+   ManagementWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration' (OnClassCondition)
+
+   MessageSourceAutoConfiguration:
+      Did not match:
+         - ResourceBundle did not find bundle with basename messages (MessageSourceAutoConfiguration.ResourceBundleCondition)
+
+   ProjectInfoAutoConfiguration#buildProperties:
+      Did not match:
+         - @ConditionalOnResource did not find resource '${spring.info.build.location:classpath:META-INF/build-info.properties}' (OnResourceCondition)
+
+   ProjectInfoAutoConfiguration#gitProperties:
+      Did not match:
+         - GitResource did not find git info at classpath:git.properties (ProjectInfoAutoConfiguration.GitResourceAvailableCondition)
+
+   RSocketSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.rsocket.server.RSocketServerCustomizer' (OnClassCondition)
+
+   ReactiveManagementWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration' (OnClassCondition)
+
+   ReactiveUserDetailsServiceAutoConfiguration:
+      Did not match:
+         - AnyNestedCondition 0 matched 2 did not; NestedCondition on ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication.ReactiveWebApplicationCondition did not find reactive web application classes; NestedCondition on ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication.RSocketSecurityEnabledCondition @ConditionalOnBean (types: org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler; SearchStrategy: all) did not find any beans of type org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler (ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.ReactiveAuthenticationManager' (OnClassCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured)
+
+   ReactiveWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'reactor.core.publisher.Flux' (OnClassCondition)
+
+   SecurityAutoConfiguration.SecurityDataConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.security.data.repository.query.SecurityEvaluationContextExtension' (OnClassCondition)
+
+   ServletHttpExchangesAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBean did not find required type 'org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository' (OnBeanCondition)
+
+   ServletManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties' (OnClassCondition)
+
+   ServletMappingsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint' (OnClassCondition)
+
+   ServletWebSecurityAutoConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' securityFilterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   ServletWebServerConfiguration#forwardedHeaderFilter:
+      Did not match:
+         - @ConditionalOnProperty (server.forward-headers-strategy=framework) did not find property 'server.forward-headers-strategy' (OnPropertyCondition)
+
+   SpringApplicationAdminJmxAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.application.admin.enabled=true) did not find property 'spring.application.admin.enabled' (OnPropertyCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerWrapperConfiguration:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans of type org.springframework.scheduling.annotation.AsyncConfigurer (OnBeanCondition)
+
+   TaskExecutorConfigurations.SimpleAsyncTaskExecutorBuilderConfiguration#simpleAsyncTaskExecutorBuilderVirtualThreads:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder; SearchStrategy: all) found beans of type 'org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder' simpleAsyncTaskExecutorBuilder (OnBeanCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutorVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+   TaskExecutorConfigurations.TaskExecutorContextPropagationConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.context.ContextSnapshot' (OnClassCondition)
+
+   TaskSchedulingConfigurations.SimpleAsyncTaskSchedulerBuilderConfiguration#simpleAsyncTaskSchedulerBuilderVirtualThreads:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder; SearchStrategy: all) found beans of type 'org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder' simpleAsyncTaskSchedulerBuilder (OnBeanCondition)
+
+   TomcatMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.core.instrument.binder.tomcat.TomcatMetrics' (OnClassCondition)
+
+   TomcatReactiveManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextFactory' (OnClassCondition)
+
+   TomcatReactiveWebServerAutoConfiguration:
+      Did not match:
+         - @ConditionalOnWebApplication did not find reactive web application classes (OnWebApplicationCondition)
+
+   TomcatServletManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextFactory' (OnClassCondition)
+
+   TomcatServletWebServerAutoConfiguration#tomcatForwardedHeaderFilterCustomizer:
+      Did not match:
+         - @ConditionalOnProperty (server.forward-headers-strategy=framework) did not find property 'server.forward-headers-strategy' (OnPropertyCondition)
+
+   TomcatWebServerConfiguration#tomcatVirtualThreadsProtocolHandlerCustomizer:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+   TransactionAutoConfiguration#transactionalOperator:
+      Did not match:
+         - @ConditionalOnSingleCandidate (types: org.springframework.transaction.ReactiveTransactionManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionAutoConfiguration.AspectJTransactionManagementConfiguration:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.transaction.aspectj.AbstractTransactionAspect; SearchStrategy: all) did not find any beans of type org.springframework.transaction.aspectj.AbstractTransactionAspect (OnBeanCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration.JdkDynamicAutoProxyConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=false) did not find property 'spring.aop.proxy-target-class' (OnPropertyCondition)
+
+   WebMvcAutoConfiguration#hiddenHttpMethodFilter:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.mvc.hiddenmethod.filter.enabled=true) did not find property 'spring.mvc.hiddenmethod.filter.enabled' (OnPropertyCondition)
+
+   WebMvcAutoConfiguration.ProblemDetailsErrorHandlingConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.mvc.problemdetails.enabled=true) did not find property 'spring.mvc.problemdetails.enabled' (OnPropertyCondition)
+
+   WebMvcAutoConfiguration.ResourceChainCustomizerConfiguration:
+      Did not match:
+         - @ConditionalOnEnabledResourceChain did not find class org.webjars.WebJarVersionLocator (OnEnabledResourceChainCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#beanNameViewResolver:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.BeanNameViewResolver; SearchStrategy: all) found beans of type 'org.springframework.web.servlet.view.BeanNameViewResolver' beanNameViewResolver (OnBeanCondition)
+
+   WebMvcHealthEndpointExtensionAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.health.actuate.endpoint.HealthEndpoint' (OnClassCondition)
+
+   WebMvcMappingsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint' (OnClassCondition)
+
+   WebMvcObservationAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.micrometer.observation.autoconfigure.ObservationProperties' (OnClassCondition)
+
+   XADataSourceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.boot.jdbc.XADataSourceWrapper; SearchStrategy: all) did not find any beans of type org.springframework.boot.jdbc.XADataSourceWrapper (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'jakarta.transaction.TransactionManager', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration
+
+    org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration
+
+    org.springframework.boot.autoconfigure.context.LifecycleAutoConfiguration
+
+    org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
+
+    org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration
+
+    org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration
+
+
+
+2026-09-26T11:59:26.079+07:00  INFO 8248 --- [library_management] [           main] c.g.l.LibraryManagementApplication       : Started LibraryManagementApplication in 17.791 seconds (process running for 18.458)
+2026-09-26T11:59:26.082+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state LivenessState changed to CORRECT
+2026-09-26T11:59:26.090+07:00 DEBUG 8248 --- [library_management] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state ReadinessState changed to ACCEPTING_TRAFFIC
+2026-09-26T11:59:26.155+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T11:59:26.185+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:26.211+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T11:59:26.214+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:26.218+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:26.274+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:26.281+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:26.284+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:26.318+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T11:59:26.334+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T11:59:41.298+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T11:59:41.304+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:41.309+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T11:59:41.313+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:41.317+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:41.324+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:41.330+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:41.335+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:56.344+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T11:59:56.347+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:56.349+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T11:59:56.351+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:56.353+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T11:59:56.356+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:56.358+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T11:59:56.361+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:11.368+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:00:11.371+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:11.375+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:00:11.378+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:11.381+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:11.387+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:11.391+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:11.394+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:26.345+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:00:26.352+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:00:26.403+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:00:26.406+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:26.409+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:00:26.411+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:26.414+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:26.416+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:26.420+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:26.422+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:41.430+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:00:41.433+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:41.435+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:00:41.437+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:41.439+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:41.444+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:41.448+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:41.450+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:56.459+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:00:56.463+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:56.466+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:00:56.469+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:56.472+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:00:56.476+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:56.480+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:00:56.482+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:11.490+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:01:11.492+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:11.495+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:01:11.497+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:11.499+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:11.502+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:11.504+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:11.506+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:26.365+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:01:26.375+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:01:26.515+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:01:26.518+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:26.520+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:01:26.522+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:26.526+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:26.530+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:26.533+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:26.536+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:41.545+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:01:41.548+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:41.551+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:01:41.554+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:41.558+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:41.562+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:41.565+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:41.569+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:56.578+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:01:56.581+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:56.589+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:01:56.591+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:56.593+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:01:56.596+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:56.598+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:01:56.604+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:11.611+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:02:11.615+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:11.618+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:02:11.619+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:11.622+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:11.626+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:11.630+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:11.631+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:26.390+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:02:26.401+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:02:26.639+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:02:26.643+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:26.646+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:02:26.648+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:26.653+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:26.658+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:26.660+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:26.663+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:41.670+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:02:41.673+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:41.676+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:02:41.679+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:41.682+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:41.686+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:41.690+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:41.692+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:56.700+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:02:56.703+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:56.705+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:02:56.708+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:56.711+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:02:56.714+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:56.719+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:02:56.722+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:11.730+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:03:11.733+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:11.735+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:03:11.738+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:11.740+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:11.745+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:11.749+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:11.752+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:26.412+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:03:26.420+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:03:26.764+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:03:26.768+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:26.775+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:03:26.779+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:26.781+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:26.785+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:26.788+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:26.791+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:41.798+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:03:41.801+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:41.803+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:03:41.806+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:41.809+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:41.814+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:41.816+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:41.820+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:56.827+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:03:56.832+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:56.837+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:03:56.841+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:56.843+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:03:56.847+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:56.853+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:03:56.855+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:11.861+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:04:11.865+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:11.867+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:04:11.869+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:11.871+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:11.874+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:11.878+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:11.880+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:26.431+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:04:26.439+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:04:26.888+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:04:26.892+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:26.897+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:04:26.901+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:26.904+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:26.908+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:26.911+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:26.915+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:41.923+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:04:41.927+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:41.930+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:04:41.931+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:41.934+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:41.938+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:41.941+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:41.944+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:56.951+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:04:56.955+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:56.958+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:04:56.960+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:56.964+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:04:56.967+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:56.970+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:04:56.972+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:11.978+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:05:11.980+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:11.983+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:05:11.987+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:11.992+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:11.997+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:12.002+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:12.006+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:26.454+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:05:26.462+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:05:27.015+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:05:27.018+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:27.021+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:05:27.025+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:27.027+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:27.032+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:27.035+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:27.039+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:42.050+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:05:42.052+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:42.054+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:05:42.057+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:42.061+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:42.066+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:42.069+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:42.074+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:57.088+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:05:57.089+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:57.091+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:05:57.093+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:57.096+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:05:57.099+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:57.102+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:05:57.106+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:12.126+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:06:12.129+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:12.133+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:06:12.136+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:12.139+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:12.147+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:12.150+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:12.156+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:26.487+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:06:26.498+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:06:27.172+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:06:27.174+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:27.177+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:06:27.181+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:27.185+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:27.189+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:27.193+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:27.198+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:42.212+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:06:42.218+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:42.224+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:06:42.231+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:42.237+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:42.248+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:42.281+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:42.289+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:57.306+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:06:57.309+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:57.312+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:06:57.315+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:57.323+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:06:57.327+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:57.332+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:06:57.335+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:12.356+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:07:12.357+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:12.360+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:07:12.364+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:12.368+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:12.373+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:12.377+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:12.394+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:26.522+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status=? and br1_0.due_at between ? and ?
+2026-09-26T12:07:26.533+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select br1_0.id,br1_0.book_copy_id,bc1_0.id,bc1_0.acquired_date,bc1_0.barcode,bc1_0.book_id,b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version,bc1_0.created_at,bc1_0.shelf_location,bc1_0.status,bc1_0.updated_at,bc1_0.version,br1_0.borrow_days,br1_0.borrow_fee,br1_0.borrowed_at,br1_0.cancelled_at,br1_0.created_at,br1_0.deposit_amount,br1_0.deposit_refunded_at,br1_0.due_at,br1_0.paid_amount,br1_0.paid_at,br1_0.payment_code,br1_0.payment_method,br1_0.pickup_location,br1_0.reference_code,br1_0.returned_at,br1_0.status,br1_0.total_amount,br1_0.updated_at,br1_0.user_id,u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from borrow_records br1_0 join book_copies bc1_0 on bc1_0.id=br1_0.book_copy_id join books b1_0 on b1_0.id=bc1_0.book_id join users u1_0 on u1_0.id=br1_0.user_id where br1_0.status in (?,?) and br1_0.due_at<?
+2026-09-26T12:07:27.503+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select bas1_0.id,bas1_0.book_id,bas1_0.created_at,bas1_0.last_available_quantity,bas1_0.user_id from book_availability_subscriptions bas1_0
+2026-09-26T12:07:27.506+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:27.510+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select u1_0.id,u1_0.active,u1_0.created_at,u1_0.email,u1_0.full_name,u1_0.password_hash,u1_0.phone,u1_0.role,u1_0.updated_at from users u1_0 where u1_0.id=?
+2026-09-26T12:07:27.513+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:27.516+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select b1_0.id,b1_0.active,b1_0.average_rating,b1_0.borrow_fee,b1_0.category_id,b1_0.cover_image_url,b1_0.created_at,b1_0.description,b1_0.isbn,b1_0.publish_year,b1_0.publisher_id,b1_0.rating_count,b1_0.title,b1_0.updated_at,b1_0.version from books b1_0 where b1_0.id=?
+2026-09-26T12:07:27.520+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:27.524+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?
+2026-09-26T12:07:27.529+07:00 DEBUG 8248 --- [library_management] [   scheduling-1] org.hibernate.SQL                        : select count(bc1_0.id) from book_copies bc1_0 where bc1_0.book_id=? and bc1_0.status=?

@@ -1,34 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { bookCategories } from "@/data/books";
 import { bookService } from "@/services/bookService";
+import type { BookCategory } from "@/services/bookService";
 import type { Book, BookFormData } from "@/types/Book";
 import styles from "./BookForm.module.scss";
-
-const readFileAsDataUrl = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.onerror = () => reject(new Error("Không đọc được file ảnh"));
-    reader.readAsDataURL(file);
-  });
 
 type BookSourceMode = "api" | "manual";
 
 interface GoogleBookMatch {
   id: string;
+  isbn: string;
   title: string;
   author: string;
   category: string;
   publisher: string;
   publishYear: string;
   cover?: string;
+  description: string;
 }
 
 interface BookFormProps {
@@ -37,16 +31,21 @@ interface BookFormProps {
 }
 
 const emptyForm: BookFormData = {
+  isbn: "",
   title: "",
   author: "",
   category: "",
   publisher: "",
   publishYear: "",
   quantity: "",
+  description: "",
+  borrowFee: "0",
+  shelfLocation: "",
 };
 
-function validate(form: BookFormData): Partial<Record<keyof BookFormData, string>> {
+function validate(form: BookFormData, mode: "create" | "edit"): Partial<Record<keyof BookFormData, string>> {
   const errors: Partial<Record<keyof BookFormData, string>> = {};
+  if (form.isbn.trim().length > 20) errors.isbn = "ISBN không được dài quá 20 ký tự";
   if (!form.title.trim()) errors.title = "Vui lòng nhập tên sách";
   if (!form.author.trim()) errors.author = "Vui lòng nhập tác giả";
   if (!form.category) errors.category = "Vui lòng chọn thể loại";
@@ -56,9 +55,16 @@ function validate(form: BookFormData): Partial<Record<keyof BookFormData, string
   } else if (Number(form.publishYear) < 1000 || Number(form.publishYear) > 2100) {
     errors.publishYear = "Năm xuất bản không hợp lệ";
   }
-  if (!form.quantity || isNaN(Number(form.quantity)) || Number(form.quantity) < 0) {
-    errors.quantity = "Số lượng phải >= 0";
+  const minimumQuantity = mode === "create" ? 1 : 0;
+  if (!form.quantity || !Number.isInteger(Number(form.quantity)) || Number(form.quantity) < minimumQuantity) {
+    errors.quantity = mode === "create" ? "Số lượng phải từ 1 trở lên" : "Số lượng phải từ 0 trở lên";
   }
+  if (!form.borrowFee || !Number.isInteger(Number(form.borrowFee)) || Number(form.borrowFee) < 0) {
+    errors.borrowFee = "Phí mượn phải là số nguyên không âm";
+  }
+  if ((form.cover?.trim().length ?? 0) > 1000) errors.cover = "URL ảnh bìa không được dài quá 1000 ký tự";
+  if (form.description.length > 5000) errors.description = "Mô tả không được dài quá 5000 ký tự";
+  if (form.shelfLocation.length > 100) errors.shelfLocation = "Vị trí kệ không được dài quá 100 ký tự";
   return errors;
 }
 
@@ -70,6 +76,12 @@ function normalizeGoogleBook(item: any): GoogleBookMatch | null {
   const publisher = String(volumeInfo.publisher ?? "").trim() || "Không rõ nhà xuất bản";
   const publishYear = String(volumeInfo.publishedDate ?? "").slice(0, 4).trim();
   const cover = volumeInfo.imageLinks?.thumbnail || volumeInfo.imageLinks?.smallThumbnail || undefined;
+  const identifiers = Array.isArray(volumeInfo.industryIdentifiers) ? volumeInfo.industryIdentifiers : [];
+  const isbn = String(
+    identifiers.find((item: { type?: string }) => item.type === "ISBN_13")?.identifier
+      ?? identifiers.find((item: { type?: string }) => item.type === "ISBN_10")?.identifier
+      ?? ""
+  ).trim();
   const category = Array.isArray(volumeInfo.categories) && volumeInfo.categories.length > 0
     ? volumeInfo.categories[0]
     : "";
@@ -78,12 +90,14 @@ function normalizeGoogleBook(item: any): GoogleBookMatch | null {
 
   return {
     id: String(item?.id ?? title),
+    isbn,
     title,
     author,
     category,
     publisher,
     publishYear,
     cover,
+    description: String(volumeInfo.description ?? "").trim(),
   };
 }
 
@@ -95,16 +109,23 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
   const [apiResults, setApiResults] = useState<GoogleBookMatch[]>([]);
   const [selectedApiId, setSelectedApiId] = useState<string | null>(null);
   const [apiLoading, setApiLoading] = useState(false);
+  const [categories, setCategories] = useState<BookCategory[]>([]);
   const [form, setForm] = useState<BookFormData>(
     initialData
       ? {
+          isbn: initialData.isbn ?? "",
           title: initialData.title,
           author: initialData.author,
           category: initialData.category,
-          publisher: initialData.publisher,
-          publishYear: String(initialData.publishYear),
+          publisher: initialData.publisher ?? "",
+          publishYear: initialData.publishYear == null ? "" : String(initialData.publishYear),
           quantity: String(initialData.quantity),
           cover: initialData.cover,
+          description: initialData.description ?? "",
+          borrowFee: String(initialData.borrowFee ?? 0),
+          shelfLocation: initialData.shelfLocation ?? "",
+          authorDetails: initialData.authorDetails,
+          publisherDetails: initialData.publisherDetails,
         }
       : emptyForm
   );
@@ -112,26 +133,49 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
   const [loading, setLoading] = useState(false);
 
   const canUseApiLookup = useMemo(() => sourceMode === "api", [sourceMode]);
+  const categoryOptions = useMemo(() => {
+    const items = categories.map((item) => ({ value: item.name, label: item.name }));
+    if (form.category && !items.some((item) => item.value === form.category)) {
+      items.push({ value: form.category, label: form.category });
+    }
+    return items;
+  }, [categories, form.category]);
+
+  useEffect(() => {
+    bookService.getCategories()
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
 
   const update = (field: keyof BookFormData, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "author" ? { authorDetails: undefined } : {}),
+      ...(field === "publisher" ? { publisherDetails: undefined } : {}),
+    }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const applyGoogleBook = (book: GoogleBookMatch) => {
     setForm((prev) => ({
       ...prev,
+      isbn: book.isbn || prev.isbn,
       title: book.title || prev.title,
       author: book.author || prev.author,
       category: book.category || prev.category,
       publisher: book.publisher || prev.publisher,
       publishYear: book.publishYear || prev.publishYear,
       cover: book.cover || prev.cover,
+      description: book.description || prev.description,
+      authorDetails: undefined,
+      publisherDetails: undefined,
     }));
     setSelectedApiId(book.id);
     setErrors((prev) => ({
       ...prev,
       title: undefined,
+      isbn: undefined,
       author: undefined,
       category: undefined,
       publisher: undefined,
@@ -180,23 +224,9 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
     }
   };
 
-  const handleCoverChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const url = await readFileAsDataUrl(file);
-      update("cover", url);
-    } catch {
-      showToast("Không thể đọc ảnh đã chọn", "error");
-    } finally {
-      event.target.value = "";
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors = validate(form);
+    const validationErrors = validate(form, mode);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -213,8 +243,8 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
         showToast("Cập nhật sách thành công");
         router.push(`/admin/books/${initialData.bookId}`);
       }
-    } catch {
-      showToast("Có lỗi xảy ra, vui lòng thử lại", "error");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Có lỗi xảy ra, vui lòng thử lại", "error");
     } finally {
       setLoading(false);
     }
@@ -296,17 +326,15 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
               Ảnh bìa
             </p>
 
-            <label className={styles.coverUploadLabel}>
+            <div className={styles.coverUploadLabel}>
               <div className={styles.coverPreview}>
                 {form.cover ? (
                   <img src={form.cover} alt="Bìa sách" />
                 ) : (
                   <span>Chưa có ảnh</span>
                 )}
-                <span className={styles.coverOverlay}>{form.cover ? "Thay ảnh" : "Chọn ảnh"}</span>
               </div>
-              <input type="file" accept="image/*" onChange={handleCoverChange} />
-            </label>
+            </div>
 
             {form.cover && (
               <div className={styles.coverRemoveRow}>
@@ -327,12 +355,23 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
             />
           </div>
 
+          <Input
+            label="ISBN"
+            value={form.isbn}
+            onChange={(e) => update("isbn", e.target.value)}
+            error={errors.isbn}
+            placeholder="VD: 9780132350884"
+            maxLength={20}
+          />
+
           <div className={styles.full}>
             <Input
               label="URL ảnh bìa"
               value={form.cover ?? ""}
               onChange={(e) => update("cover", e.target.value)}
+              error={errors.cover}
               placeholder="https://example.com/cover.jpg"
+              maxLength={1000}
             />
           </div>
 
@@ -349,7 +388,7 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
             value={form.category}
             onChange={(e) => update("category", e.target.value)}
             placeholder="Chọn thể loại"
-            options={bookCategories.map((c) => ({ value: c, label: c }))}
+            options={categoryOptions}
           />
           {errors.category && (
             <span style={{ color: "var(--danger)", fontSize: 12, gridColumn: "1 / -1", marginTop: -8 }}>
@@ -380,9 +419,43 @@ export default function BookForm({ initialData, mode }: BookFormProps) {
             value={form.quantity}
             onChange={(e) => update("quantity", e.target.value)}
             error={errors.quantity}
-            placeholder="0"
-            min={0}
+            placeholder={mode === "create" ? "1" : "0"}
+            min={mode === "create" ? 1 : 0}
+            step={1}
           />
+
+          <Input
+            label="Phí mượn (VNĐ)"
+            type="number"
+            value={form.borrowFee}
+            onChange={(e) => update("borrowFee", e.target.value)}
+            error={errors.borrowFee}
+            min={0}
+            step={1}
+          />
+
+          <Input
+            label="Vị trí kệ"
+            value={form.shelfLocation}
+            onChange={(e) => update("shelfLocation", e.target.value)}
+            error={errors.shelfLocation}
+            placeholder="VD: Kệ A-03"
+            maxLength={100}
+          />
+
+          <div className={styles.full}>
+            <label className={styles.textareaLabel} htmlFor="book-description">Mô tả</label>
+            <textarea
+              id="book-description"
+              className={`${styles.textarea} ${errors.description ? styles.textareaError : ""}`}
+              value={form.description}
+              onChange={(event) => update("description", event.target.value)}
+              placeholder="Nhập mô tả nội dung sách"
+              maxLength={5000}
+              rows={5}
+            />
+            {errors.description && <span className={styles.errorText}>{errors.description}</span>}
+          </div>
         </div>
 
         <div className={styles.actions}>

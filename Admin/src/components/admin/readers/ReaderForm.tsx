@@ -23,36 +23,43 @@ export default function ReaderForm({ initialData, mode }: ReaderFormProps) {
     email: initialData?.email ?? "",
     phone: initialData?.phone ?? "",
     status: initialData?.status ?? "active",
+    password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ReaderFormData, string>>>({});
   const [loading, setLoading] = useState(false);
 
   const update = (field: keyof ReaderFormData, value: string) => {
-    setForm((p) => ({ ...p, [field]: value }));
-    setErrors((p) => ({ ...p, [field]: undefined }));
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs: typeof errors = {};
-    if (!form.name.trim()) errs.name = "Vui lòng nhập họ tên";
-    if (!form.email.trim()) errs.email = "Vui lòng nhập email";
-    if (!form.phone.trim()) errs.phone = "Vui lòng nhập SĐT";
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const nextErrors: typeof errors = {};
+    if (!form.name.trim()) nextErrors.name = "Vui lòng nhập họ tên";
+    if (!form.email.trim()) nextErrors.email = "Vui lòng nhập email";
+    if (!/^\d{10,15}$/.test(form.phone.trim())) nextErrors.phone = "Số điện thoại phải có từ 10 đến 15 chữ số";
+    if (mode === "create" && (!form.password || form.password.length < 6)) {
+      nextErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      return;
+    }
 
     setLoading(true);
     try {
       if (mode === "create") {
-        const r = await readerService.createReader(form);
+        const reader = await readerService.createReader(form);
         showToast("Thêm độc giả thành công");
-        router.push(`/admin/readers/${r.readerId}`);
+        router.push(`/admin/readers/${reader.readerId}`);
       } else if (initialData) {
         await readerService.updateReader(initialData.readerId, form);
         showToast("Cập nhật độc giả thành công");
         router.push(`/admin/readers/${initialData.readerId}`);
       }
-    } catch {
-      showToast("Có lỗi xảy ra", "error");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Có lỗi xảy ra", "error");
     } finally {
       setLoading(false);
     }
@@ -63,13 +70,18 @@ export default function ReaderForm({ initialData, mode }: ReaderFormProps) {
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>{mode === "create" ? "Thêm độc giả" : "Sửa độc giả"}</h2>
         <div className={styles.grid}>
-          <div className={styles.full}><Input label="Họ tên" value={form.name} onChange={(e) => update("name", e.target.value)} error={errors.name} /></div>
-          <Input label="Email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} error={errors.email} />
-          <Input label="Số điện thoại" value={form.phone} onChange={(e) => update("phone", e.target.value)} error={errors.phone} />
-          <Select label="Trạng thái" value={form.status} onChange={(e) => update("status", e.target.value as ReaderStatus)}
-            options={[
-              { value: "active", label: "Hoạt động" }, { value: "inactive", label: "Không hoạt động" }, { value: "suspended", label: "Tạm khóa" },
-            ]} />
+          <div className={styles.full}>
+            <Input label="Họ tên" value={form.name} onChange={(event) => update("name", event.target.value)} error={errors.name} />
+          </div>
+          <Input label="Email" type="email" value={form.email} onChange={(event) => update("email", event.target.value)} error={errors.email} />
+          <Input label="Số điện thoại" inputMode="numeric" value={form.phone} onChange={(event) => update("phone", event.target.value)} error={errors.phone} />
+          {mode === "create" && (
+            <Input label="Mật khẩu ban đầu" type="password" value={form.password} onChange={(event) => update("password", event.target.value)} error={errors.password} />
+          )}
+          <Select label="Trạng thái" value={form.status} onChange={(event) => update("status", event.target.value as ReaderStatus)} options={[
+            { value: "active", label: "Hoạt động" },
+            { value: "inactive", label: "Đã khóa" },
+          ]} />
         </div>
         <div className={styles.actions}>
           <Button type="button" variant="secondary" onClick={() => router.back()}>Hủy</Button>

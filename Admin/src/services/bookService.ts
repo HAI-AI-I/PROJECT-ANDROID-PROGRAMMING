@@ -17,6 +17,13 @@ export interface PaginatedBooks {
   totalPages: number;
 }
 
+export interface BookCategory {
+  id: number;
+  name: string;
+  slug: string;
+  active: boolean;
+}
+
 export const bookService = {
   async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
     const page = filters.page ?? 1;
@@ -29,7 +36,7 @@ export const bookService = {
     params.set("pageSize", String(pageSize));
     const response = await apiClient.get<ApiPagedBooks>(`/books?${params.toString()}`);
     return {
-      items: response.items.map(mapBook),
+      items: response.items.map((book) => mapBook(book)),
       total: response.total,
       page: response.page,
       pageSize: response.pageSize,
@@ -37,16 +44,26 @@ export const bookService = {
     };
   },
 
+  async getCategories(): Promise<BookCategory[]> {
+    const categories = await apiClient.get<BookCategory[]>("/categories");
+    return categories.filter((category) => category.active);
+  },
+
   async getBookById(id: string): Promise<Book | null> {
     try {
-      return mapBook(await apiClient.get<ApiBook>(`/books/${toApiId(id)}`));
+      const detail = await apiClient.get<ApiBookDetail>(`/books/${toApiId(id)}/detail`);
+      const shelfLocation = detail.copies.find((copy) => copy.shelfLocation?.trim())?.shelfLocation;
+      return mapBook(detail.book, shelfLocation);
     } catch {
       return null;
     }
   },
 
   async getBookHistory(id: string): Promise<BookBorrowHistory[]> {
-    return [];
+    const history = await apiClient.get<ApiBorrowOrder[]>(
+      `/admin/borrow-orders/books/${toApiId(id)}`
+    );
+    return history.map(mapBookHistory);
   },
 
   async createBook(data: BookFormData): Promise<Book> {
@@ -54,13 +71,9 @@ export const bookService = {
     return mapBook(book);
   },
 
-  async updateBook(id: string, data: BookFormData): Promise<Book | null> {
-    try {
-      const book = await apiClient.patch<ApiBook>(`/books/${toApiId(id)}`, toApiBook(data));
-      return mapBook(book);
-    } catch {
-      return null;
-    }
+  async updateBook(id: string, data: BookFormData): Promise<Book> {
+    const book = await apiClient.patch<ApiBook>(`/books/${toApiId(id)}`, toApiBook(data));
+    return mapBook(book, data.shelfLocation);
   },
 
   async deleteBook(id: string): Promise<boolean> {
@@ -75,14 +88,24 @@ export const bookService = {
 
 interface ApiBook {
   id: number;
+  isbn?: string;
   title: string;
   author: string;
   category: string;
-  publisher: string;
-  publishYear: number;
+  publisher?: string;
+  publishYear?: number;
   quantity: number;
   availableQuantity: number;
   cover?: string;
+  description?: string;
+  borrowFee: number;
+  authorDetails?: Book["authorDetails"];
+  publisherDetails?: Book["publisherDetails"];
+}
+
+interface ApiBookDetail {
+  book: ApiBook;
+  copies: Array<{ shelfLocation?: string }>;
 }
 
 interface ApiPagedBooks {
@@ -93,18 +116,64 @@ interface ApiPagedBooks {
   totalPages: number;
 }
 
-function mapBook(book: ApiBook): Book {
-  return { ...book, bookId: `B-${String(book.id).padStart(3, "0")}` };
+interface ApiBorrowOrder {
+  referenceCode: string;
+  status: string;
+  copyBarcode: string;
+  borrowerId: number;
+  borrowerName: string;
+  requestedAt: string;
+  borrowedAt?: string;
+  dueAt?: string;
+  returnedAt?: string;
+}
+
+function mapBook(book: ApiBook, shelfLocation?: string): Book {
+  return { ...book, shelfLocation, bookId: `B-${String(book.id).padStart(3, "0")}` };
+}
+
+function mapBookHistory(order: ApiBorrowOrder): BookBorrowHistory {
+  const statusMap: Record<string, BookBorrowHistory["status"]> = {
+    PENDING_PAYMENT: "pending_payment",
+    REQUESTED: "requested",
+    BORROWED: "borrowing",
+    RETURNED: "returned",
+    OVERDUE: "overdue",
+    CANCELLED: "cancelled",
+  };
+  return {
+    id: order.referenceCode,
+    readerId: String(order.borrowerId),
+    readerName: order.borrowerName,
+    copyBarcode: order.copyBarcode,
+    requestedDate: formatDateTime(order.requestedAt),
+    borrowDate: formatDateTime(order.borrowedAt),
+    dueDate: formatDateTime(order.dueAt),
+    returnDate: order.returnedAt ? formatDateTime(order.returnedAt) : undefined,
+    status: statusMap[order.status] ?? "requested",
+  };
+}
+
+function formatDateTime(value?: string): string {
+  return value ? new Date(value).toLocaleString("vi-VN") : "—";
 }
 
 function toApiBook(data: BookFormData) {
+  const authorIds = data.authorDetails?.map((author) => ({ id: author.id }));
+  const publisherId = data.publisherDetails?.id;
   return {
+    isbn: data.isbn.trim(),
     title: data.title.trim(),
-    author: data.author.trim(),
+    author: authorIds?.length ? null : data.author.trim(),
+    authors: authorIds?.length ? authorIds : null,
     category: data.category,
-    publisher: data.publisher.trim(),
+    publisher: publisherId ? null : data.publisher.trim(),
+    publisherDetails: publisherId ? { id: publisherId } : null,
     publishYear: Number(data.publishYear),
     quantity: Number(data.quantity),
-    cover: data.cover,
+    cover: data.cover?.trim() ?? "",
+    description: data.description.trim(),
+    borrowFee: Number(data.borrowFee),
+    shelfLocation: data.shelfLocation.trim(),
   };
 }

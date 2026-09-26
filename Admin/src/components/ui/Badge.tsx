@@ -58,6 +58,7 @@ export function getUserRoleBadge(role: string) {
 
 export function getHistoryActionBadge(action: string) {
   const map: Record<string, { label: string; variant: BadgeVariant }> = {
+    request: { label: "Tạo yêu cầu", variant: "warning" },
     borrow: { label: "Mượn", variant: "info" },
     return: { label: "Trả", variant: "success" },
     extend: { label: "Gia hạn", variant: "primary" },
@@ -73,7 +74,7 @@ export function getSupportStatusBadge(status: string) {
     open: { label: "Mở", variant: "warning" },
     in_progress: { label: "Đang xử lý", variant: "info" },
     resolved: { label: "Đã xử lý", variant: "success" },
-    closed: { label: "Đóng", variant: "default" },
+    closed: { label: "Đã đóng", variant: "default" },
   };
   const config = map[status] ?? { label: status, variant: "default" as const };
   return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -85,6 +86,9 @@ export function getBorrowingStatusBadge(status: string) {
     returned: { label: "Đã trả", variant: "success" },
     overdue: { label: "Quá hạn", variant: "danger" },
     pending: { label: "Chờ duyệt", variant: "warning" },
+    pending_payment: { label: "Chờ thanh toán", variant: "warning" },
+    requested: { label: "Chờ nhận", variant: "primary" },
+    cancelled: { label: "Đã hủy", variant: "default" },
   };
   const config = map[status] ?? { label: status, variant: "default" as const };
   return <Badge variant={config.variant}>{config.label}</Badge>;

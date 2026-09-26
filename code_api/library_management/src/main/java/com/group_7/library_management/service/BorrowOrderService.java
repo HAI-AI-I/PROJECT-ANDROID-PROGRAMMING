@@ -19,12 +19,15 @@ import com.group_7.library_management.repository.BorrowRecordRepository;
 import com.group_7.library_management.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.Locale;
 
 @Service
 public class BorrowOrderService {
@@ -120,6 +123,33 @@ public class BorrowOrderService {
     }
 
     @Transactional(readOnly = true)
+    public List<BorrowOrderResponse> getBookHistory(Long bookId) {
+        if (!bookRepository.existsById(bookId)) {
+            throw new ResourceNotFoundException("Không tìm thấy sách");
+        }
+        return borrowRecordRepository.findAllByBookCopyBookIdOrderByCreatedAtDesc(bookId).stream()
+                .map(BorrowOrderResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BorrowOrderResponse> getOrdersForAdmin(
+            String search,
+            String status,
+            Pageable pageable
+    ) {
+        String normalizedSearch = search == null || search.isBlank() ? null : search.strip();
+        BorrowStatus normalizedStatus = parseAdminStatus(status);
+        return borrowRecordRepository.searchForAdmin(
+                        normalizedSearch,
+                        normalizedStatus,
+                        Instant.now(),
+                        pageable
+                )
+                .map(BorrowOrderResponse::from);
+    }
+
+    @Transactional(readOnly = true)
     public CurrentBorrowOrderResponse getCurrentOrderForBook(Long userId, Long bookId) {
         BorrowOrderResponse order = borrowRecordRepository
                 .findFirstByUserIdAndBookCopyBookIdAndStatusInOrderByCreatedAtDesc(
@@ -203,6 +233,29 @@ public class BorrowOrderService {
         return BorrowOrderResponse.from(findOrderForUpdate(referenceCode));
     }
 
+    @Transactional(readOnly = true)
+    public BorrowOrderResponse findOrderForReturn(String query) {
+        String normalizedQuery = query == null ? "" : query.strip();
+        if (normalizedQuery.isEmpty()) {
+            throw new com.group_7.library_management.exception.BadRequestException(
+                    "Vui lòng nhập mã đơn hoặc mã bản sách"
+            );
+        }
+        BorrowRecord order = borrowRecordRepository
+                .findFirstByReferenceCodeIgnoreCaseOrBookCopyBarcodeIgnoreCaseOrderByCreatedAtDesc(
+                        normalizedQuery,
+                        normalizedQuery
+                )
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn mượn"));
+        BorrowOrderResponse response = BorrowOrderResponse.from(order);
+        if (response.status() != BorrowStatus.BORROWED
+                && response.status() != BorrowStatus.OVERDUE
+                && response.status() != BorrowStatus.RETURNED) {
+            throw new ConflictException("Đơn này chưa ở trạng thái có thể trả hoặc hoàn cọc");
+        }
+        return response;
+    }
+
     @Transactional
     public BorrowOrderResponse confirmPickup(String referenceCode) {
         BorrowRecord order = findOrderForUpdate(referenceCode);
@@ -264,6 +317,26 @@ public class BorrowOrderService {
     private BorrowRecord findOrderForUpdate(String referenceCode) {
         return borrowRecordRepository.findByReferenceCode(referenceCode.trim().toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn mượn"));
+    }
+
+    private BorrowStatus parseAdminStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        String normalized = status.strip().toUpperCase(Locale.ROOT);
+        if ("BORROWING".equals(normalized)) {
+            normalized = "BORROWED";
+        }
+        if ("PENDING".equals(normalized)) {
+            normalized = "REQUESTED";
+        }
+        try {
+            return BorrowStatus.valueOf(normalized);
+        } catch (IllegalArgumentException exception) {
+            throw new com.group_7.library_management.exception.BadRequestException(
+                    "Trạng thái đơn mượn không hợp lệ"
+            );
+        }
     }
 
     private String createReferenceCode() {

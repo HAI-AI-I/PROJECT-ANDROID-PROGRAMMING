@@ -5,13 +5,8 @@ import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { apiClient } from "@/services/apiClient";
+import { authService } from "@/services/authService";
 import styles from "./page.module.scss";
-
-interface AuthResponse {
-  accessToken: string;
-  user: { role: string };
-}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,10 +20,8 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await apiClient.post<AuthResponse>("/auth/login", { identifier: email, password });
-      window.localStorage.setItem("library_access_token", result.accessToken);
-      window.localStorage.setItem("library_user", JSON.stringify(result.user));
-      router.push("/admin/dashboard");
+      await authService.login(email, password);
+      router.replace("/admin/dashboard");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Đăng nhập thất bại");
     } finally {

@@ -2,6 +2,9 @@ package com.group_7.library_management.ui.support
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.components.AppSnackbarController
+import com.group_7.library_management.data.network.NetworkMonitor
+import com.group_7.library_management.data.repository.BorrowRepository
 import com.group_7.library_management.data.repository.SupportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +12,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
+import java.io.IOException
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class BorrowedBookItem(
@@ -28,11 +37,13 @@ data class FaqItem(
 
 data class SupportRequestItem(
     val id: String,
-    val bookTitle: String,
+    val bookTitle: String?,
     val problemType: String,
     val description: String,
     val date: String,
-    val status: String // "Đang xử lý" or "Đã giải quyết"
+    val status: String,
+    val adminReply: String? = null,
+    val repliedDate: String? = null
 )
 
 data class ContactMethodItem(
@@ -49,12 +60,7 @@ data class OtherFaqItem(
 data class SupportUiState(
     val searchQuery: String = "",
     val selectedCategory: String = "Tất cả",
-    val borrowedBooks: List<BorrowedBookItem> = listOf(
-        BorrowedBookItem("1", "Clean Architecture", "Robert C. Martin", "Hạn trả: 15/08/2026"),
-        BorrowedBookItem("2", "Design Patterns", "Gang of Four", "Hạn trả: 19/08/2026"),
-        BorrowedBookItem("3", "Mạng máy tính căn bản", "Lê Văn C", "Hạn trả: 03/08/2026"),
-        BorrowedBookItem("4", "Code Dạo Ký Sự", "Phạm Huy Hoàng", "Hạn trả: 05/09/2026")
-    ),
+    val borrowedBooks: List<BorrowedBookItem> = emptyList(),
     val categoryFaqs: Map<String, List<FaqItem>> = mapOf(
         "Mượn sách" to listOf(
             FaqItem("m1", "Cách thức mượn sách?", "Bạn có thể mượn sách bằng cách tìm kiếm sách trên ứng dụng, quét mã QR tại quầy thư viện hoặc liên hệ admin để được hướng dẫn chi tiết.", "Mượn sách", "Quy trình, thủ tục, điều kiện mượn"),
@@ -103,23 +109,28 @@ data class SupportUiState(
     val description: String = "",
     val selectedRequestTab: String = "Tất cả",
     val isLoading: Boolean = false,
+    val isSubmitting: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null
 )
 
 @HiltViewModel
 class SupportViewModel @Inject constructor(
-    private val supportRepository: SupportRepository
+    private val supportRepository: SupportRepository,
+    private val borrowRepository: BorrowRepository,
+    private val networkMonitor: NetworkMonitor,
+    private val snackbarController: AppSnackbarController
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SupportUiState())
     val uiState: StateFlow<SupportUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            supportRepository.getAllRequests().collect { requests ->
+            supportRepository.observeRequests().collect { requests ->
                 _uiState.update { it.copy(supportRequests = requests) }
             }
         }
+        refreshSupportData()
     }
 
     fun updateSearchQuery(query: String) {
@@ -148,6 +159,7 @@ class SupportViewModel @Inject constructor(
 
     fun createSupportRequest(onSuccess: () -> Unit) {
         val current = _uiState.value
+        if (current.isSubmitting) return
         if (current.selectedProblem.isBlank()) {
             _uiState.update { it.copy(error = "Vui lòng chọn vấn đề gặp phải") }
             return
@@ -156,29 +168,64 @@ class SupportViewModel @Inject constructor(
             _uiState.update { it.copy(error = "Vui lòng mô tả chi tiết cho mục Khác") }
             return
         }
+        if (!networkMonitor.isConnected.value) {
+            snackbarController.show("Không có kết nối mạng. Không thể gửi yêu cầu hỗ trợ.")
+            return
+        }
 
         viewModelScope.launch {
-            val newReq = SupportRequestItem(
-                id = System.currentTimeMillis().toString(),
-                bookTitle = current.selectedBook?.title ?: "Sách chung",
-                problemType = current.selectedProblem,
-                description = current.description.ifBlank { "Không có mô tả chi tiết" },
-                date = "Hôm nay",
-                status = "Đang xử lý"
-            )
-
-            supportRepository.createRequest(newReq, isOnline = true)
-
-            _uiState.update {
-                it.copy(
-                    error = null,
-                    successMessage = "Gửi yêu cầu thành công!",
-                    selectedProblem = "",
-                    description = "",
-                    selectedBook = null
+            _uiState.update { it.copy(isSubmitting = true, error = null) }
+            runCatching {
+                supportRepository.createRequest(
+                    bookId = current.selectedBook?.id?.toLongOrNull(),
+                    subject = current.selectedProblem,
+                    message = current.description.ifBlank { "Không có mô tả chi tiết" }
                 )
+            }.onSuccess {
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        successMessage = "Gửi yêu cầu thành công!",
+                        selectedProblem = "",
+                        description = "",
+                        selectedBook = null
+                    )
+                }
+                snackbarController.show("Đã gửi yêu cầu hỗ trợ.")
+                onSuccess()
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(isSubmitting = false, error = error.toUserMessage())
+                }
             }
-            onSuccess()
+        }
+    }
+
+    fun refreshSupportData() {
+        if (_uiState.value.isLoading || !networkMonitor.isConnected.value) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            runCatching {
+                val orders = runCatching {
+                    borrowRepository.getBorrowOrders()
+                        .filter { it.status == "BORROWED" || it.status == "OVERDUE" }
+                        .distinctBy { it.bookId }
+                        .map { order ->
+                            BorrowedBookItem(
+                                id = order.bookId.toString(),
+                                title = order.bookTitle,
+                                author = order.bookAuthor,
+                                dueDate = "Hạn trả: ${order.dueAt.toDisplayDate()}"
+                            )
+                        }
+                }.getOrDefault(_uiState.value.borrowedBooks)
+                supportRepository.refreshRequests()
+                orders
+            }.onSuccess { books ->
+                _uiState.update { it.copy(borrowedBooks = books, isLoading = false) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, error = error.toUserMessage()) }
+            }
         }
     }
 
@@ -187,5 +234,21 @@ class SupportViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    private fun String.toDisplayDate(): String {
+        val dateTime = runCatching { OffsetDateTime.parse(this) }.getOrNull()
+        return dateTime
+            ?.atZoneSameInstant(ZoneId.systemDefault())
+            ?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            ?: this
+    }
+
+    private fun Throwable.toUserMessage(): String = when (this) {
+        is IOException -> "Không thể kết nối đến máy chủ."
+        is HttpException -> runCatching {
+            JSONObject(response()?.errorBody()?.string().orEmpty()).optString("message")
+        }.getOrDefault("").ifBlank { "Máy chủ trả về lỗi HTTP ${code()}." }
+        else -> message ?: "Không thể xử lý yêu cầu hỗ trợ."
     }
 }

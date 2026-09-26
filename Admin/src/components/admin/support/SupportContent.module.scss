@@ -51,6 +51,31 @@
   max-width: 640px;
 }
 
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+}
+
+.meta {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
 .message {
   background: var(--background-light);
   border: 1px solid var(--border);

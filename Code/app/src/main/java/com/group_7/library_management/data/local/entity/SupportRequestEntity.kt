@@ -6,11 +6,15 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "support_requests")
 data class SupportRequestEntity(
     @PrimaryKey
-    val id: String,
-    val bookTitle: String,
-    val problemType: String,
-    val description: String,
-    val date: String,
+    val id: Long,
+    val userId: Long,
+    val bookId: Long?,
+    val bookTitle: String?,
+    val subject: String,
+    val message: String,
     val status: String,
-    val isSynced: Boolean = true
+    val adminReply: String?,
+    val repliedAt: String?,
+    val createdAt: String,
+    val updatedAt: String
 )

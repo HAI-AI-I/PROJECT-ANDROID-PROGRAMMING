@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, Menu, Search } from "lucide-react";
 import { notificationService } from "@/services/notificationService";
 import styles from "./AdminHeader.module.scss";
@@ -10,10 +9,10 @@ import styles from "./AdminHeader.module.scss";
 interface AdminHeaderProps {
   title: string;
   onMenuClick: () => void;
+  onLogout: () => Promise<void>;
 }
 
-export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
-  const router = useRouter();
+export default function AdminHeader({ title, onMenuClick, onLogout }: AdminHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -27,9 +26,9 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
         return;
       }
       try {
-        const notifications = await notificationService.getNotifications();
+        const unreadCount = await notificationService.getUnreadCount();
         if (!active) return;
-        setHasUnreadNotifications(notifications.some((notification) => !notification.isRead));
+        setHasUnreadNotifications(unreadCount > 0);
       } catch {
         if (active) setHasUnreadNotifications(false);
       }
@@ -53,9 +52,9 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setDropdownOpen(false);
-    router.push("/login");
+    await onLogout();
   };
 
   return (

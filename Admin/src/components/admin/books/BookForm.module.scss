@@ -140,6 +140,41 @@
   grid-column: 1 / -1;
 }
 
+.textareaLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: var(--primary);
+}
+
+.textareaError {
+  border-color: var(--danger);
+}
+
+.errorText {
+  display: block;
+  margin-top: 5px;
+  color: var(--danger);
+  font-size: 12px;
+}
+
 .coverUploadLabel {
   display: inline-block;
   cursor: pointer;

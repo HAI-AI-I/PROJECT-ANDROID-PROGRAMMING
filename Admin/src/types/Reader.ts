@@ -1,4 +1,4 @@
-export type ReaderStatus = "active" | "inactive" | "suspended";
+export type ReaderStatus = "active" | "inactive";
 
 export interface Reader {
   readerId: string;
@@ -16,4 +16,5 @@ export interface ReaderFormData {
   email: string;
   phone: string;
   status: ReaderStatus;
+  password?: string;
 }

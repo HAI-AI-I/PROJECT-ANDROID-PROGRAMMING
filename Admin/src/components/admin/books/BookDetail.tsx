@@ -16,6 +16,11 @@ interface BookDetailProps {
 }
 
 export default function BookDetail({ book, history }: BookDetailProps) {
+  const borrowFee = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(book.borrowFee ?? 0);
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.top}>
@@ -33,6 +38,10 @@ export default function BookDetail({ book, history }: BookDetailProps) {
 
           <div className={styles.meta}>
             <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>ISBN</span>
+              <span className={styles.metaValue}>{book.isbn || "—"}</span>
+            </div>
+            <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Tác giả</span>
               <span className={styles.metaValue}>{book.author}</span>
             </div>
@@ -42,11 +51,11 @@ export default function BookDetail({ book, history }: BookDetailProps) {
             </div>
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Nhà xuất bản</span>
-              <span className={styles.metaValue}>{book.publisher}</span>
+              <span className={styles.metaValue}>{book.publisher || "—"}</span>
             </div>
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Năm xuất bản</span>
-              <span className={styles.metaValue}>{book.publishYear}</span>
+              <span className={styles.metaValue}>{book.publishYear ?? "—"}</span>
             </div>
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Tổng số</span>
@@ -55,6 +64,14 @@ export default function BookDetail({ book, history }: BookDetailProps) {
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Số lượng còn</span>
               <span className={styles.metaValue}>{book.availableQuantity}</span>
+            </div>
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Phí mượn</span>
+              <span className={styles.metaValue}>{borrowFee}</span>
+            </div>
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Vị trí kệ</span>
+              <span className={styles.metaValue}>{book.shelfLocation || "—"}</span>
             </div>
           </div>
 
@@ -72,6 +89,10 @@ export default function BookDetail({ book, history }: BookDetailProps) {
         </div>
       </div>
 
+      <Card title="Mô tả sách">
+        <p className={styles.description}>{book.description || "Chưa có mô tả cho sách này."}</p>
+      </Card>
+
       <Card title="Lịch sử mượn sách">
         {history.length === 0 ? (
           <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
@@ -80,7 +101,14 @@ export default function BookDetail({ book, history }: BookDetailProps) {
         ) : (
           <Table
             columns={[
-              { key: "readerName", header: "Độc giả" },
+              { key: "id", header: "Mã đơn" },
+              {
+                key: "readerName",
+                header: "Độc giả",
+                render: (item) => `${item.readerName} (#${item.readerId})`,
+              },
+              { key: "copyBarcode", header: "Mã bản sách" },
+              { key: "requestedDate", header: "Ngày yêu cầu" },
               { key: "borrowDate", header: "Ngày mượn" },
               { key: "dueDate", header: "Hạn trả" },
               {

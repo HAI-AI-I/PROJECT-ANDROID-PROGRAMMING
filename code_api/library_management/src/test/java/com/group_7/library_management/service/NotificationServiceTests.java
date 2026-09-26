@@ -1,7 +1,9 @@
 package com.group_7.library_management.service;
 
 import com.group_7.library_management.dto.NotificationResponse;
+import com.group_7.library_management.entity.Book;
 import com.group_7.library_management.entity.Notification;
+import com.group_7.library_management.entity.NotificationActionType;
 import com.group_7.library_management.entity.NotificationType;
 import com.group_7.library_management.entity.User;
 import com.group_7.library_management.repository.NotificationRepository;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTests {
@@ -66,6 +69,34 @@ class NotificationServiceTests {
         assertThat(response.isRead()).isTrue();
         assertThat(response.clickedAt()).isNotNull();
         assertThat(response.readAt()).isNotNull();
+    }
+
+    @Test
+    void notificationWithoutDestinationReturnsNoneAction() {
+        NotificationResponse response = NotificationResponse.from(notification("notification-none"));
+
+        assertThat(response.actionType()).isEqualTo(NotificationActionType.NONE);
+        assertThat(response.targetId()).isNull();
+    }
+
+    @Test
+    void bookNotificationReturnsBookDetailDestination() {
+        Book book = mock(Book.class);
+        when(book.getId()).thenReturn(42L);
+        User user = new User("Người dùng", "book@example.com", "0900000001", "password");
+        Notification notification = new Notification(
+                "notification-book",
+                user,
+                book,
+                "Sách đã có lại",
+                "Sách hiện có thể mượn.",
+                NotificationType.BOOK
+        );
+
+        NotificationResponse response = NotificationResponse.from(notification);
+
+        assertThat(response.actionType()).isEqualTo(NotificationActionType.BOOK_DETAIL);
+        assertThat(response.targetId()).isEqualTo(42L);
     }
 
     @Test

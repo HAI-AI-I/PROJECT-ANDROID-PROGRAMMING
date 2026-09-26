@@ -33,3 +33,7 @@ build/
 .vscode/
 hs_err_pid*.log
 replay_pid*.log
+
+# Uploaded files are runtime data. Keep only the directory structure in Git.
+uploads/book-covers/*
+!uploads/book-covers/.gitkeep

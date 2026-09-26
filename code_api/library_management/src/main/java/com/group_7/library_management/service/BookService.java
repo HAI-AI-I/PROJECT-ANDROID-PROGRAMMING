@@ -98,6 +98,7 @@ public class BookService {
     public Page<BookResponse> searchBooks(
             String keyword,
             String category,
+            String status,
             Pageable pageable
     ) {
         String normalizedKeyword = normalizeNullable(keyword);
@@ -105,8 +106,26 @@ public class BookService {
         if (categorySlug != null) {
             categorySlug = slugify(categorySlug);
         }
-        return bookRepository.searchActiveBooks(normalizedKeyword, categorySlug, pageable)
+        String availabilityStatus = normalizeAvailabilityStatus(status);
+        return bookRepository.searchActiveBooks(
+                        normalizedKeyword,
+                        categorySlug,
+                        availabilityStatus,
+                        pageable
+                )
                 .map(this::toResponse);
+    }
+
+    private String normalizeAvailabilityStatus(String status) {
+        String normalizedStatus = normalizeNullable(status);
+        if (normalizedStatus == null) {
+            return null;
+        }
+        normalizedStatus = normalizedStatus.toLowerCase(Locale.ROOT);
+        if (!Set.of("available", "borrowed", "out_of_stock").contains(normalizedStatus)) {
+            throw new BadRequestException("Trạng thái sách không hợp lệ");
+        }
+        return normalizedStatus;
     }
 
     @Transactional(readOnly = true)

@@ -15,6 +15,17 @@ import java.time.Instant;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+    long countByActiveTrue();
+
+    @Query("""
+            select b.category.name as label, count(b.id) as total
+            from Book b
+            where b.active = true
+            group by b.category.id, b.category.name
+            order by count(b.id) desc
+            """)
+    List<LabelCountProjection> countActiveBooksByCategory();
+
     boolean existsByIsbn(String isbn);
 
     boolean existsByIsbnAndIdNot(String isbn, Long id);
@@ -42,6 +53,32 @@ public interface BookRepository extends JpaRepository<Book, Long> {
                            or lower(b.isbn) like lower(concat('%', :keyword, '%')))
                       and (:categorySlug is null
                            or lower(b.category.slug) = lower(:categorySlug))
+                      and (
+                            :availabilityStatus is null
+                            or (:availabilityStatus = 'available' and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ) and not exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status <> com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                            or (:availabilityStatus = 'borrowed' and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ) and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status <> com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                            or (:availabilityStatus = 'out_of_stock' and not exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                      )
                     """,
             countQuery = """
                     select count(distinct b.id) from Book b
@@ -53,11 +90,38 @@ public interface BookRepository extends JpaRepository<Book, Long> {
                            or lower(b.isbn) like lower(concat('%', :keyword, '%')))
                       and (:categorySlug is null
                            or lower(b.category.slug) = lower(:categorySlug))
+                      and (
+                            :availabilityStatus is null
+                            or (:availabilityStatus = 'available' and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ) and not exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status <> com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                            or (:availabilityStatus = 'borrowed' and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ) and exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status <> com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                            or (:availabilityStatus = 'out_of_stock' and not exists (
+                                select 1 from BookCopy bc
+                                where bc.book = b
+                                  and bc.status = com.group_7.library_management.entity.BookCopyStatus.AVAILABLE
+                            ))
+                      )
                     """
     )
     Page<Book> searchActiveBooks(
             @Param("keyword") String keyword,
             @Param("categorySlug") String categorySlug,
+            @Param("availabilityStatus") String availabilityStatus,
             Pageable pageable
     );
 
