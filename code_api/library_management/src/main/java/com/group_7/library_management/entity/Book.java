@@ -57,7 +57,7 @@ public class Book {
     private long borrowFee;
 
     @Column(name = "average_rating", nullable = false, precision = 3, scale = 2)
-    private BigDecimal averageRating = BigDecimal.ZERO;
+    private BigDecimal averageRating = BigDecimal.valueOf(5);
 
     @Column(name = "rating_count", nullable = false)
     private int ratingCount;

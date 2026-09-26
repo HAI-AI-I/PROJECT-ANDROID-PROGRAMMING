@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -16,7 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.group_7.library_management.components.BorrowOrderItemCard
 import com.group_7.library_management.components.BorrowingTopBar
 import com.group_7.library_management.models.BorrowOrder
@@ -47,6 +51,7 @@ fun BorrowRecordListScreen(title: String, onBack: () -> Unit = {}) {
 fun BorrowRecordListContent(
     modifier: Modifier = Modifier,
     initialTab: BorrowTab = BorrowTab.ALL,
+    scrollToTopSignal: Int = 0,
     onOrderClick: (Long) -> Unit = {},
     viewModel: BorrowRecordListViewModel = hiltViewModel()
 ) {
@@ -54,8 +59,24 @@ fun BorrowRecordListContent(
     var selectedTabName by rememberSaveable { mutableStateOf(initialTab.name) }
     var orderToCancel by remember { mutableStateOf<BorrowOrder?>(null) }
     val selectedTab = BorrowTab.entries.firstOrNull { it.name == selectedTabName } ?: BorrowTab.ALL
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollToTopSignal) {
+        if (scrollToTopSignal > 0) listState.animateScrollToItem(0)
+    }
 
     LaunchedEffect(initialTab) { selectedTabName = initialTab.name }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val filteredOrders = remember(state.orders, selectedTab) {
         state.orders.filter { order ->
@@ -87,6 +108,7 @@ fun BorrowRecordListContent(
             )
             filteredOrders.isEmpty() -> EmptyBorrowList(selectedTab)
             else -> LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize().padding(horizontal = LibrarySpacing.Medium),
                 verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
             ) {

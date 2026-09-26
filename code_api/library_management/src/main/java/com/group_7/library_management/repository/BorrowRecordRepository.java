@@ -265,6 +265,39 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     List<BorrowRecord> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
+    @Query("""
+            select b from BorrowRecord b
+            where b.user.id = :userId
+              and (
+                    :filter = 'ALL'
+                    or (:filter = 'PENDING_PAYMENT'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.PENDING_PAYMENT)
+                    or (:filter = 'REQUESTED'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.REQUESTED)
+                    or (:filter = 'BORROWING'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.BORROWED
+                        and (b.dueAt is null or b.dueAt > :dueSoonUntil))
+                    or (:filter = 'DUE_SOON'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.BORROWED
+                        and b.dueAt between :now and :dueSoonUntil)
+                    or (:filter = 'OVERDUE'
+                        and (b.status = com.group_7.library_management.entity.BorrowStatus.OVERDUE
+                             or (b.status = com.group_7.library_management.entity.BorrowStatus.BORROWED
+                                 and b.dueAt < :now)))
+                    or (:filter = 'RETURNED'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.RETURNED)
+                    or (:filter = 'CANCELLED'
+                        and b.status = com.group_7.library_management.entity.BorrowStatus.CANCELLED)
+              )
+            """)
+    Page<BorrowRecord> findPageForUser(
+            @Param("userId") Long userId,
+            @Param("filter") String filter,
+            @Param("now") Instant now,
+            @Param("dueSoonUntil") Instant dueSoonUntil,
+            Pageable pageable
+    );
+
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book", "bookCopy.book.authors"})
     List<BorrowRecord> findAllByBookCopyBookIdOrderByCreatedAtDesc(Long bookId);
 

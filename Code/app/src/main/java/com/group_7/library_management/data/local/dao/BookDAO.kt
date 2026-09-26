@@ -25,6 +25,15 @@ interface BookDAO {
     @Query("SELECT * FROM books")
     fun getAllBooks(): Flow<List<BookEntity>>
 
+    @Query("SELECT * FROM books")
+    suspend fun getAllBooksOnce(): List<BookEntity>
+
+    @Query("SELECT * FROM books WHERE id IN (:ids)")
+    suspend fun getBooksByIds(ids: List<String>): List<BookEntity>
+
+    @Query("UPDATE books SET popularityScore = 0")
+    suspend fun resetPopularityScores()
+
     @Query("SELECT * FROM books ORDER BY createdAt DESC LIMIT :limit")
     fun getNewestBooks(limit: Int): Flow<List<BookEntity>>
 

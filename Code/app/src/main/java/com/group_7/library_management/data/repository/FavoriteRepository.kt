@@ -69,7 +69,7 @@ private fun Book.toFavoriteEntity(userId: String, favoritedAt: Long) = FavoriteB
     description = description,
     borrowFee = borrowFee,
     availableCopies = availableCopies,
-    rating = rating,
+    rating = if (ratingCount == 0) 5.0 else rating,
     createdAt = createdAt,
     ratingCount = ratingCount,
     popularityScore = popularityScore,
@@ -89,7 +89,7 @@ private fun FavoriteBookEntity.toBook() = Book(
     description = description,
     borrowFee = borrowFee,
     availableCopies = availableCopies,
-    rating = rating,
+    rating = if (ratingCount == 0) 5.0 else rating,
     createdAt = createdAt,
     ratingCount = ratingCount,
     popularityScore = popularityScore

@@ -18,6 +18,21 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface BookApi {
+    @GET("api/v1/books")
+    suspend fun getBooks(
+        @Query("search") search: String? = null,
+        @Query("category") category: String? = null,
+        @Query("categories") categories: List<String>? = null,
+        @Query("status") status: String? = null,
+        @Query("minRating") minRating: Double? = null,
+        @Query("minPrice") minPrice: Long? = null,
+        @Query("maxPrice") maxPrice: Long? = null,
+        @Query("createdAfter") createdAfter: String? = null,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+        @Query("sort") sort: String
+    ): PagedResponseDto<BookResponseDto>
+
     @GET("api/v1/favorites")
     suspend fun getFavoriteBooks(): List<BookResponseDto>
 

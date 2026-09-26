@@ -62,8 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.group_7.library_management.R
+import com.group_7.library_management.components.BookCoverImage
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.BookReview
 import com.group_7.library_management.ui.theme.Border
@@ -226,13 +225,11 @@ private fun ReviewTopBar(book: Book?, onBack: () -> Unit) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại")
             }
-            AsyncImage(
-                model = book?.coverImageUrl,
+            BookCoverImage(
+                coverImageUrl = book?.coverImageUrl,
                 contentDescription = book?.title,
                 modifier = Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-                fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
-                error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+                contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {

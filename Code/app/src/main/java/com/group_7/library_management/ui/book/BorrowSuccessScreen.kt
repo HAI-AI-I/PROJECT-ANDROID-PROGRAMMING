@@ -17,11 +17,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.group_7.library_management.components.BookCoverImage
 import com.group_7.library_management.models.BorrowOrder
 import java.text.NumberFormat
 import java.time.Instant
@@ -82,6 +84,15 @@ private fun BorrowSuccessContent(order: BorrowOrder, onViewQrCode: (Long) -> Uni
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Thông tin đơn mượn", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    BookCoverImage(
+                        coverImageUrl = order.coverImageUrl,
+                        contentDescription = "Bìa sách ${order.bookTitle}",
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(width = 92.dp, height = 128.dp)
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentScale = ContentScale.Crop
+                    )
                     OrderRow("Mã đơn", order.referenceCode, true)
                     OrderRow("Sách", order.bookTitle)
                     if (order.bookAuthor.isNotBlank()) OrderRow("Tác giả", order.bookAuthor)

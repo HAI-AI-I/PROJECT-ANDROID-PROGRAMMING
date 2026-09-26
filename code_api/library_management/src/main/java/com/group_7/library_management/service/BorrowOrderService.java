@@ -116,10 +116,17 @@ public class BorrowOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<BorrowOrderResponse> getOrders(Long userId) {
-        return borrowRecordRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
-                .map(BorrowOrderResponse::from)
-                .toList();
+    public Page<BorrowOrderResponse> getOrders(Long userId, String status, Pageable pageable) {
+        String filter = normalizeUserBorrowFilter(status);
+        Instant now = Instant.now();
+        return borrowRecordRepository.findPageForUser(
+                        userId,
+                        filter,
+                        now,
+                        now.plus(1, ChronoUnit.DAYS),
+                        pageable
+                )
+                .map(BorrowOrderResponse::from);
     }
 
     @Transactional(readOnly = true)
@@ -337,6 +344,25 @@ public class BorrowOrderService {
                     "Trạng thái đơn mượn không hợp lệ"
             );
         }
+    }
+
+    private String normalizeUserBorrowFilter(String status) {
+        if (status == null || status.isBlank()) {
+            return "ALL";
+        }
+        return switch (status.strip().toUpperCase(Locale.ROOT)) {
+            case "ALL" -> "ALL";
+            case "PENDING_PAYMENT" -> "PENDING_PAYMENT";
+            case "PENDING", "REQUESTED" -> "REQUESTED";
+            case "BORROWING", "BORROWED" -> "BORROWING";
+            case "DUE_SOON" -> "DUE_SOON";
+            case "OVERDUE" -> "OVERDUE";
+            case "RETURNED" -> "RETURNED";
+            case "CANCELLED" -> "CANCELLED";
+            default -> throw new com.group_7.library_management.exception.BadRequestException(
+                    "Trạng thái đơn mượn không hợp lệ"
+            );
+        };
     }
 
     private String createReferenceCode() {

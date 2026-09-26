@@ -3,6 +3,7 @@ package com.group_7.library_management.components
 import android.media.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ fun MemberTopBar(
     rightIcon:ImageVector=Icons.Default.Notifications,
     rightIconTint: Color= MaterialTheme.colorScheme.onSurface,
     onRightClick: () -> Unit,
+    onLogoClick: () -> Unit = {},
     showNotificationBadge: Boolean = true,
     modifier: Modifier = Modifier
 ) {
@@ -45,6 +47,7 @@ fun MemberTopBar(
             )
         }
         Row(
+            modifier = Modifier.clickable(onClick = onLogoClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CreateLogoIcon()

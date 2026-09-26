@@ -12,6 +12,12 @@ data class LoginRequestDto(
     val password: String
 )
 
+data class UpdateProfileRequestDto(
+    val fullName: String,
+    val email: String,
+    val phone: String
+)
+
 data class UserResponseDto(
     val id: Long,
     val fullName: String,

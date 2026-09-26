@@ -12,6 +12,13 @@ import com.group_7.library_management.models.BookReview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+data class BookPage(
+    val items: List<Book>,
+    val page: Int,
+    val totalPages: Int,
+    val total: Long
+)
+
 class BookRepository(
     private val bookDao: BookDAO,
     private val bookApi: BookApi
@@ -92,8 +99,56 @@ class BookRepository(
             .associateBy { it.id }
             .values
             .toList()
-        bookDao.replaceBooks(homeBooks)
+        bookDao.resetPopularityScores()
+        bookDao.insertBooks(homeBooks)
     }
+
+    suspend fun getBooksPage(
+        search: String?,
+        category: String?,
+        categories: List<String>?,
+        status: String?,
+        minRating: Double?,
+        minPrice: Long?,
+        maxPrice: Long?,
+        createdAfter: String?,
+        page: Int,
+        pageSize: Int,
+        sort: String
+    ): BookPage {
+        val response = bookApi.getBooks(
+            search = search,
+            category = category,
+            categories = categories,
+            status = status,
+            minRating = minRating,
+            minPrice = minPrice,
+            maxPrice = maxPrice,
+            createdAfter = createdAfter,
+            page = page,
+            pageSize = pageSize,
+            sort = sort
+        )
+        val responseIds = response.items.map { it.id.toString() }
+        val existingScores = if (responseIds.isEmpty()) {
+            emptyMap()
+        } else {
+            bookDao.getBooksByIds(responseIds).associate { it.id to it.popularityScore }
+        }
+        val entities = response.items.map { dto ->
+            dto.toEntity(popularityScore = existingScores[dto.id.toString()] ?: 0L)
+        }
+        bookDao.insertBooks(entities)
+        return BookPage(
+            items = entities.map { it.toBookModel() },
+            page = response.page,
+            totalPages = response.totalPages,
+            total = response.total
+        )
+    }
+
+    suspend fun getCachedBooks(): List<Book> =
+        bookDao.getAllBooksOnce().map { it.toBookModel() }
 
     fun getNewestBooks(limit: Int = 10): Flow<List<Book>> {
         return bookDao.getNewestBooks(limit).map{ list ->

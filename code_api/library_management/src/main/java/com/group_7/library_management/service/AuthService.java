@@ -5,6 +5,7 @@ import com.group_7.library_management.dto.BiometricTokenResponse;
 import com.group_7.library_management.dto.LoginRequest;
 import com.group_7.library_management.dto.RegisterRequest;
 import com.group_7.library_management.dto.UserResponse;
+import com.group_7.library_management.dto.UpdateProfileRequest;
 import com.group_7.library_management.entity.User;
 import com.group_7.library_management.exception.ConflictException;
 import com.group_7.library_management.exception.UnauthorizedException;
@@ -84,6 +85,33 @@ public class AuthService {
                 .filter(User::isActive)
                 .orElseThrow(() -> new UnauthorizedException("Tài khoản không còn hoạt động"));
         return UserResponse.from(user);
+    }
+
+    @Transactional
+    public UserResponse updateCurrentUser(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .filter(User::isActive)
+                .orElseThrow(() -> new UnauthorizedException("Tài khoản không còn hoạt động"));
+
+        String fullName = normalizeFullName(request.fullName());
+        String email = request.email().strip().toLowerCase(Locale.ROOT);
+        String phone = request.phone().strip();
+
+        userRepository.findByEmailIgnoreCase(email)
+                .filter(existing -> !existing.getId().equals(userId))
+                .ifPresent(existing -> {
+                    throw new ConflictException("Email đã được sử dụng");
+                });
+        userRepository.findByPhone(phone)
+                .filter(existing -> !existing.getId().equals(userId))
+                .ifPresent(existing -> {
+                    throw new ConflictException("Số điện thoại đã được sử dụng");
+                });
+
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPhone(phone);
+        return UserResponse.from(userRepository.save(user));
     }
 
     public void logout(String rawToken) {

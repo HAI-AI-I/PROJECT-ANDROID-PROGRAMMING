@@ -42,7 +42,7 @@ class UserRootViewModel @Inject constructor(
 
     init {
         _uiState.update { it.copy(isBiometricEnabled = checkLogin.isBiometricEnabled()) }
-        loadCurrentUserInfo()
+        observeCurrentUserInfo()
         observeUnreadNotifications()
         pollUnreadNotificationCount()
         observeNetworkConnection()
@@ -69,24 +69,20 @@ class UserRootViewModel @Inject constructor(
         }
     }
 
-    private fun loadCurrentUserInfo() {
+    private fun observeCurrentUserInfo() {
+        val savedUserId = checkLogin.getSavedUserId()?.toLongOrNull() ?: return
         viewModelScope.launch {
-            val savedUserId = checkLogin.getSavedUserId()?.toLongOrNull()
-            val userEntity = if (savedUserId != null) {
-                userRepository.getUserById(savedUserId) ?: userRepository.getLatestUser()
-            } else {
-                userRepository.getLatestUser()
-            }
-
-            if (userEntity != null) {
-                _uiState.update {
-                    it.copy(
-                        currentUser = User(
-                            id = userEntity.id.toString(),
-                            name = userEntity.name,
-                            phone = userEntity.phone,
-                            qrCodeData = "USER_${userEntity.id}"
-                        )
+            userRepository.observeUserById(savedUserId).collect { userEntity ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        currentUser = userEntity?.let {
+                            User(
+                                id = it.id.toString(),
+                                name = it.name,
+                                phone = it.phone,
+                                qrCodeData = "USER_${it.id}"
+                            )
+                        }
                     )
                 }
             }

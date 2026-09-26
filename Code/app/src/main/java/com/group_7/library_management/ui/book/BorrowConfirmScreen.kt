@@ -61,8 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.group_7.library_management.R
+import com.group_7.library_management.components.BookCoverImage
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.Border
 import com.group_7.library_management.ui.theme.SuccessColor
@@ -279,13 +278,11 @@ private fun BorrowBookCard(book: Book) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = book.coverImageUrl,
+            BookCoverImage(
+                coverImageUrl = book.coverImageUrl,
                 contentDescription = "Bìa sách ${book.title}",
                 modifier = Modifier.size(width = 62.dp, height = 82.dp).clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-                fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
-                error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+                contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {

@@ -8,9 +8,7 @@ import com.group_7.library_management.dto.UpdateBookRequest;
 import com.group_7.library_management.dto.PopularBookResponse;
 import com.group_7.library_management.service.BookService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -41,15 +40,22 @@ public class BookController {
     public PagedResponse<BookResponse> getBooks(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAfter,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(defaultValue = "newest") String sort
     ) {
-        int safePage = Math.max(page, 1) - 1;
         int safePageSize = normalizePageSize(pageSize);
-        Pageable pageable = PageRequest.of(safePage, safePageSize, resolveSort(sort));
-        return PagedResponse.from(bookService.searchBooks(search, category, status, pageable));
+        return bookService.searchBooks(
+                search, category, categories, status, minRating, minPrice, maxPrice, createdAfter,
+                Math.max(page, 1), safePageSize, sort
+        );
     }
 
     @GetMapping("/latest")
@@ -103,15 +109,6 @@ public class BookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBook(@PathVariable Long id) {
         bookService.deactivateBook(id);
-    }
-
-    private Sort resolveSort(String sort) {
-        return switch (sort.toLowerCase()) {
-            case "title" -> Sort.by(Sort.Direction.ASC, "title");
-            case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
-            default -> Sort.by(Sort.Direction.DESC, "createdAt")
-                    .and(Sort.by(Sort.Direction.DESC, "id"));
-        };
     }
 
     private int normalizePageSize(int requestedSize) {

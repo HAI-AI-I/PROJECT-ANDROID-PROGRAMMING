@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -68,6 +69,7 @@ fun UserScreen(
     val pendingBookFilter = remember { mutableStateOf<String?>(null) }
     val pendingBorrowTab = remember { mutableStateOf(BorrowTab.ALL) }
     val borrowScreenResetKey = remember { mutableIntStateOf(0) }
+    var scrollToTopSignal by remember { mutableIntStateOf(0) }
 
     val navigateTab: (String) -> Unit = { route ->
         userNavController.navigate(route) {
@@ -132,6 +134,7 @@ fun UserScreen(
                     MemberTopBar(
                         onLeftClick = { scope.launch { drawerState.open() } },
                         onRightClick = { navigateTab(Routes.NOTIFICATIONS) },
+                        onLogoClick = { scrollToTopSignal++ },
                         showNotificationBadge = userState.unreadNotificationCount > 0
                     )
                 }
@@ -162,6 +165,7 @@ fun UserScreen(
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
+                        scrollToTopSignal = scrollToTopSignal,
                         onBookClick = { book -> userNavController.navigate(Routes.bookDetail(book.id)) },
                         onViewAllClick = { filter ->
                             pendingBookFilter.value = filter
@@ -289,6 +293,7 @@ fun UserScreen(
                 }
                 composable(Routes.NOTIFICATIONS) {
                     NotificationsContent(
+                        scrollToTopSignal = scrollToTopSignal,
                         onNotificationClick = { notification ->
                             when (notification.actionType) {
                                 NotificationActionType.BOOK_DETAIL -> {
@@ -348,6 +353,7 @@ fun UserScreen(
                 }
                 composable(Routes.BOOKS) {
                     BookListScreen(
+                        scrollToTopSignal = scrollToTopSignal,
                         initialFilter = pendingBookFilter.value,
                         onInitialFilterApplied = { pendingBookFilter.value = null },
                         onBookClick = { book -> userNavController.navigate(Routes.bookDetail(book.id)) }
@@ -356,6 +362,7 @@ fun UserScreen(
                 composable(Routes.BORROW) {
                     androidx.compose.runtime.key(borrowScreenResetKey.intValue) {
                         BorrowRecordListContent(
+                            scrollToTopSignal = scrollToTopSignal,
                             initialTab = pendingBorrowTab.value,
                             onOrderClick = { orderId ->
                                 userNavController.navigate(Routes.borrowOrderDetail(orderId))
@@ -384,6 +391,7 @@ fun UserScreen(
                     val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
                     ProfileScreen(
                         viewModel = profileViewModel,
+                        scrollToTopSignal = scrollToTopSignal,
                         onEditProfileClick = { userNavController.navigate(Routes.EDIT_PROFILE) },
                         onChangePasswordClick = {
                             userNavController.navigate(Routes.CHANGE_PASSWORD)
@@ -452,6 +460,7 @@ fun UserScreen(
                 }
                 composable(Routes.FAVORITE) {
                     FavoriteScreen(
+                        scrollToTopSignal = scrollToTopSignal,
                         onBookClick = { book ->
                             userNavController.navigate(Routes.bookDetail(book.id))
                         }

@@ -4,12 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,6 +24,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.group_7.library_management.ui.theme.LibrarySpacing
 
 data class UserProfile(
@@ -29,37 +36,86 @@ data class UserProfile(
     val phone: String,
     val joinDate: String,
     val avatarUrl: String = "",
-    val borrowedBooksCount: Int = 0,
-    val totalBooksRead: Int = 0
+    val borrowedBooksCount: Long = 0,
+    val totalBorrowedCount: Long = 0
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
+    scrollToTopSignal: Int = 0,
     onEditProfileClick: () -> Unit = {},
     onChangePasswordClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollToTopSignal) {
+        if (scrollToTopSignal > 0) listState.animateScrollToItem(0)
+    }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadUserProfile()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
     ) { paddingValues ->
-        uiState.userProfile?.let { profile ->
-            ProfileContent(
+        when {
+            uiState.userProfile != null -> ProfileContent(
                 modifier = Modifier.padding(paddingValues),
-                userProfile = profile,
+                listState = listState,
+                userProfile = requireNotNull(uiState.userProfile),
                 onEditProfileClick = onEditProfileClick,
                 onChangePasswordClick = onChangePasswordClick,
                 onSettingsClick = onSettingsClick,
                 onLogoutClick = onLogoutClick
             )
-        } ?: Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+
+            uiState.isLoading -> Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            else -> ProfileLoadError(
+                message = uiState.errorMessage ?: "Không thể tải thông tin hồ sơ.",
+                onRetry = viewModel::loadUserProfile,
+                modifier = Modifier.padding(paddingValues)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileLoadError(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(LibrarySpacing.Large),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = message,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(LibrarySpacing.Medium))
+        Button(onClick = onRetry) {
+            Text("Thử lại")
         }
     }
 }
@@ -67,6 +123,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileContent(
     modifier: Modifier = Modifier,
+    listState: LazyListState,
     userProfile: UserProfile,
     onEditProfileClick: () -> Unit = {},
     onChangePasswordClick: () -> Unit = {},
@@ -74,6 +131,7 @@ fun ProfileContent(
     onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
@@ -117,7 +175,7 @@ fun ProfileContent(
                     Spacer(modifier = Modifier.height(LibrarySpacing.ExtraSmall))
 
                     Text(
-                        text = "ID: ${userProfile.id}",
+                        text = "SĐT: ${userProfile.phone}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -140,8 +198,8 @@ fun ProfileContent(
                             value = userProfile.borrowedBooksCount.toString()
                         )
                         StatItem(
-                            label = "Tổng đã đọc",
-                            value = userProfile.totalBooksRead.toString()
+                            label = "Tổng đã mượn",
+                            value = userProfile.totalBorrowedCount.toString()
                         )
                     }
 

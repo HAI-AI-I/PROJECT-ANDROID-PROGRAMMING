@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Table from "@/components/ui/Table";
 import { getBookStatusBadge, getBorrowingStatusBadge } from "@/components/ui/Badge";
 import type { Book, BookBorrowHistory } from "@/types/Book";
+import { resolveApiAssetUrl } from "@/services/apiClient";
 import { getBookStatus } from "@/types/Book";
 import styles from "./BookDetail.module.scss";
 
@@ -26,7 +27,7 @@ export default function BookDetail({ book, history }: BookDetailProps) {
       <div className={styles.top}>
         <div className={styles.cover}>
           {book.cover ? (
-            <img src={book.cover} alt={book.title} />
+            <img src={resolveApiAssetUrl(book.cover)} alt={book.title} />
           ) : (
             "Chưa có ảnh bìa"
           )}

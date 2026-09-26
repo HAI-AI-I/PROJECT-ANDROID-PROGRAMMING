@@ -53,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.group_7.library_management.components.BorrowStatusBadge
+import com.group_7.library_management.data.remote.toApiAssetUrl
 import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.ui.book.BorrowOrderViewModel
 import java.text.NumberFormat
@@ -319,7 +320,7 @@ private fun DetailBookCover(order: BorrowOrder) {
         contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
-            model = order.coverImageUrl,
+            model = order.coverImageUrl.toApiAssetUrl(),
             contentDescription = "Bìa sách ${order.bookTitle}",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,

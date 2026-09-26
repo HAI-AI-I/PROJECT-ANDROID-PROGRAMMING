@@ -115,8 +115,8 @@ public class BookReviewService {
     private void updateBookRating(Book book) {
         BookRatingStatistics statistics = bookReviewRepository.calculateStatistics(book.getId());
         long ratingCount = statistics == null ? 0 : statistics.getRatingCount();
-        double averageRating = statistics == null || statistics.getAverageRating() == null
-                ? 0.0
+        double averageRating = ratingCount == 0 || statistics == null || statistics.getAverageRating() == null
+                ? 5.0
                 : statistics.getAverageRating();
 
         book.setRatingCount(Math.toIntExact(ratingCount));

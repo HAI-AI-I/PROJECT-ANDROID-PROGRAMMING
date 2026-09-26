@@ -15,6 +15,7 @@ import com.group_7.library_management.dto.RegisterRequest;
 import com.group_7.library_management.dto.RegistrationCodeResponse;
 import com.group_7.library_management.dto.ResendRegistrationCodeRequest;
 import com.group_7.library_management.dto.UserResponse;
+import com.group_7.library_management.dto.UpdateProfileRequest;
 import com.group_7.library_management.dto.VerifyRegistrationCodeRequest;
 import com.group_7.library_management.service.AuthService;
 import com.group_7.library_management.service.PasswordResetService;
@@ -23,6 +24,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,6 +110,17 @@ public class AuthController {
     @GetMapping("/me")
     public UserResponse getCurrentUser(Authentication authentication) {
         return authService.getCurrentUser((Long) authentication.getPrincipal());
+    }
+
+    @PatchMapping("/me")
+    public UserResponse updateCurrentUser(
+            Authentication authentication,
+            @Valid @RequestBody UpdateProfileRequest request
+    ) {
+        return authService.updateCurrentUser(
+                (Long) authentication.getPrincipal(),
+                request
+        );
     }
 
     @PostMapping("/password/forgot/code")

@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.group_7.library_management.data.remote.toApiAssetUrl
 import com.group_7.library_management.models.BorrowOrder
 import com.group_7.library_management.ui.theme.Success
 import com.group_7.library_management.ui.theme.Warning
@@ -198,7 +199,7 @@ private fun OrderBookCover(order: BorrowOrder) {
         contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
-            model = order.coverImageUrl,
+            model = order.coverImageUrl.toApiAssetUrl(),
             contentDescription = "Bìa sách ${order.bookTitle}",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,

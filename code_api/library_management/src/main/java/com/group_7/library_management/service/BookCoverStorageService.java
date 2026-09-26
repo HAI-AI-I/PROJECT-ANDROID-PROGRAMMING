@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -16,7 +15,6 @@ import java.util.UUID;
 public class BookCoverStorageService {
 
     private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;
-
     private final Path bookCoverDirectory;
 
     public BookCoverStorageService(StorageProperties storageProperties) {
@@ -26,7 +24,17 @@ public class BookCoverStorageService {
     public String store(MultipartFile file) {
         validateFile(file);
 
-        String extension = detectExtension(file);
+        byte[] content;
+        try {
+            content = file.getBytes();
+        } catch (IOException exception) {
+            throw new BadRequestException("Không thể đọc file ảnh bìa");
+        }
+        return store(content);
+    }
+
+    private String store(byte[] content) {
+        String extension = detectExtension(content);
         String storedFileName = UUID.randomUUID().toString().toLowerCase(Locale.ROOT) + extension;
         Path destination = bookCoverDirectory.resolve(storedFileName).normalize();
 
@@ -34,9 +42,9 @@ public class BookCoverStorageService {
             throw new BadRequestException("Tên file ảnh bìa không hợp lệ");
         }
 
-        try (InputStream inputStream = file.getInputStream()) {
+        try {
             Files.createDirectories(bookCoverDirectory);
-            Files.copy(inputStream, destination);
+            Files.write(destination, content);
             return storedFileName;
         } catch (IOException exception) {
             throw new IllegalStateException("Không thể lưu ảnh bìa sách", exception);
@@ -52,27 +60,17 @@ public class BookCoverStorageService {
         }
     }
 
-    private String detectExtension(MultipartFile file) {
-        byte[] header = readHeader(file);
-
-        if (isJpeg(header)) {
+    private String detectExtension(byte[] content) {
+        if (isJpeg(content)) {
             return ".jpg";
         }
-        if (isPng(header)) {
+        if (isPng(content)) {
             return ".png";
         }
-        if (isWebP(header)) {
+        if (isWebP(content)) {
             return ".webp";
         }
         throw new BadRequestException("Ảnh bìa chỉ hỗ trợ định dạng JPEG, PNG hoặc WebP");
-    }
-
-    private byte[] readHeader(MultipartFile file) {
-        try (InputStream inputStream = file.getInputStream()) {
-            return inputStream.readNBytes(12);
-        } catch (IOException exception) {
-            throw new BadRequestException("Không thể đọc file ảnh bìa");
-        }
     }
 
     private boolean isJpeg(byte[] header) {

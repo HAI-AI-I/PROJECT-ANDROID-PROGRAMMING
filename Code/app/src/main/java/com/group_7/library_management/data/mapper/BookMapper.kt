@@ -20,7 +20,7 @@ fun BookEntity.toBookModel(): Book {
         description=description,
         borrowFee=borrowFee,
         availableCopies = availableCopies,
-        rating = rating,
+        rating = if (ratingCount == 0) 5.0 else rating,
         createdAt = createdAt,
         ratingCount = ratingCount,
         popularityScore = popularityScore
@@ -42,7 +42,7 @@ fun BookResponseDto.toEntity(popularityScore: Long = 0): BookEntity {
         description = null,
         borrowFee = borrowFee,
         availableCopies = availableQuantity.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
-        rating = rating,
+        rating = if (ratingCount == 0) 5.0 else rating,
         createdAt = runCatching { Instant.parse(createdAt).toEpochMilli() }.getOrDefault(0L),
         ratingCount = ratingCount,
         popularityScore = popularityScore
@@ -65,7 +65,7 @@ fun BookResponseDto.toBookModel(popularityScore: Long = 0): Book {
         description = description,
         borrowFee = borrowFee,
         availableCopies = availableQuantity.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
-        rating = rating,
+        rating = if (ratingCount == 0) 5.0 else rating,
         createdAt = runCatching { Instant.parse(createdAt).toEpochMilli() }.getOrDefault(0L),
         ratingCount = ratingCount,
         popularityScore = popularityScore

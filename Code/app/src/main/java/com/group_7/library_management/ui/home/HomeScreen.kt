@@ -17,11 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
@@ -46,6 +46,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,6 +54,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,18 +70,21 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.group_7.library_management.components.BookListItemCard
+import com.group_7.library_management.components.BookCoverImage
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.models.UserBorrowSummary
 
 import com.group_7.library_management.ui.theme.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    scrollToTopSignal: Int = 0,
     onBookClick: (Book) -> Unit,
     onViewAllClick: (String) -> Unit = {},
     onOpenQRClick: () -> Unit = {},
@@ -88,15 +93,49 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val homeListState = rememberLazyListState()
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.resetSearch()
+                viewModel.refreshBooks()
                 viewModel.refreshBorrowSummary()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(uiState.searchQuery) {
+        homeListState.scrollToItem(0)
+    }
+
+    LaunchedEffect(scrollToTopSignal) {
+        if (scrollToTopSignal > 0) homeListState.animateScrollToItem(0)
+    }
+
+    LaunchedEffect(
+        homeListState,
+        uiState.searchQuery,
+        uiState.searchResults.size,
+        uiState.searchHasMore
+    ) {
+        snapshotFlow {
+            val layoutInfo = homeListState.layoutInfo
+            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            lastVisibleIndex to layoutInfo.totalItemsCount
+        }
+            .distinctUntilChanged()
+            .collect { (lastVisibleIndex, totalItemsCount) ->
+                if (uiState.searchQuery.isNotBlank() &&
+                    uiState.searchResults.isNotEmpty() &&
+                    totalItemsCount > 0 &&
+                    lastVisibleIndex >= totalItemsCount - 4
+                ) {
+                    viewModel.loadNextSearchPage()
+                }
+            }
     }
 
     if(uiState.isLoadingBooks){
@@ -108,6 +147,7 @@ fun HomeScreen(
         }
     }else{
         LazyColumn(
+            state = homeListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = LibrarySpacing.Large),
@@ -125,7 +165,7 @@ fun HomeScreen(
                 )
             }
 
-            uiState.bookLoadError?.let { message ->
+            if (uiState.searchQuery.isBlank()) uiState.bookLoadError?.let { message ->
                 item {
                     Text(
                         text = message,
@@ -136,13 +176,28 @@ fun HomeScreen(
             }
 
             if (uiState.searchQuery.isNotBlank()) {
-                val allBooks = (uiState.popularBooks + uiState.newBooks + uiState.recommendedBooks).distinctBy { it.id }
-                val searchResults = allBooks.filter {
-                    it.title.contains(uiState.searchQuery, ignoreCase = true) ||
-                    it.author.contains(uiState.searchQuery, ignoreCase = true)
+                uiState.searchError?.let { message ->
+                    item {
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
 
-                if (searchResults.isEmpty()) {
+                if (uiState.isSearching && uiState.searchResults.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                } else if (uiState.searchResults.isEmpty()) {
                     item {
                         Box(
                             modifier = Modifier
@@ -158,8 +213,24 @@ fun HomeScreen(
                         }
                     }
                 } else {
-                    items(searchResults, key = { it.id }) { book ->
+                    items(uiState.searchResults, key = { it.id }) { book ->
                         BookListItemCard(book = book, onClick = { onBookClick(book) })
+                    }
+                }
+
+                if (uiState.isLoadingMoreSearch) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = LibrarySpacing.Medium),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(28.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             } else {
@@ -286,14 +357,12 @@ fun BookItemCard(book: Book,
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Default.Book,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    modifier = Modifier.size(48.dp)
-                )
-            }
+            BookCoverImage(
+                coverImageUrl = book.coverImageUrl,
+                contentDescription = "Bìa sách ${book.title}",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(

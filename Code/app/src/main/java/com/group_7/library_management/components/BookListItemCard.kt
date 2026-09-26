@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.group_7.library_management.data.remote.toApiAssetUrl
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.StarColor
 import java.text.NumberFormat
@@ -235,7 +236,7 @@ private fun BookCover(book: Book) {
         contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
-            model = book.coverImageUrl,
+            model = book.coverImageUrl.toApiAssetUrl(),
             contentDescription = "Bìa sách ${book.title}",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -316,7 +317,7 @@ private fun LegacyBookListItemCard(
                 contentAlignment = Alignment.Center
             ) {
                 SubcomposeAsyncImage(
-                    model = book.coverImageUrl,
+                    model = book.coverImageUrl.toApiAssetUrl(),
                     contentDescription = "Bìa sách ${book.title}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,

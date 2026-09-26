@@ -8,6 +8,7 @@ import com.group_7.library_management.dto.CreateBookRequest;
 import com.group_7.library_management.dto.UpdateBookRequest;
 import com.group_7.library_management.dto.PublisherRequest;
 import com.group_7.library_management.dto.PopularBookResponse;
+import com.group_7.library_management.dto.PagedResponse;
 import com.group_7.library_management.entity.Author;
 import com.group_7.library_management.entity.Book;
 import com.group_7.library_management.entity.BookCopy;
@@ -27,8 +28,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Subquery;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.Instant;
@@ -95,25 +100,159 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BookResponse> searchBooks(
+    public PagedResponse<BookResponse> searchBooks(
             String keyword,
             String category,
+            List<String> categories,
             String status,
-            Pageable pageable
+            Double minRating,
+            Long minPrice,
+            Long maxPrice,
+            Instant createdAfter,
+            int page,
+            int pageSize,
+            String sort
     ) {
         String normalizedKeyword = normalizeNullable(keyword);
-        String categorySlug = normalizeNullable(category);
-        if (categorySlug != null) {
-            categorySlug = slugify(categorySlug);
-        }
+        String categorySlug = normalizeNullable(category) == null ? null : slugify(category);
+        List<String> categorySlugs = categories == null
+                ? List.of()
+                : categories.stream()
+                        .map(this::normalizeNullable)
+                        .filter(value -> value != null)
+                        .map(BookService::slugify)
+                        .distinct()
+                        .toList();
         String availabilityStatus = normalizeAvailabilityStatus(status);
-        return bookRepository.searchActiveBooks(
-                        normalizedKeyword,
-                        categorySlug,
-                        availabilityStatus,
-                        pageable
-                )
-                .map(this::toResponse);
+        validateSearchFilters(minRating, minPrice, maxPrice);
+
+        Specification<Book> specification = buildSearchSpecification(
+                normalizedKeyword, categorySlug, categorySlugs, availabilityStatus,
+                minRating, minPrice, maxPrice, createdAfter
+        );
+        int pageIndex = Math.max(page, 1) - 1;
+        String normalizedSort = normalizeNullable(sort) == null
+                ? "newest"
+                : sort.toLowerCase(Locale.ROOT);
+
+        if (normalizedSort.equals("popular")) {
+            List<Book> filteredBooks = bookRepository.findAll(specification);
+            Instant thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
+            Map<Long, Long> popularityScores = bookRepository
+                    .findPopularBooksSince(thirtyDaysAgo, Pageable.unpaged())
+                    .stream()
+                    .collect(Collectors.toMap(
+                            BookPopularityStatistics::getBookId,
+                            BookPopularityStatistics::getPopularityScore
+                    ));
+            filteredBooks.sort(
+                    Comparator.comparingLong((Book book) -> popularityScores.getOrDefault(book.getId(), 0L))
+                            .reversed()
+                            .thenComparing(Book::getCreatedAt, Comparator.reverseOrder())
+                            .thenComparing(Book::getId, Comparator.reverseOrder())
+            );
+            int fromIndex = Math.min(pageIndex * pageSize, filteredBooks.size());
+            int toIndex = Math.min(fromIndex + pageSize, filteredBooks.size());
+            List<BookResponse> items = filteredBooks.subList(fromIndex, toIndex)
+                    .stream()
+                    .map(this::toResponse)
+                    .toList();
+            int totalPages = (int) Math.ceil((double) filteredBooks.size() / pageSize);
+            return new PagedResponse<>(items, filteredBooks.size(), pageIndex + 1, pageSize, totalPages);
+        }
+
+        Pageable pageable = PageRequest.of(pageIndex, pageSize, resolveSearchSort(normalizedSort));
+        return PagedResponse.from(bookRepository.findAll(specification, pageable).map(this::toResponse));
+    }
+
+    private Specification<Book> buildSearchSpecification(
+            String keyword,
+            String categorySlug,
+            List<String> categorySlugs,
+            String availabilityStatus,
+            Double minRating,
+            Long minPrice,
+            Long maxPrice,
+            Instant createdAfter
+    ) {
+        return (root, query, builder) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            predicates.add(builder.isTrue(root.get("active")));
+
+            if (keyword != null) {
+                var authorJoin = root.join("authors", JoinType.LEFT);
+                String pattern = "%" + keyword.toLowerCase(Locale.ROOT) + "%";
+                predicates.add(builder.or(
+                        builder.like(builder.lower(root.get("title")), pattern),
+                        builder.like(builder.lower(authorJoin.get("name")), pattern),
+                        builder.like(builder.lower(root.get("isbn")), pattern)
+                ));
+                query.distinct(true);
+            }
+            if (categorySlug != null) {
+                predicates.add(builder.equal(builder.lower(root.get("category").get("slug")), categorySlug));
+            }
+            if (!categorySlugs.isEmpty()) {
+                predicates.add(builder.lower(root.get("category").get("slug")).in(categorySlugs));
+            }
+            if (minRating != null) {
+                predicates.add(builder.or(
+                        builder.equal(root.get("ratingCount"), 0),
+                        builder.greaterThanOrEqualTo(
+                                root.get("averageRating"), BigDecimal.valueOf(minRating)
+                        )
+                ));
+            }
+            if (minPrice != null) {
+                predicates.add(builder.greaterThanOrEqualTo(root.get("borrowFee"), minPrice));
+            }
+            if (maxPrice != null) {
+                predicates.add(builder.lessThanOrEqualTo(root.get("borrowFee"), maxPrice));
+            }
+            if (createdAfter != null) {
+                predicates.add(builder.greaterThanOrEqualTo(root.get("createdAt"), createdAfter));
+            }
+            if (availabilityStatus != null) {
+                Subquery<Integer> availableCopy = query.subquery(Integer.class);
+                var copy = availableCopy.from(BookCopy.class);
+                availableCopy.select(builder.literal(1));
+                availableCopy.where(
+                        builder.equal(copy.get("book"), root),
+                        builder.equal(copy.get("status"), BookCopyStatus.AVAILABLE)
+                );
+                predicates.add(availabilityStatus.equals("available")
+                        ? builder.exists(availableCopy)
+                        : builder.not(builder.exists(availableCopy)));
+            }
+            return builder.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
+    }
+
+    private Sort resolveSearchSort(String sort) {
+        return switch (sort) {
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "borrowFee")
+                    .and(Sort.by(Sort.Direction.DESC, "id"));
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, "borrowFee")
+                    .and(Sort.by(Sort.Direction.DESC, "id"));
+            case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating")
+                    .and(Sort.by(Sort.Direction.DESC, "ratingCount"));
+            case "title" -> Sort.by(Sort.Direction.ASC, "title");
+            case "newest" -> Sort.by(Sort.Direction.DESC, "createdAt")
+                    .and(Sort.by(Sort.Direction.DESC, "id"));
+            default -> throw new BadRequestException("Kiểu sắp xếp sách không hợp lệ");
+        };
+    }
+
+    private void validateSearchFilters(Double minRating, Long minPrice, Long maxPrice) {
+        if (minRating != null && (minRating < 0 || minRating > 5)) {
+            throw new BadRequestException("Đánh giá tối thiểu phải từ 0 đến 5");
+        }
+        if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0)) {
+            throw new BadRequestException("Khoảng giá không hợp lệ");
+        }
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            throw new BadRequestException("Giá tối thiểu không được lớn hơn giá tối đa");
+        }
     }
 
     private String normalizeAvailabilityStatus(String status) {
@@ -125,7 +264,7 @@ public class BookService {
         if (!Set.of("available", "borrowed", "out_of_stock").contains(normalizedStatus)) {
             throw new BadRequestException("Trạng thái sách không hợp lệ");
         }
-        return normalizedStatus;
+        return normalizedStatus.equals("borrowed") ? "out_of_stock" : normalizedStatus;
     }
 
     @Transactional(readOnly = true)
@@ -215,6 +354,17 @@ public class BookService {
         Book book = bookRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách"));
         return toResponse(book);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isIsbnAvailable(String rawIsbn, Long excludedBookId) {
+        String isbn = normalizeNullable(rawIsbn);
+        if (isbn == null) {
+            throw new BadRequestException("ISBN không được để trống");
+        }
+        return excludedBookId == null
+                ? !bookRepository.existsByIsbn(isbn)
+                : !bookRepository.existsByIsbnAndIdNot(isbn, excludedBookId);
     }
 
     @Transactional

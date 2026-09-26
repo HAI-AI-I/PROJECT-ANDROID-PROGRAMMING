@@ -13,8 +13,11 @@ import com.group_7.library_management.data.remote.dto.RegisterRequestDto
 import com.group_7.library_management.data.remote.dto.RegistrationCodeResponseDto
 import com.group_7.library_management.data.remote.dto.ResendRegistrationCodeRequestDto
 import com.group_7.library_management.data.remote.dto.UserResponseDto
+import com.group_7.library_management.data.remote.dto.UpdateProfileRequestDto
 import com.group_7.library_management.data.remote.dto.VerifyRegistrationCodeRequestDto
 import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.Response
 
@@ -51,6 +54,14 @@ interface AuthApi {
 
     @POST("api/v1/auth/login")
     suspend fun login(@Body request: LoginRequestDto): AuthResponseDto
+
+    @GET("api/v1/auth/me")
+    suspend fun getCurrentUser(): UserResponseDto
+
+    @PATCH("api/v1/auth/me")
+    suspend fun updateCurrentUser(
+        @Body request: UpdateProfileRequestDto
+    ): UserResponseDto
 
     @POST("api/v1/auth/password/forgot/code")
     suspend fun sendForgotPasswordCode(

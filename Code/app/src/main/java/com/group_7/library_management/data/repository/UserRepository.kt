@@ -3,6 +3,7 @@ package com.group_7.library_management.data.repository
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.entity.UserEntity
 import com.group_7.library_management.data.local.preferences.CheckLogin
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.dto.LoginRequestDto
 import com.group_7.library_management.data.remote.dto.PasswordChangeCodeRequestDto
@@ -16,6 +17,7 @@ import com.group_7.library_management.data.remote.dto.RegistrationCodeResponseDt
 import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import com.group_7.library_management.data.remote.dto.ResendRegistrationCodeRequestDto
 import com.group_7.library_management.data.remote.dto.UserResponseDto
+import com.group_7.library_management.data.remote.dto.UpdateProfileRequestDto
 import com.group_7.library_management.data.remote.dto.VerifyRegistrationCodeRequestDto
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -24,11 +26,13 @@ import java.net.SocketTimeoutException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class UserRepository @Inject constructor(
     private val userDao: UserDAO,
     private val authApi: AuthApi,
-    private val checkLogin: CheckLogin
+    private val checkLogin: CheckLogin,
+    private val networkMonitor: NetworkMonitor
 ) {
     suspend fun sendRegistrationCode    (
         name: String,
@@ -156,7 +160,53 @@ class UserRepository @Inject constructor(
 
     suspend fun getUserById(id: Long): UserEntity? = userDao.getUserById(id)
 
+    fun observeUserById(id: Long): Flow<UserEntity?> = userDao.observeUserById(id)
+
     suspend fun getLatestUser(): UserEntity? = userDao.getLatestUser()
+
+    suspend fun getCurrentUserProfile(): Result<UserEntity> {
+        val savedUserId = checkLogin.getSavedUserId()?.toLongOrNull()
+            ?: return Result.failure(Exception("Không tìm thấy người dùng đang đăng nhập."))
+
+        if (!networkMonitor.isConnected.value) {
+            val cachedUser = userDao.getUserById(savedUserId)
+            return if (cachedUser != null) {
+                Result.success(cachedUser)
+            } else {
+                Result.failure(Exception("Không có dữ liệu hồ sơ đã lưu trên thiết bị."))
+            }
+        }
+
+        return apiResult {
+            val currentUser = authApi.getCurrentUser().toUserEntity()
+            userDao.insertUser(currentUser)
+            currentUser
+        }
+    }
+
+    suspend fun updateCurrentUserProfile(
+        fullName: String,
+        email: String,
+        phone: String
+    ): Result<UserEntity> {
+        if (!networkMonitor.isConnected.value) {
+            return Result.failure(
+                Exception("Không có kết nối mạng. Không thể cập nhật hồ sơ.")
+            )
+        }
+
+        return apiResult {
+            val updatedUser = authApi.updateCurrentUser(
+                UpdateProfileRequestDto(
+                    fullName = fullName.trim(),
+                    email = email.trim(),
+                    phone = phone.trim()
+                )
+            ).toUserEntity()
+            userDao.insertUser(updatedUser)
+            updatedUser
+        }
+    }
 
     suspend fun logout(): Result<Unit> {
         return try {

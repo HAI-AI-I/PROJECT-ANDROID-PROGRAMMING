@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/password/reset",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/biometric/login",
-                                "/api/v1/payments/sepay/webhook"
+                                "/api/v1/payments/sepay/webhook",
+                                "/uploads/book-covers/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/books/*/reviews/mine").authenticated()
                         .requestMatchers(

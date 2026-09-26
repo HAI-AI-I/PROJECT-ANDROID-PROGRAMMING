@@ -53,8 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.group_7.library_management.R
+import com.group_7.library_management.components.BookCoverImage
 import com.group_7.library_management.components.MemberTopBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.LibrarySpacing
@@ -212,13 +211,11 @@ private fun BookDetailContent(
             modifier = Modifier.fillMaxWidth().height(310.dp).background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = book.coverImageUrl,
+            BookCoverImage(
+                coverImageUrl = book.coverImageUrl,
                 contentDescription = "Bìa sách ${book.title}",
                 modifier = Modifier.height(240.dp).clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Fit,
-                fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
-                error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+                contentScale = ContentScale.Fit
             )
         }
 
@@ -344,13 +341,11 @@ private fun RelatedBookCard(book: Book, onClick: () -> Unit) {
     Column(
         modifier = Modifier.width(120.dp).clickable(onClick = onClick)
     ) {
-        AsyncImage(
-            model = book.coverImageUrl,
+        BookCoverImage(
+            coverImageUrl = book.coverImageUrl,
             contentDescription = "Bìa sách ${book.title}",
             modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(10.dp)),
-            contentScale = ContentScale.Crop,
-            fallback = androidx.compose.ui.res.painterResource(R.drawable.cleancode),
-            error = androidx.compose.ui.res.painterResource(R.drawable.cleancode)
+            contentScale = ContentScale.Crop
         )
         Spacer(Modifier.height(6.dp))
         Text(

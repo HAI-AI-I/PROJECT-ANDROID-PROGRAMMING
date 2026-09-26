@@ -47,7 +47,7 @@ public record BookResponse(
                 book.getCoverImageUrl(),
                 book.getDescription(),
                 book.getBorrowFee(),
-                book.getAverageRating(),
+                book.getRatingCount() == 0 ? BigDecimal.valueOf(5) : book.getAverageRating(),
                 book.getRatingCount(),
                 book.isActive(),
                 book.getCreatedAt(),

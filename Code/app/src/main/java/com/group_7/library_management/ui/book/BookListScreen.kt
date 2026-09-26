@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,10 +20,14 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.group_7.library_management.components.BookListItemCard
 import com.group_7.library_management.components.SearchBar
 import com.group_7.library_management.models.Book
 import com.group_7.library_management.ui.theme.LibrarySpacing
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 private val QUICK_GENRE_TABS = listOf("Tất cả", "Lập trình", "Khoa học máy tính", "Cơ sở dữ liệu", "Mạng máy tính")
 
@@ -31,11 +36,14 @@ private val QUICK_GENRE_TABS = listOf("Tất cả", "Lập trình", "Khoa học 
 fun BookListScreen(
     modifier: Modifier = Modifier,
     viewModel: BookViewModel = hiltViewModel(),
+    scrollToTopSignal: Int = 0,
     onBookClick: (Book) -> Unit = {},
     initialFilter: String? = null,
     onInitialFilterApplied: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val bookListState = rememberLazyListState()
+    val lifecycleOwner = LocalLifecycleOwner.current
     var showQuickFilters by remember { mutableStateOf(true) }
     val quickFiltersScrollConnection = remember {
         object : NestedScrollConnection {
@@ -56,6 +64,47 @@ fun BookListScreen(
             viewModel.applyInitialFilter(it)
             onInitialFilterApplied()
         }
+    }
+
+    LaunchedEffect(
+        uiState.searchQuery,
+        uiState.quickGenre,
+        uiState.quickStatus,
+        uiState.filter
+    ) {
+        bookListState.scrollToItem(0)
+        showQuickFilters = true
+    }
+
+    LaunchedEffect(scrollToTopSignal) {
+        if (scrollToTopSignal > 0) {
+            bookListState.animateScrollToItem(0)
+            showQuickFilters = true
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshBooks()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(bookListState, uiState.filteredBooks.size, uiState.hasMore) {
+        snapshotFlow {
+            bookListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+        }
+            .distinctUntilChanged()
+            .collect { lastVisibleIndex ->
+                if (uiState.filteredBooks.isNotEmpty()
+                    && lastVisibleIndex >= uiState.filteredBooks.lastIndex - 4
+                ) {
+                    viewModel.loadNextPage()
+                }
+            }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -116,12 +165,26 @@ fun BookListScreen(
                 }
             }
 
-            if (uiState.filteredBooks.isEmpty()) {
+            uiState.errorMessage?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = LibrarySpacing.Small)
+                )
+            }
+
+            if (uiState.isLoading && uiState.filteredBooks.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (uiState.filteredBooks.isEmpty()) {
                 EmptyBooksState(
                     onViewPopularClick = viewModel::resetFilters
                 )
             } else {
                 LazyColumn(
+                    state = bookListState,
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Small)
                 ) {
@@ -131,6 +194,16 @@ fun BookListScreen(
                             onClick = { onBookClick(book) },
                             onBorrowClick = { onBookClick(book) },
                         )
+                    }
+                    if (uiState.isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(LibrarySpacing.Medium),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                            }
+                        }
                     }
                 }
             }

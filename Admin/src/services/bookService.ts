@@ -24,6 +24,12 @@ export interface BookCategory {
   active: boolean;
 }
 
+export interface BookCoverUpload {
+  fileName: string;
+  path: string;
+  url: string;
+}
+
 export const bookService = {
   async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
     const page = filters.page ?? 1;
@@ -47,6 +53,48 @@ export const bookService = {
   async getCategories(): Promise<BookCategory[]> {
     const categories = await apiClient.get<BookCategory[]>("/categories");
     return categories.filter((category) => category.active);
+  },
+
+  async uploadBookCover(file: File): Promise<BookCoverUpload> {
+    const body = new FormData();
+    body.append("file", file);
+    return apiClient.postForm<BookCoverUpload>("/admin/book-covers", body);
+  },
+
+  async importBookCover(url: string): Promise<BookCoverUpload> {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Không thể tải ảnh bìa từ nguồn dữ liệu (${response.status})`);
+    }
+
+    const blob = await response.blob();
+    if (blob.size > 5 * 1024 * 1024) {
+      throw new Error("Ảnh bìa không được vượt quá 5 MB");
+    }
+
+    const mimeType = blob.type.split(";")[0].toLowerCase();
+    const extensionByType: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const extension = extensionByType[mimeType];
+    if (!extension) {
+      throw new Error("Nguồn dữ liệu không trả về ảnh JPEG, PNG hoặc WebP");
+    }
+
+    const body = new FormData();
+    body.append("file", new File([blob], `book-cover.${extension}`, { type: mimeType }));
+    return apiClient.postForm<BookCoverUpload>("/admin/book-covers", body);
+  },
+
+  async isIsbnAvailable(isbn: string, excludedBookId?: string): Promise<boolean> {
+    const params = new URLSearchParams({ isbn });
+    if (excludedBookId) params.set("excludeBookId", String(toApiId(excludedBookId)));
+    const result = await apiClient.get<{ isbn: string; available: boolean }>(
+      `/admin/books/isbn-availability?${params.toString()}`
+    );
+    return result.available;
   },
 
   async getBookById(id: string): Promise<Book | null> {

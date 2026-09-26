@@ -130,6 +130,25 @@
   color: var(--text-secondary);
 }
 
+.resultSource {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.apiError {
+  margin-top: 12px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.loadMoreRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -226,6 +245,12 @@
 
 .coverRemoveRow {
   margin-top: 10px;
+}
+
+.coverHint {
+  margin-top: 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
 }
 
 .removeCoverButton {

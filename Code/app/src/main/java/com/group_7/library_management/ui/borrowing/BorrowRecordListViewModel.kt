@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -31,12 +32,14 @@ class BorrowRecordListViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(BorrowRecordListUiState())
     val uiState: StateFlow<BorrowRecordListUiState> = _uiState.asStateFlow()
+    private var refreshJob: Job? = null
 
     init {
         refresh()
     }
 
     fun refresh() {
+        if (refreshJob?.isActive == true) return
         if (!networkMonitor.isConnected.value) {
             _uiState.value = BorrowRecordListUiState(
                 isLoading = false,
@@ -44,7 +47,7 @@ class BorrowRecordListViewModel @Inject constructor(
             )
             return
         }
-        viewModelScope.launch {
+        refreshJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             runCatching { repository.getBorrowOrders() }
                 .onSuccess { orders ->

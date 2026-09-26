@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.group_7.library_management.components.NotificationCard
 import com.group_7.library_management.ui.theme.*
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -52,11 +55,27 @@ data class NotificationItem(
 fun NotificationsContent(
     modifier: Modifier = Modifier,
     viewModel: NotificationViewModel = hiltViewModel(),
+    scrollToTopSignal: Int = 0,
     onNotificationClick: (NotificationItem) -> Unit = {}
 ) {
     val notifications by viewModel.notificationsFlow.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(scrollToTopSignal) {
+        if (scrollToTopSignal > 0) listState.animateScrollToItem(0)
+    }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshNotifications()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow {

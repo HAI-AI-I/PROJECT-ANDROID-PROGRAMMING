@@ -12,6 +12,7 @@ import com.group_7.library_management.data.local.dao.HomeSummaryDao
 import com.group_7.library_management.data.local.dao.UserDAO
 import com.group_7.library_management.data.local.dao.SupportRequestDao
 import com.group_7.library_management.data.local.preferences.CheckLogin
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.remote.api.AuthApi
 import com.group_7.library_management.data.remote.api.BookApi
 import com.group_7.library_management.data.remote.api.NotificationApi
@@ -262,9 +263,10 @@ object  DatabaseModule {
     fun provideUserRepository(
         userDao: UserDAO,
         authApi: AuthApi,
-        checkLogin: CheckLogin
+        checkLogin: CheckLogin,
+        networkMonitor: NetworkMonitor
     ): UserRepository {
-        return UserRepository(userDao, authApi, checkLogin)
+        return UserRepository(userDao, authApi, checkLogin, networkMonitor)
     }
 
     @Provides
