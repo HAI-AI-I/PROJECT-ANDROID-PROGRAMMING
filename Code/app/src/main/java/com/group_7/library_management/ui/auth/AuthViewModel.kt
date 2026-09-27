@@ -2,6 +2,7 @@ package com.group_7.library_management.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.repository.UserRepository
 import com.group_7.library_management.data.remote.dto.RegistrationVerificationMethod
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,8 @@ data class AuthUiState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -34,6 +36,7 @@ class AuthViewModel @Inject constructor(
         method: RegistrationVerificationMethod,
         onSuccess: (String) -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val result = userRepository.sendRegistrationCode(
@@ -57,6 +60,7 @@ class AuthViewModel @Inject constructor(
         method: RegistrationVerificationMethod,
         onSuccess: () -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val result = userRepository.verifyRegistrationCode(registrationId, code, method)
@@ -76,6 +80,7 @@ class AuthViewModel @Inject constructor(
         registrationId: String,
         method: RegistrationVerificationMethod
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val result = userRepository.resendRegistrationCode(registrationId, method)
@@ -95,6 +100,7 @@ class AuthViewModel @Inject constructor(
         password: String,
         onSuccess: (Long) -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val result = userRepository.loginUser(emailOrPhone, password)
@@ -135,6 +141,7 @@ class AuthViewModel @Inject constructor(
         request: suspend () -> Result<com.group_7.library_management.data.remote.dto.PasswordCodeResponseDto>,
         onSuccess: (String) -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             request().onSuccess { response ->
@@ -154,6 +161,7 @@ class AuthViewModel @Inject constructor(
         code: String,
         onSuccess: (String) -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             userRepository.verifyPasswordCode(requestId, code)
@@ -171,6 +179,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun resendPasswordCode(requestId: String) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             userRepository.resendPasswordCode(requestId)
@@ -191,6 +200,7 @@ class AuthViewModel @Inject constructor(
         newPassword: String,
         onSuccess: () -> Unit
     ) {
+        if (!ensureNetwork()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             userRepository.resetPassword(resetToken, newPassword)
@@ -234,5 +244,15 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    private fun ensureNetwork(): Boolean {
+        if (networkMonitor.isConnected.value) return true
+
+        _uiState.value = _uiState.value.copy(
+            isLoading = false,
+            errorMessage = "Không có kết nối mạng. Vui lòng kiểm tra Wi-Fi hoặc dữ liệu di động."
+        )
+        return false
     }
 }

@@ -114,6 +114,8 @@ class UserRootViewModel @Inject constructor(
     }
 
     private suspend fun refreshUnreadNotificationCount() {
+        if (!networkMonitor.isConnected.value) return
+
         runCatching {
             notificationRepository.getUnreadCount()
         }.onSuccess { serverUnreadCount ->

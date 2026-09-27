@@ -3,6 +3,7 @@ package com.group_7.library_management.ui.book
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.models.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +38,8 @@ data class BookListUiState(
 @HiltViewModel
 class BookViewModel @Inject constructor(
     private val bookRepository: BookRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
     private val restoredFilter = BookFilterState(
         sort = enumValueOrDefault(savedStateHandle[KEY_SORT], SortOption.NEWEST),
@@ -96,6 +98,14 @@ class BookViewModel @Inject constructor(
                     hasMore = if (reset) true else it.hasMore
                 )
             }
+
+            if (!networkMonitor.isConnected.value) {
+                showCachedBooks(
+                    message = "Không có kết nối mạng. Đang hiển thị dữ liệu sách trên thiết bị."
+                )
+                return@launch
+            }
+
             try {
                 val current = _uiState.value
                 val (minPrice, maxPrice) = current.filter.priceRange.toApiPriceRange()
@@ -129,27 +139,33 @@ class BookViewModel @Inject constructor(
                 throw error
             } catch (error: Throwable) {
                 if (reset) {
-                    val cachedBooks = runCatching { bookRepository.getCachedBooks() }
-                        .getOrDefault(emptyList())
-                    val filteredCache = filterCachedBooks(cachedBooks, _uiState.value)
-                    _uiState.update {
-                        it.copy(
-                            allBooks = filteredCache,
-                            filteredBooks = filteredCache,
-                            isLoading = false,
-                            isLoadingMore = false,
-                            hasMore = false,
-                            currentPage = 0,
-                            total = filteredCache.size.toLong(),
-                            errorMessage = "Không thể cập nhật sách từ máy chủ. Đang hiển thị dữ liệu trên thiết bị."
-                        )
-                    }
+                    showCachedBooks(
+                        message = "Không thể cập nhật sách từ máy chủ. Đang hiển thị dữ liệu trên thiết bị."
+                    )
                 } else {
                     _uiState.update {
                         it.copy(isLoadingMore = false, errorMessage = "Không thể tải thêm sách.")
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun showCachedBooks(message: String) {
+        val cachedBooks = runCatching { bookRepository.getCachedBooks() }
+            .getOrDefault(emptyList())
+        val filteredCache = filterCachedBooks(cachedBooks, _uiState.value)
+        _uiState.update {
+            it.copy(
+                allBooks = filteredCache,
+                filteredBooks = filteredCache,
+                isLoading = false,
+                isLoadingMore = false,
+                hasMore = false,
+                currentPage = 0,
+                total = filteredCache.size.toLong(),
+                errorMessage = message
+            )
         }
     }
 

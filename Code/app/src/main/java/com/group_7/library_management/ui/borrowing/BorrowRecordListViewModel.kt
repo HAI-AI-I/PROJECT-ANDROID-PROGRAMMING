@@ -40,13 +40,6 @@ class BorrowRecordListViewModel @Inject constructor(
 
     fun refresh() {
         if (refreshJob?.isActive == true) return
-        if (!networkMonitor.isConnected.value) {
-            _uiState.value = BorrowRecordListUiState(
-                isLoading = false,
-                errorMessage = "Không có kết nối mạng để tải danh sách mượn."
-            )
-            return
-        }
         refreshJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             runCatching { repository.getBorrowOrders() }

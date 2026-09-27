@@ -209,16 +209,17 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun logout(): Result<Unit> {
-        return try {
-            val response = authApi.logout()
-            if (!response.isSuccessful && response.code() !in listOf(401, 403)) {
-                throw HttpException(response)
+        if (networkMonitor.isConnected.value) {
+            runCatching {
+                val response = authApi.logout()
+                if (!response.isSuccessful && response.code() !in listOf(401, 403)) {
+                    throw HttpException(response)
+                }
             }
+        }
 
+        return runCatching {
             checkLogin.clearLogin()
-            Result.success(Unit)
-        } catch (exception: Exception) {
-            Result.failure(toReadableException(exception))
         }
     }
 
@@ -258,7 +259,7 @@ class UserRepository @Inject constructor(
 
         if (exception is IOException) {
             return Exception(
-                "Không thể kết nối tới máy chủ. Hãy kiểm tra Spring Boot đang chạy ở cổng 8386."
+                "Không thể kết nối tới máy chủ API. Vui lòng thử lại sau."
             )
         }
 

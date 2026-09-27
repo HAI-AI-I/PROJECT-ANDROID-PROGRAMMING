@@ -2,6 +2,7 @@ package com.group_7.library_management.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.repository.BookRepository
 import com.group_7.library_management.data.repository.BorrowRepository
 import com.group_7.library_management.models.Book
@@ -43,7 +44,8 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val bookRepository: BookRepository,
-    private val borrowRepository: BorrowRepository
+    private val borrowRepository: BorrowRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -126,6 +128,16 @@ class HomeViewModel @Inject constructor(
                     searchError = null
                 )
             }
+
+            if (!networkMonitor.isConnected.value) {
+                showCachedSearchResults(
+                    query = query,
+                    reset = reset,
+                    message = "Không có kết nối mạng. Đang tìm trong dữ liệu trên thiết bị."
+                )
+                return@launch
+            }
+
             try {
                 val page = bookRepository.getBooksPage(
                     search = query,
@@ -159,24 +171,11 @@ class HomeViewModel @Inject constructor(
             } catch (error: Throwable) {
                 if (_uiState.value.searchQuery.trim() != query) return@launch
                 if (reset) {
-                    val cachedBooks = runCatching { bookRepository.getCachedBooks() }
-                        .getOrDefault(emptyList())
-                        .filter { book ->
-                            book.title.contains(query, ignoreCase = true) ||
-                                    book.author.contains(query, ignoreCase = true)
-                        }
-                        .sortedByDescending { it.createdAt }
-                    _uiState.update {
-                        it.copy(
-                            searchResults = cachedBooks,
-                            isSearching = false,
-                            isLoadingMoreSearch = false,
-                            searchHasMore = false,
-                            searchPage = 0,
-                            searchTotal = cachedBooks.size.toLong(),
-                            searchError = "Không thể tìm kiếm từ máy chủ. Đang hiển thị dữ liệu trên thiết bị."
-                        )
-                    }
+                    showCachedSearchResults(
+                        query = query,
+                        reset = true,
+                        message = "Không thể tìm kiếm từ máy chủ. Đang hiển thị dữ liệu trên thiết bị."
+                    )
                 } else {
                     _uiState.update {
                         it.copy(
@@ -186,6 +185,35 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun showCachedSearchResults(
+        query: String,
+        reset: Boolean,
+        message: String
+    ) {
+        val cachedBooks = runCatching { bookRepository.getCachedBooks() }
+            .getOrDefault(emptyList())
+            .filter { book ->
+                book.title.contains(query, ignoreCase = true) ||
+                        book.author.contains(query, ignoreCase = true)
+            }
+            .sortedByDescending { it.createdAt }
+
+        if (_uiState.value.searchQuery.trim() != query) return
+        _uiState.update { latest ->
+            val books = if (reset) cachedBooks
+            else (latest.searchResults + cachedBooks).distinctBy { it.id }
+            latest.copy(
+                searchResults = books,
+                isSearching = false,
+                isLoadingMoreSearch = false,
+                searchHasMore = false,
+                searchPage = 0,
+                searchTotal = books.size.toLong(),
+                searchError = message
+            )
         }
     }
 
@@ -211,6 +239,16 @@ class HomeViewModel @Inject constructor(
 
     fun refreshBooks() {
         if (bookRefreshJob?.isActive == true) return
+        if (!networkMonitor.isConnected.value) {
+            _uiState.update { state ->
+                state.copy(
+                    isLoadingBooks = false,
+                    bookLoadError = "Không có kết nối mạng. Đang hiển thị dữ liệu sách trên thiết bị."
+                )
+            }
+            return
+        }
+
         bookRefreshJob = viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(

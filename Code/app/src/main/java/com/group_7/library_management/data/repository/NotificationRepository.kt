@@ -4,18 +4,21 @@ import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.preferences.CheckLogin
 import com.group_7.library_management.data.mapper.toNotificationEntity
 import com.group_7.library_management.data.mapper.toNotificationItem
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.remote.api.NotificationApi
 import com.group_7.library_management.ui.home.NotificationItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
 import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class NotificationRepository @Inject constructor(
     private val notificationDao: NotificationDAO,
     private val notificationApi: NotificationApi,
-    private val checkLogin: CheckLogin
+    private val checkLogin: CheckLogin,
+    private val networkMonitor: NetworkMonitor
 ) {
     companion object {
         private const val MAX_CACHED_NOTIFICATIONS = 40
@@ -30,16 +33,18 @@ class NotificationRepository @Inject constructor(
 
     suspend fun getCachedNotifications(): List<NotificationItem> {
         val userId = currentUserId() ?: return emptyList()
-        return notificationDao.getAllNotificationsOnce(userId)
+        return notificationDao.getNotificationsOnce(userId, MAX_CACHED_NOTIFICATIONS)
             .map { it.toNotificationItem() }
     }
 
     suspend fun getUnreadCount(): Long {
+        requireNetwork()
         requireCurrentUserId()
         return notificationApi.getUnreadCount().unreadCount
     }
 
     suspend fun loadNotificationPage(page: Int, limit: Int = 20): List<NotificationItem> {
+        requireNetwork()
         val userId = requireCurrentUserId()
         val notifications = notificationApi.getNotifications(page, limit)
             .map { it.toNotificationEntity(userId) }
@@ -53,12 +58,14 @@ class NotificationRepository @Inject constructor(
     }
 
     suspend fun markAllAsRead() {
+        requireNetwork()
         val userId = requireCurrentUserId()
         notificationApi.markAllAsRead()
         notificationDao.markAllAsRead(userId)
     }
 
     suspend fun markAsRead(id: String): NotificationItem {
+        requireNetwork()
         val userId = requireCurrentUserId()
         val notification = notificationApi.markAsRead(requireNotificationId(id))
             .toNotificationEntity(userId)
@@ -67,6 +74,7 @@ class NotificationRepository @Inject constructor(
     }
 
     suspend fun markAsClicked(id: String): NotificationItem {
+        requireNetwork()
         val userId = requireCurrentUserId()
         val notification = notificationApi.markAsClicked(requireNotificationId(id))
             .toNotificationEntity(userId)
@@ -75,6 +83,7 @@ class NotificationRepository @Inject constructor(
     }
 
     suspend fun deleteNotification(id: String) {
+        requireNetwork()
         val userId = requireCurrentUserId()
         val notificationId = requireNotificationId(id)
         val response = notificationApi.deleteNotification(notificationId)
@@ -89,4 +98,10 @@ class NotificationRepository @Inject constructor(
 
     private fun requireNotificationId(id: String): Long =
         requireNotNull(id.toLongOrNull()) { "Mã thông báo không hợp lệ." }
+
+    private fun requireNetwork() {
+        if (!networkMonitor.isConnected.value) {
+            throw IOException("Không có kết nối mạng.")
+        }
+    }
 }

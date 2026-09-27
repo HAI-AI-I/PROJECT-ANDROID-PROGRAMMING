@@ -6,6 +6,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.group_7.library_management.data.local.AppDatabase
 import com.group_7.library_management.data.local.dao.BookDAO
+import com.group_7.library_management.data.local.dao.BorrowOrderDao
 import com.group_7.library_management.data.local.dao.FavoriteBookDao
 import com.group_7.library_management.data.local.dao.NotificationDAO
 import com.group_7.library_management.data.local.dao.HomeSummaryDao
@@ -180,6 +181,45 @@ object  DatabaseModule {
         }
     }
 
+    private val MIGRATION_15_16 = object : Migration(15, 16) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS borrow_orders (
+                    userId INTEGER NOT NULL,
+                    id INTEGER NOT NULL,
+                    referenceCode TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    bookId INTEGER NOT NULL,
+                    bookTitle TEXT NOT NULL,
+                    bookAuthor TEXT NOT NULL,
+                    coverImageUrl TEXT,
+                    copyBarcode TEXT NOT NULL,
+                    borrowerId INTEGER NOT NULL,
+                    borrowerName TEXT NOT NULL,
+                    pickupLocation TEXT NOT NULL,
+                    borrowDays INTEGER NOT NULL,
+                    requestedAt TEXT NOT NULL,
+                    borrowedAt TEXT,
+                    dueAt TEXT NOT NULL,
+                    returnedAt TEXT,
+                    borrowFee INTEGER NOT NULL,
+                    depositAmount INTEGER NOT NULL,
+                    totalAmount INTEGER NOT NULL,
+                    paidAmount INTEGER NOT NULL,
+                    paymentCode TEXT,
+                    paymentStatus TEXT NOT NULL,
+                    paymentMethod TEXT,
+                    paidAt TEXT,
+                    depositRefunded INTEGER NOT NULL,
+                    remainingRefundAmount INTEGER NOT NULL,
+                    PRIMARY KEY(userId, id)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -201,7 +241,8 @@ object  DatabaseModule {
             MIGRATION_11_12,
             MIGRATION_12_13,
             MIGRATION_13_14,
-            MIGRATION_14_15
+            MIGRATION_14_15,
+            MIGRATION_15_16
         )
         .fallbackToDestructiveMigration(true)
         .build()
@@ -210,6 +251,11 @@ object  DatabaseModule {
     @Provides
     fun provideBookDao(database: AppDatabase): BookDAO {
         return database.getBookDao()
+    }
+
+    @Provides
+    fun provideBorrowOrderDao(database: AppDatabase): BorrowOrderDao {
+        return database.getBorrowOrderDao()
     }
 
     @Provides
@@ -248,9 +294,15 @@ object  DatabaseModule {
     fun provideNotificationRepository(
         notificationDao: NotificationDAO,
         notificationApi: NotificationApi,
-        checkLogin: CheckLogin
+        checkLogin: CheckLogin,
+        networkMonitor: NetworkMonitor
     ): NotificationRepository {
-        return NotificationRepository(notificationDao, notificationApi, checkLogin)
+        return NotificationRepository(
+            notificationDao,
+            notificationApi,
+            checkLogin,
+            networkMonitor
+        )
     }
 
     @Provides

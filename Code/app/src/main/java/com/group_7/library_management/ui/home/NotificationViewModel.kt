@@ -51,6 +51,20 @@ class NotificationViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
+
+            if (!networkMonitor.isConnected.value) {
+                _notificationsFlow.value = notificationRepository.getCachedNotifications()
+                nextPage = 0
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = false,
+                        hasMore = false,
+                        errorMessage = "Không có kết nối mạng. Đang hiển thị thông báo trên thiết bị."
+                    )
+                }
+                return@launch
+            }
+
             runCatching {
                 notificationRepository.loadNotificationPage(page = 0, limit = PAGE_SIZE)
             }.onSuccess { notifications ->
@@ -65,6 +79,16 @@ class NotificationViewModel @Inject constructor(
     fun loadNextPage() {
         val state = _uiState.value
         if (state.isRefreshing || state.isLoadingMore || !state.hasMore) return
+
+        if (!networkMonitor.isConnected.value) {
+            _uiState.update {
+                it.copy(
+                    hasMore = false,
+                    errorMessage = "Không có kết nối mạng. Không thể tải thêm thông báo."
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingMore = true, errorMessage = null) }
@@ -141,7 +165,7 @@ class NotificationViewModel @Inject constructor(
             is IOException -> "Không thể kết nối đến máy chủ..."
             else -> throwable.message ?: "Không thể xử lý thông báo."
         }
-        _uiState.update { it.copy(errorMessage = message) }
+        _uiState.update { it.copy(hasMore = false, errorMessage = message) }
     }
 
     private fun ensureNetwork(): Boolean {
@@ -152,7 +176,11 @@ class NotificationViewModel @Inject constructor(
 
     private fun showCrudError(throwable: Throwable) {
         if (throwable is IOException) {
-            showOfflineSnackbar()
+            if (networkMonitor.isConnected.value) {
+                snackbarController.show("Không thể kết nối tới máy chủ API. Vui lòng thử lại sau.")
+            } else {
+                showOfflineSnackbar()
+            }
         } else {
             showError(throwable)
         }

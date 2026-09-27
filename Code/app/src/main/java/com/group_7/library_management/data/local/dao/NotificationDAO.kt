@@ -17,6 +17,9 @@ interface NotificationDAO {
     suspend fun getAllNotificationsOnce(userId: Long): List<NotificationEntity>
 
     @Query("SELECT * FROM notifications WHERE userId = :userId AND isDeleted = 0 ORDER BY createdAt DESC LIMIT :amount")
+    suspend fun getNotificationsOnce(userId: Long, amount: Int): List<NotificationEntity>
+
+    @Query("SELECT * FROM notifications WHERE userId = :userId AND isDeleted = 0 ORDER BY createdAt DESC LIMIT :amount")
     fun getNotifications(userId: Long, amount: Int): Flow<List<NotificationEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -36,13 +39,15 @@ interface NotificationDAO {
 
     @Query("""
         DELETE FROM notifications
-        WHERE id NOT IN (
+        WHERE userId = :userId
+          AND id NOT IN (
               SELECT id FROM notifications
+              WHERE userId = :userId
               ORDER BY createdAt DESC
               LIMIT :maxCount
           )
     """)
-    suspend fun trimNotifications(maxCount: Int)
+    suspend fun trimNotifications(userId: Long, maxCount: Int)
 
     @Transaction
     suspend fun cacheNotificationPage(
@@ -53,7 +58,7 @@ interface NotificationDAO {
     ) {
         if (page == 0) deleteNotificationsForUser(userId)
         if (notifications.isNotEmpty()) insertNotifications(notifications)
-        trimNotifications(maxCount)
+        trimNotifications(userId, maxCount)
     }
 
     @Transaction
@@ -63,7 +68,7 @@ interface NotificationDAO {
         maxCount: Int
     ) {
         insertNotifications(listOf(notification))
-        trimNotifications(maxCount)
+        trimNotifications(userId, maxCount)
     }
 
     @Query("UPDATE notifications SET isRead = 1 WHERE userId = :userId AND isDeleted = 0")

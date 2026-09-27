@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.group_7.library_management.components.AppSnackbarController
+import com.group_7.library_management.data.network.NetworkMonitor
 import com.group_7.library_management.data.repository.ScanDestinationType
 import com.group_7.library_management.data.repository.ScanRepository
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -21,6 +23,7 @@ import javax.inject.Inject
 sealed interface ScanResultState {
     data object Idle : ScanResultState
     data object Processing : ScanResultState
+    data object NetworkUnavailable : ScanResultState
     data class Success(
         val type: ScanDestinationType,
         val targetId: Long
@@ -36,10 +39,24 @@ data class ScanUiState(
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val scanRepository: ScanRepository
+    private val scanRepository: ScanRepository,
+    private val networkMonitor: NetworkMonitor,
+    private val snackbarController: AppSnackbarController
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            networkMonitor.isConnected.collect { isConnected ->
+                if (isConnected &&
+                    _uiState.value.scanState is ScanResultState.NetworkUnavailable
+                ) {
+                    resetScanState()
+                }
+            }
+        }
+    }
 
     fun onLiveCameraScanned(rawCode: String) {
         if (_uiState.value.scanState !is ScanResultState.Idle) return
@@ -92,6 +109,14 @@ class ScanViewModel @Inject constructor(
             return
         }
 
+        if (!networkMonitor.isConnected.value) {
+            _uiState.update { it.copy(scanState = ScanResultState.NetworkUnavailable) }
+            snackbarController.show(
+                "Không có kết nối mạng. Không thể kiểm tra mã đã quét."
+            )
+            return
+        }
+
         _uiState.update { it.copy(scanState = ScanResultState.Processing) }
         viewModelScope.launch {
             try {
@@ -113,7 +138,11 @@ class ScanViewModel @Inject constructor(
                 _uiState.update { it.copy(scanState = ScanResultState.Error(message)) }
             } catch (_: IOException) {
                 _uiState.update {
-                    it.copy(scanState = ScanResultState.Error("Không có kết nối tới máy chủ."))
+                    it.copy(
+                        scanState = ScanResultState.Error(
+                            "Không thể kết nối tới máy chủ API. Vui lòng thử lại sau."
+                        )
+                    )
                 }
             } catch (_: Exception) {
                 _uiState.update {

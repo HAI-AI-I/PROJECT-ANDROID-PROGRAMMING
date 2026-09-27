@@ -41,13 +41,6 @@ class BorrowOrderViewModel @Inject constructor(
     }
 
     fun loadOrder() {
-        if (!networkMonitor.isConnected.value) {
-            _uiState.value = BorrowOrderUiState(
-                isLoading = false,
-                errorMessage = "Không có kết nối mạng để tải đơn mượn."
-            )
-            return
-        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching { borrowRepository.getBorrowOrder(orderId) }
