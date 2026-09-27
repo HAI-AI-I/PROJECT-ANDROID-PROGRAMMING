@@ -26,8 +26,7 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController()
 ) {
     val context= LocalContext.current
-    val
-            checkLogin= remember { CheckLogin(context) }
+    val checkLogin= remember { CheckLogin(context) }
 
     NavHost(
         navController = navController,

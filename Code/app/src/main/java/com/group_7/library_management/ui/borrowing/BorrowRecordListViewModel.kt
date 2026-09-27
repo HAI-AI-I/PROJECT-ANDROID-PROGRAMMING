@@ -20,6 +20,9 @@ import javax.inject.Inject
 data class BorrowRecordListUiState(
     val orders: List<BorrowOrder> = emptyList(),
     val isLoading: Boolean = true,
+    val isLoadingMore: Boolean = false,
+    val hasMore: Boolean = true,
+    val selectedTab: BorrowTab = BorrowTab.ALL,
     val errorMessage: String? = null,
     val cancellingOrderId: Long? = null
 )
@@ -33,25 +36,77 @@ class BorrowRecordListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BorrowRecordListUiState())
     val uiState: StateFlow<BorrowRecordListUiState> = _uiState.asStateFlow()
     private var refreshJob: Job? = null
+    private var currentPage = 0
 
     init {
         refresh()
     }
 
-    fun refresh() {
-        if (refreshJob?.isActive == true) return
+    fun selectTab(tab: BorrowTab) {
+        if (_uiState.value.selectedTab == tab && _uiState.value.orders.isNotEmpty()) return
+        if (_uiState.value.selectedTab != tab) refreshJob?.cancel()
+        refresh(tab)
+    }
+
+    fun refresh(tab: BorrowTab = _uiState.value.selectedTab) {
+        if (refreshJob?.isActive == true) {
+            if (_uiState.value.selectedTab == tab) return
+            refreshJob?.cancel()
+        }
         refreshJob = viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            runCatching { repository.getBorrowOrders() }
-                .onSuccess { orders ->
-                    _uiState.value = BorrowRecordListUiState(orders = orders, isLoading = false)
+            currentPage = 0
+            _uiState.value = _uiState.value.copy(
+                orders = emptyList(),
+                isLoading = true,
+                isLoadingMore = false,
+                hasMore = true,
+                selectedTab = tab,
+                errorMessage = null
+            )
+            runCatching {
+                repository.getBorrowOrders(tab.apiStatus, page = 1, pageSize = PAGE_SIZE)
+            }
+                .onSuccess { result ->
+                    currentPage = result.page
+                    _uiState.value = _uiState.value.copy(
+                        orders = result.items,
+                        isLoading = false,
+                        hasMore = result.page < result.totalPages,
+                        errorMessage = null
+                    )
                 }
                 .onFailure { error ->
-                    _uiState.value = BorrowRecordListUiState(
+                    _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        hasMore = false,
                         errorMessage = error.toUserMessage()
                     )
                 }
+        }
+    }
+
+    fun loadMore() {
+        val state = _uiState.value
+        if (state.isLoading || state.isLoadingMore || !state.hasMore) return
+        viewModelScope.launch {
+            _uiState.value = state.copy(isLoadingMore = true)
+            runCatching {
+                repository.getBorrowOrders(
+                    status = state.selectedTab.apiStatus,
+                    page = currentPage + 1,
+                    pageSize = PAGE_SIZE
+                )
+            }.onSuccess { result ->
+                currentPage = result.page
+                _uiState.value = _uiState.value.copy(
+                    orders = (_uiState.value.orders + result.items).distinctBy { it.id },
+                    isLoadingMore = false,
+                    hasMore = result.page < result.totalPages
+                )
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(isLoadingMore = false)
+                snackbarController.show(error.toUserMessage())
+            }
         }
     }
 
@@ -67,8 +122,12 @@ class BorrowRecordListViewModel @Inject constructor(
             runCatching { repository.cancelBorrowOrder(orderId) }
                 .onSuccess { result ->
                     _uiState.value = _uiState.value.copy(
-                        orders = _uiState.value.orders.map { order ->
-                            if (order.id == result.order.id) result.order else order
+                        orders = if (_uiState.value.selectedTab == BorrowTab.ALL) {
+                            _uiState.value.orders.map { order ->
+                                if (order.id == result.order.id) result.order else order
+                            }
+                        } else {
+                            _uiState.value.orders.filterNot { it.id == result.order.id }
                         },
                         cancellingOrderId = null
                     )
@@ -99,5 +158,9 @@ class BorrowRecordListViewModel @Inject constructor(
         is IOException -> "Không thể kết nối đến máy chủ."
         is HttpException -> "Máy chủ trả về lỗi HTTP ${code()}."
         else -> message ?: "Không thể tải danh sách mượn."
+    }
+
+    private companion object {
+        const val PAGE_SIZE = 20
     }
 }

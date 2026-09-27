@@ -207,7 +207,7 @@ class SupportViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
                 val orders = runCatching {
-                    borrowRepository.getBorrowOrders()
+                    borrowRepository.getBorrowOrders(pageSize = 100).items
                         .filter { it.status == "BORROWED" || it.status == "OVERDUE" }
                         .distinctBy { it.bookId }
                         .map { order ->

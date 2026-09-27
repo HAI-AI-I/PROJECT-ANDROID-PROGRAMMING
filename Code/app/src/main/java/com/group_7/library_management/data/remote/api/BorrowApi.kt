@@ -6,17 +6,23 @@ import com.group_7.library_management.data.remote.dto.CurrentBorrowOrderResponse
 import com.group_7.library_management.data.remote.dto.HomeSummaryResponseDto
 import com.group_7.library_management.data.remote.dto.CancelBorrowOrderResponseDto
 import com.group_7.library_management.data.remote.dto.BorrowPaymentResponseDto
+import com.group_7.library_management.data.remote.dto.PagedResponseDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface BorrowApi {
     @GET("api/v1/home/summary")
     suspend fun getHomeSummary(): HomeSummaryResponseDto
 
     @GET("api/v1/borrow-orders")
-    suspend fun getBorrowOrders(): List<BorrowOrderResponseDto>
+    suspend fun getBorrowOrders(
+        @Query("status") status: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20
+    ): PagedResponseDto<BorrowOrderResponseDto>
 
     @POST("api/v1/borrow-orders")
     suspend fun createBorrowOrder(

@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
 
 class BorrowRepository @Inject constructor(
@@ -31,19 +33,81 @@ class BorrowRepository @Inject constructor(
         val remainingCancellations: Int
     )
 
-    suspend fun getBorrowOrders(): List<BorrowOrder> {
+    data class BorrowOrderPage(
+        val items: List<BorrowOrder>,
+        val page: Int,
+        val totalPages: Int
+    )
+
+    suspend fun getBorrowOrders(
+        status: String? = null,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): BorrowOrderPage {
         val userId = requireCurrentUserId()
         if (!networkMonitor.isConnected.value) {
-            return borrowOrderDao.getOrders(userId).map { it.toModel() }
+            return getCachedBorrowOrders(userId, status, page, pageSize)
         }
 
         return try {
-            val orders = borrowApi.getBorrowOrders().map { it.toModel() }
-            borrowOrderDao.replaceForUser(userId, orders.map { it.toEntity(userId) })
-            orders
+            val response = borrowApi.getBorrowOrders(status, page, pageSize)
+            val orders = response.items.map { it.toModel() }
+            val entities = orders.map { it.toEntity(userId) }
+            if (page == 1 && status.isNullOrBlank()) {
+                borrowOrderDao.replaceForUser(userId, entities)
+            } else {
+                borrowOrderDao.upsertAll(entities)
+            }
+            BorrowOrderPage(
+                items = orders,
+                page = response.page,
+                totalPages = response.totalPages
+            )
         } catch (error: Throwable) {
-            val cachedOrders = borrowOrderDao.getOrders(userId).map { it.toModel() }
-            if (error.canReadFromCache() && cachedOrders.isNotEmpty()) cachedOrders else throw error
+            val cachedPage = getCachedBorrowOrders(userId, status, page, pageSize)
+            if (error.canReadFromCache() && cachedPage.items.isNotEmpty()) cachedPage else throw error
+        }
+    }
+
+    private suspend fun getCachedBorrowOrders(
+        userId: Long,
+        status: String?,
+        page: Int,
+        pageSize: Int
+    ): BorrowOrderPage {
+        val filtered = borrowOrderDao.getOrders(userId)
+            .map { it.toModel() }
+            .filter { it.matchesStatus(status) }
+        val safePage = page.coerceAtLeast(1)
+        val safePageSize = pageSize.coerceAtLeast(1)
+        val fromIndex = ((safePage - 1) * safePageSize).coerceAtMost(filtered.size)
+        val toIndex = (fromIndex + safePageSize).coerceAtMost(filtered.size)
+        val totalPages = if (filtered.isEmpty()) 0 else {
+            (filtered.size + safePageSize - 1) / safePageSize
+        }
+        return BorrowOrderPage(
+            items = filtered.subList(fromIndex, toIndex),
+            page = safePage,
+            totalPages = totalPages
+        )
+    }
+
+    private fun BorrowOrder.matchesStatus(filter: String?): Boolean {
+        val now = Instant.now()
+        val due = runCatching { Instant.parse(dueAt) }.getOrNull()
+        val remaining = due?.let { Duration.between(now, it) }
+        val isDueSoon = status == "BORROWED" && remaining != null &&
+            !remaining.isNegative && remaining <= Duration.ofDays(1)
+        return when (filter?.uppercase()) {
+            null, "", "ALL" -> true
+            "PENDING_PAYMENT" -> status == "PENDING_PAYMENT"
+            "PENDING", "REQUESTED" -> status == "REQUESTED"
+            "BORROWING", "BORROWED" -> status == "BORROWED" && !isDueSoon
+            "DUE_SOON" -> isDueSoon
+            "OVERDUE" -> status == "OVERDUE" || (status == "BORROWED" && due?.isBefore(now) == true)
+            "RETURNED" -> status == "RETURNED"
+            "CANCELLED" -> status == "CANCELLED"
+            else -> false
         }
     }
 

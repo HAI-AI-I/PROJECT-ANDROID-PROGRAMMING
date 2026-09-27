@@ -66,7 +66,26 @@ fun BorrowRecordListContent(
         if (scrollToTopSignal > 0) listState.animateScrollToItem(0)
     }
 
-    LaunchedEffect(initialTab) { selectedTabName = initialTab.name }
+    LaunchedEffect(initialTab) {
+        selectedTabName = initialTab.name
+        viewModel.selectTab(initialTab)
+    }
+
+    LaunchedEffect(selectedTab) {
+        listState.scrollToItem(0)
+    }
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?: return@derivedStateOf false
+            state.orders.isNotEmpty() && lastVisibleIndex >= state.orders.lastIndex - 3
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) viewModel.loadMore()
+    }
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
@@ -78,24 +97,13 @@ fun BorrowRecordListContent(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val filteredOrders = remember(state.orders, selectedTab) {
-        state.orders.filter { order ->
-            when (selectedTab) {
-                BorrowTab.ALL -> true
-                BorrowTab.PENDING_PAYMENT -> order.status == "PENDING_PAYMENT"
-                BorrowTab.PENDING -> order.status == "REQUESTED"
-                BorrowTab.BORROWING -> order.status == "BORROWED" && !order.isDueSoon()
-                BorrowTab.DUE_SOON -> order.status == "BORROWED" && order.isDueSoon()
-                BorrowTab.OVERDUE -> order.status == "OVERDUE"
-                BorrowTab.RETURNED -> order.status == "RETURNED"
-            }
-        }
-    }
-
     Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BorrowingTopBar(
             selectedTab = selectedTab,
-            onTabSelected = { selectedTabName = it.name }
+            onTabSelected = {
+                selectedTabName = it.name
+                viewModel.selectTab(it)
+            }
         )
 
         when {
@@ -106,14 +114,14 @@ fun BorrowRecordListContent(
                 message = requireNotNull(state.errorMessage),
                 onRetry = viewModel::refresh
             )
-            filteredOrders.isEmpty() -> EmptyBorrowList(selectedTab)
+            state.orders.isEmpty() -> EmptyBorrowList(selectedTab)
             else -> LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize().padding(horizontal = LibrarySpacing.Medium),
                 verticalArrangement = Arrangement.spacedBy(LibrarySpacing.Medium)
             ) {
                 item { Spacer(Modifier.height(LibrarySpacing.Small)) }
-                items(filteredOrders, key = { it.id }) { order ->
+                items(state.orders, key = { it.id }) { order ->
                     BorrowOrderItemCard(
                         order = order,
                         onClick = { onOrderClick(order.id) },
@@ -124,6 +132,16 @@ fun BorrowRecordListContent(
                         },
                         isCancelling = state.cancellingOrderId == order.id
                     )
+                }
+                if (state.isLoadingMore) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(LibrarySpacing.Medium),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                        }
+                    }
                 }
                 item { Spacer(Modifier.height(LibrarySpacing.Medium)) }
             }
@@ -185,17 +203,9 @@ private fun EmptyBorrowList(tab: BorrowTab) {
     }
 }
 
-private fun BorrowOrder.isDueSoon(now: Instant = Instant.now()): Boolean {
-    if (status != "BORROWED") return false
-    val due = runCatching { Instant.parse(dueAt) }.getOrNull() ?: return false
-    val remaining = Duration.between(now, due)
-    return !remaining.isNegative && remaining <= Duration.ofDays(DUE_SOON_DAYS)
-}
-
 private fun BorrowOrder.canCancel(now: Instant = Instant.now()): Boolean {
     if (status != "PENDING_PAYMENT" && status != "REQUESTED") return false
     val requested = runCatching { Instant.parse(requestedAt) }.getOrNull() ?: return false
     val elapsed = Duration.between(requested, now)
     return !elapsed.isNegative && elapsed <= Duration.ofHours(24)
 }
-private const val DUE_SOON_DAYS = 1L

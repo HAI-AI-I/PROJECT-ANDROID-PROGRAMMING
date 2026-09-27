@@ -7,5 +7,16 @@ enum class BorrowTab(val title: String) {
     BORROWING("Đang mượn"),
     DUE_SOON("Sắp đến hạn"),
     OVERDUE("Quá hạn"),
-    RETURNED("Đã trả")
+    RETURNED("Đã trả");
+
+    val apiStatus: String?
+        get() = when (this) {
+            ALL -> null
+            PENDING_PAYMENT -> "PENDING_PAYMENT"
+            PENDING -> "REQUESTED"
+            BORROWING -> "BORROWING"
+            DUE_SOON -> "DUE_SOON"
+            OVERDUE -> "OVERDUE"
+            RETURNED -> "RETURNED"
+        }
 }

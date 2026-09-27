@@ -1,8 +1,10 @@
 package com.group_7.library_management.utils
 
+import android.util.Patterns
+
 object ValidationUtils {
     fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
     fun isValidPhone(phone: String): Boolean {
         return phone.length >= 10 && phone.all { it.isDigit() }
